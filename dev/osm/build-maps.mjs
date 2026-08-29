@@ -16,7 +16,7 @@ const raw = JSON.parse(readFileSync(join(here, key + '.json'), 'utf8'));
 const KINDS = { fairway:'f', green:'g', tee:'t', bunker:'b', water_hazard:'w', lateral_water_hazard:'w', rough:'r' };
 const CORRIDOR = 70;   // m either side of the centerline that belongs to a hole
 const SIMPLIFY = 2.5;  // m Douglas-Peucker tolerance
-const W = 100;         // output viewBox width
+const W = 360;         // output viewBox width (long axis of the hole)
 
 // ---- geometry helpers (local equirectangular metres) ------------------------
 const R = 6371000, D = Math.PI / 180;
@@ -93,11 +93,11 @@ for (const h of holes.sort((a,b) => (+a.tags.ref||0) - (+b.tags.ref||0))){
   const ref = +h.tags.ref;
   if (only && !only.includes(ref)) continue;
   const line = h.geometry.map(proj);
-  // rotate so the tee (line start) sits at the bottom, green at the top
+  // rotate so play runs left (tee) to right (green): x along the hole, y across
   const a = line[0], b = line[line.length-1];
-  const ang = Math.atan2(b[0]-a[0], b[1]-a[1]); // bearing of play
-  const cos = Math.cos(ang), sin = Math.sin(ang);
-  const rot = p => [ (p[0]-a[0])*cos - (p[1]-a[1])*sin, -((p[0]-a[0])*sin + (p[1]-a[1])*cos) ];
+  const len = Math.hypot(b[0]-a[0], b[1]-a[1]) || 1;
+  const ux = (b[0]-a[0])/len, uy = (b[1]-a[1])/len, nx = -uy, ny = ux;
+  const rot = p => { const dx = p[0]-a[0], dy = p[1]-a[1]; return [dx*ux+dy*uy, dx*nx+dy*ny]; };
   const near = projFeats.filter(f => f.pts.some(p => lineDist2(p, line) < CORRIDOR*CORRIDOR));
   const shapes = [];
   let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
@@ -113,7 +113,7 @@ for (const h of holes.sort((a,b) => (+a.tags.ref||0) - (+b.tags.ref||0))){
   for (const p of cl){ minx=Math.min(minx,p[0]); maxx=Math.max(maxx,p[0]); miny=Math.min(miny,p[1]); maxy=Math.max(maxy,p[1]); }
   const pad = 12;
   minx -= pad; miny -= pad; maxx += pad; maxy += pad;
-  const s = W / (maxx - minx), Hgt = Math.round((maxy - miny) * s);
+  const s = W / (maxx - minx), Hgt = Math.round((maxy - miny) * s * 10) / 10;
   const tx = p => [ +( (p[0]-minx)*s ).toFixed(1), +( (p[1]-miny)*s ).toFixed(1) ];
   const path = (pts, close) => 'M' + pts.map(tx).map(p => p.join(' ')).join('L') + (close ? 'Z' : '');
   const order = { w:0, r:1, f:2, t:3, b:4, g:5 };
