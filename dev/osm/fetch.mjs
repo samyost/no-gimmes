@@ -7,12 +7,17 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const OP = 'https://overpass-api.de/api/interpreter';
+const ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
+const UA = 'no-gimmes-course-maps/1.0 (github.com/samyost/no-gimmes; one-time course geometry fetch)';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // re: name regex for the OSM golf_course polygon; center: fallback [lat,lon]
 const COURSES = [
-  { key:'vail',      re:'Vail Golf',            center:[39.6440,-106.3200] },
+  { key:'vail',      re:'^Vail Golf',           center:[39.6440,-106.3200] },
   { key:'breck',     re:'Breckenridge Golf',    center:[39.5330,-106.0260] },
   { key:'river',     re:'River Course',         center:[39.6075,-105.9780] },
   { key:'ranch',     re:'Keystone Ranch',       center:[39.5805,-105.9995] },
@@ -24,17 +29,25 @@ const COURSES = [
   { key:'wellshire', re:'Wellshire Golf',       center:[39.6525,-104.9415] },
 ];
 
-async function q(query, tries = 3){
+async function q(query, tries = 4){
+  const compact = query.replace(/\s+/g, ' ').trim();
+  let lastErr = null;
   for (let i = 0; i < tries; i++){
+    const url = ENDPOINTS[i % ENDPOINTS.length];
     try {
-      const r = await fetch(OP, { method:'POST',
-        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
-        body:'data=' + encodeURIComponent(query) });
-      if (r.status === 429 || r.status === 504){ await sleep(15000); continue; }
-      if (!r.ok) throw new Error('overpass ' + r.status);
+      const r = await fetch(url, { method:'POST',
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded', 'User-Agent': UA, 'Accept': 'application/json' },
+        body:'data=' + encodeURIComponent(compact) });
+      if (r.status === 429 || r.status === 504){ lastErr = new Error(url + ' ' + r.status); await sleep(15000); continue; }
+      if (!r.ok){
+        const body = (await r.text().catch(() => '')).slice(0, 300).replace(/\s+/g, ' ');
+        lastErr = new Error(url + ' ' + r.status + ': ' + body);
+        await sleep(8000); continue;
+      }
       return await r.json();
-    } catch (e){ if (i === tries - 1) throw e; await sleep(10000); }
+    } catch (e){ lastErr = e; await sleep(8000); }
   }
+  throw lastErr;
 }
 
 const round = n => Math.round(n * 1e6) / 1e6;
@@ -52,6 +65,7 @@ function slim(el){
 const summary = {};
 for (const c of COURSES){
   process.stdout.write(c.key + ': ');
+  try {
   // stage 1 — locate the golf_course polygon by name inside Colorado
   let bb = null, courseName = null;
   try {
@@ -86,6 +100,10 @@ for (const c of COURSES){
   const holeRefs = els.filter(e => e.tags.golf === 'hole' && e.tags.ref).map(e => e.tags.ref);
   summary[c.key] = { course: courseName, counts, holeRefs: holeRefs.sort((a, b) => a - b) };
   console.log(JSON.stringify(summary[c.key]));
+  } catch (e){
+    summary[c.key] = { error: String(e.message || e) };
+    console.log('FAILED: ' + (e.message || e));
+  }
   await sleep(4000);
 }
 mkdirSync(here, { recursive: true });

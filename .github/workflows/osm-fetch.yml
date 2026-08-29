@@ -21,4 +21,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add dev/osm
           git commit -m "Fetch OSM course geometry" || echo "nothing to commit"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push
