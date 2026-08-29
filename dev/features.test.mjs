@@ -1,4 +1,5 @@
-// Feature tests: the Mixer day format (rotating segments + back-nine flip)
+// Feature tests: the Mixer day format (rotating segments + back-nine flip),
+// the shared mix library (day-independent rotations a day picks from),
 // and grudge-match side bets (1v1, zero cup points).
 //   node dev/features.test.mjs
 import { createServer } from 'node:http';
@@ -32,9 +33,17 @@ function seed(){
       net:true, allowances:{singles:100,fourball:90,shamble:85,foursomes:50,greensomes:60,chapman:60,scramble:35},
       flat100:false, strokeCap:0, junk:false, junkTypes:{}, skins:false, skinsNet:true, skinsCarry:true },
     players, usualTeams,
-    days: { sun: { course:'breck', rot:'bb', format:'mixer',
-      mixer:{ seg:3, formats:['scramble','greensomes','fourball'], flip:true },
-      points:1, times:{a:'06:00'}, teamOf:{} } },
+    mixes: {
+      mx1: { name:'The Classic', seg:3, formats:['scramble','greensomes','fourball'], flip:true, ord:0 },
+      mx2: { name:'Purist Special', seg:9, formats:['foursomes','fourball'], flip:false, ord:1 },
+    },
+    days: {
+      sun: { course:'breck', rot:'bb', format:'mixer', mixId:'mx1',
+        points:1, times:{a:'06:00'}, teamOf:{} },
+      // pre-library data shape: a day carrying its own inline rotation
+      sat: { course:'vail', format:'mixer',
+        mixer:{ seg:9, formats:['foursomes','chapman'], flip:false }, teamOf:{} },
+    },
     matches: {
       m3:  { day:'sun', group:'a', ord:0, red:['p1','p3'], blue:['p2','p4'], holes:{} },
       sb1: { day:'sun', side:true, group:'a', ord:90, red:['p1'], blue:['p3'], holes:{} }, // two red teammates
@@ -104,6 +113,39 @@ try {
     if (await p.locator('.drawer .srow').count() === 0) await p.locator('.drawerh').click();
     return p.locator('.srow').count().then(n=>n===2);
   }));
+
+  // --- mix library: shared day-independent rotations ---
+  // sun resolves its rotation through mixes/mx1 (all the mixer checks above
+  // already ran against that path); sat still carries a pre-library inline one
+  ok('legacy inline rotation still drives sat', await p.evaluate(()=>holeFormat('sat',1)==='foursomes' && holeFormat('sat',10)==='chapman'));
+
+  await p.evaluate(()=>{ location.hash='#/day/sun/setup'; });
+  ok('setup lists both library mixes', await until(()=>p.locator('.mixcard').count().then(n=>n===2)));
+  ok('the day’s pick is highlighted', await until(()=>p.locator('.mixcard.on .fn').textContent().then(t=>/The Classic/i.test(t))));
+
+  // a rename from "another phone" (straight REST write) lands live via SSE
+  await fetch(`${DB}/t/no-gimmes-2026/mixes/mx2/name.json`, { method:'PUT', body:JSON.stringify('Purist 2.0') });
+  ok('remote rename shows up live', await until(()=>p.locator('.mixcard', { hasText:'Purist 2.0' }).count().then(n=>n===1)));
+
+  // picking the other mix rewires the day's holes and syncs
+  await p.locator('.mixcard:not(.on) .mixmain').click();
+  ok('picked mix drives the day’s holes', await until(()=>p.evaluate(()=>holeFormat('sun',1)==='foursomes' && dayCfg('sun').mixId==='mx2')));
+  ok('the pick syncs to the database', await until(async()=>{
+    const r = await fetch(`${DB}/t/no-gimmes-2026/days/sun/mixId.json`); return (await r.json())==='mx2';
+  }));
+
+  // + New mix saves a shared version and opens the designer
+  await p.locator('[data-act="mixnew"]').click();
+  ok('designer sheet opens', await until(()=>p.locator('#sheetbox h3').textContent().then(t=>/Mix designer/i.test(t))));
+  ok('new mix saved to the library', await until(()=>p.evaluate(()=>mixes().length===3)));
+  ok('new mix seeded from the day and picked for it', await p.evaluate(()=>dayCfg('sun').mixId!=='mx2' && holeFormat('sun',1)==='foursomes'));
+
+  // deleting a mix in play: the day keeps a private copy of the rotation
+  p.once('dialog', d=>d.accept());
+  await p.locator('[data-act="mixdelete"]').click();
+  ok('deleted from the library', await until(()=>p.evaluate(()=>mixes().length===2)));
+  ok('day keeps playing the same rotation', await until(()=>p.evaluate(()=>holeFormat('sun',1)==='foursomes' && !dayCfg('sun').mixId)));
+  ok('day shows its now-unsaved own rotation', await until(()=>p.locator('.mixcard.on', { hasText:'OWN ROTATION' }).count().then(n=>n===1)));
 
   console.log(`\n${pass} passed, ${fail} failed`);
 } catch(e){

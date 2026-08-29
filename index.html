@@ -398,6 +398,12 @@ a{color:var(--brass)}
 .fmtc.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--card)}
 .fmtc .fn{font-family:'Saira Condensed';font-weight:700;font-size:14.5px;letter-spacing:.05em}
 .fmtc .fd{font-size:11.5px;color:var(--sage);margin-top:3px;line-height:1.35}
+.mixcard{display:flex;gap:8px;border:1.5px solid var(--pencil);border-radius:10px;background:var(--bone);padding:9px 10px;margin-top:8px}
+.mixcard.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--card)}
+.mixcard .mixmain{flex:1;text-align:left;background:none;border:0;padding:0}
+.mixcard .fn{font-family:'Saira Condensed';font-weight:700;font-size:14.5px;letter-spacing:.05em}
+.mixcard .fd{font-size:11.5px;color:var(--sage);margin-top:3px;line-height:1.35}
+.mixcard .mixedit{align-self:center;font-size:15px;color:var(--sage);border:1.5px solid var(--pencil);border-radius:9px;background:var(--bone);padding:6px 10px}
 .stepper{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--pencil);border-radius:9px;background:var(--bone)}
 .stepper button{width:42px;height:42px;font-size:20px;color:var(--ink)}
 .stepper .v{font-family:'Saira Condensed';font-weight:700;font-size:17px;min-width:44px;text-align:center}
@@ -793,24 +799,46 @@ function effTeam(d, pid){
   return (S.usualTeams||{})[pid] || null;
 }
 function dayNet(d){ const dc = dayCfg(d); return dc.net == null ? cfg().net : dc.net; }
-function mixerCfg(dc){
-  const m = dc.mixer || {};
+function sanitizeMix(m){
+  m = m || {};
   const fmts = arr(m.formats).filter(f=>FORMATS[f] && f!=='mixer');
   return { seg: [3,6,9].includes(m.seg) ? m.seg : 3,
            formats: fmts.length ? fmts : MIXER_DEFAULT.formats.slice(),
            flip: m.flip !== false };
 }
-// the format actually being played on a given hole (mixer days rotate it)
-function holeFormat(d, n){
-  const dc = dayCfg(d);
-  if (dc.format !== 'mixer') return dc.format;
-  const mx = mixerCfg(dc);
+function mixerCfg(dc){
+  // a mixer day points at a shared library mix (mixId); older data may still
+  // carry its own inline rotation under days/{d}/mixer — that keeps working
+  const shared = dc.mixId ? (S.mixes||{})[dc.mixId] : null;
+  return sanitizeMix(shared || dc.mixer);
+}
+function mixes(){ return Object.entries(S.mixes||{}).map(([id,m])=>Object.assign({id},m||{}))
+  .sort((a,b)=>((a.ord||0)-(b.ord||0)) || String(a.id).localeCompare(String(b.id))); }
+function mixName(m){ return String((m&&m.name)||'').trim() || 'Unnamed mix'; }
+function dayMixId(dc){ return (dc.mixId && (S.mixes||{})[dc.mixId]) ? dc.mixId : null; }
+function daysUsingMix(id){ return DAYS.filter(d=>(((S.days||{})[d]||{}).mixId)===id); }
+// the format played on hole n under a mix rotation
+function mixFormatAt(mx, n){
   const L = mx.formats.length;
   if (mx.flip && mx.seg !== 6 && n > 9){ // seg 6 straddles the turn — no flip
     const rev = mx.formats.slice().reverse();
     return rev[Math.floor((n-10)/mx.seg) % L];
   }
   return mx.formats[Math.floor((n-1)/mx.seg) % L];
+}
+// the format actually being played on a given hole (mixer days rotate it)
+function holeFormat(d, n){
+  const dc = dayCfg(d);
+  if (dc.format !== 'mixer') return dc.format;
+  return mixFormatAt(mixerCfg(dc), n);
+}
+function mixRotTxt(mx){
+  return `${mx.seg}-hole turns · ${mx.formats.map(f=>FORMATS[f].name).join(' → ')}${mx.flip && mx.seg!==6 ? ' · flips on the back' : ''}`;
+}
+function mixSegsTxt(mx){
+  const segs = [];
+  for (let n0=1; n0<=18; n0+=mx.seg) segs.push(`${n0}–${Math.min(n0+mx.seg-1,18)} ${FORMATS[mixFormatAt(mx,n0)].name}`);
+  return segs.join(' · ');
 }
 function dayAllowancePct(d){
   // For EVERY format this returns the effective "% of handicap" number the user
@@ -1330,7 +1358,8 @@ function dayTabsHtml(d){
 function rulesChipsHtml(d){
   const dc = dayCfg(d), c = cfg();
   const chips = [];
-  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${FORMATS[dc.format].name}${dc.format==='mixer' ? ' '+mixerCfg(dc).seg+'s' : ''}</button>`);
+  const mixTag = dc.format==='mixer' ? (dayMixId(dc) ? ' · '+esc(mixName(S.mixes[dc.mixId]).toUpperCase()) : ' '+mixerCfg(dc).seg+'s') : '';
+  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${FORMATS[dc.format].name}${mixTag}</button>`);
   const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
   const net = dayNet(d) && anyH && dc.course !== 'tbd';
   const pct = dayAllowancePct(d);
@@ -1865,21 +1894,24 @@ function renderSetupDay(d){
   let mixerPanel = '';
   if (dc.format === 'mixer'){
     const mx = mixerCfg(dc);
-    const segSel = [3,6,9].map(s=>`<button class="selopt ${mx.seg===s?'on':''}" data-act="mixseg" data-d="${d}" data-v="${s}">${s}-hole turns</button>`).join('');
-    const rotChips = mx.formats.map((f,i)=>
-      `<button class="selopt on" data-act="mixdel" data-d="${d}" data-i="${i}">${FORMATS[f].name} ✕</button>`).join('');
-    const palette = Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles').map(f=>
-      `<button class="selopt" data-act="mixadd" data-d="${d}" data-v="${f}">+ ${FORMATS[f].name}</button>`).join('');
-    const segs = [];
-    for (let n0=1; n0<=18; n0+=mx.seg) segs.push(`${n0}–${Math.min(n0+mx.seg-1,18)} ${FORMATS[holeFormat(d,n0)].name}`);
+    const selId = dayMixId(dc);
+    const cards = mixes().map(m=>`<div class="mixcard ${selId===m.id?'on':''}">
+        <button class="mixmain" data-act="mixpick" data-d="${d}" data-id="${m.id}">
+          <div class="fn sc">${esc(mixName(m))}</div>
+          <div class="fd">${mixRotTxt(sanitizeMix(m))}</div></button>
+        <button class="mixedit" data-act="mixeditsheet" data-id="${m.id}" title="Edit this mix">✎</button>
+      </div>`).join('');
+    // a day carrying its own pre-library rotation (or nothing picked yet)
+    const legacy = !selId ? `<div class="mixcard on">
+        <div class="mixmain"><div class="fn sc">THIS DAY’S OWN ROTATION</div>
+          <div class="fd">${mixRotTxt(mx)}</div></div>
+        <button class="ghostbtn" style="align-self:center;white-space:nowrap" data-act="mixsave" data-d="${d}">Save to library</button>
+      </div>` : '';
     mixerPanel = `<div style="margin-top:12px;border-top:1px solid var(--pencil);padding-top:10px">
-      <div class="mut" style="font-size:13px;margin-bottom:6px">The rotation — order matters:</div>
-      <div class="selrow">${segSel}</div>
-      <div class="selrow" style="margin-top:8px">${rotChips}</div>
-      <div class="selrow" style="margin-top:6px">${palette}</div>
-      ${mx.seg!==6 ? `<div class="togg"><span>Reverse the order on the back nine</span>
-        <button class="sw ${mx.flip?'on':''}" data-act="mixflip" data-d="${d}" role="switch" aria-checked="${!!mx.flip}"></button></div>` : ''}
-      <div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.6">${segs.join(' · ')}</div>
+      <div class="mut" style="font-size:13px;margin-bottom:6px">Pick today’s mix. Rotations live in a shared library — anyone can build one, every phone sees it, and it isn’t tied to a day until you pick it here.</div>
+      ${legacy}${cards}
+      <div style="margin-top:8px"><button class="ghostbtn" data-act="mixnew" data-d="${d}">+ New mix</button></div>
+      <div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.6">${mixSegsTxt(mx)}</div>
     </div>`;
   }
   const x2html = dc.format==='singles' ? `<div class="togg"><span>Double singles <span class="mut" style="font-size:12.5px">— Singles ×2 → trip total ${halfTxt(cup().scheduled + (dc.x2 ? -1 : 1) * cupMatchesFor(d).length * (dc.points||1))} → recomputes live</span></span>
@@ -2029,6 +2061,21 @@ function renderSettings(){
       <div class="field"><label>Stroke cap per match (0 = none)</label><input type="number" value="${c.strokeCap|0}" data-input="strokecap" style="width:74px"></div>
       ${c.flat100?'':allowRows}
       <div style="margin-top:6px"><button class="ghostbtn" data-act="resetwhs">Reset to WHS</button></div>
+    </div>
+
+    <h2>Mix library <span class="ct">for MIXER days</span></h2>
+    <div class="block">
+      <div class="mut" style="font-size:13px;margin-bottom:2px">Rotation recipes for the MIXER format. Build one here — it saves to the trip so everybody sees it, and it isn’t tied to a day until a day’s setup picks it.</div>
+      ${mixes().map(m=>{
+        const used = daysUsingMix(m.id);
+        return `<div class="mixcard">
+          <button class="mixmain" data-act="mixeditsheet" data-id="${m.id}">
+            <div class="fn sc">${esc(mixName(m))}</div>
+            <div class="fd">${mixRotTxt(sanitizeMix(m))}${used.length?` · in play: ${used.map(d=>DAYMETA[d].name).join(', ')}`:''}</div></button>
+          <button class="mixedit" data-act="mixeditsheet" data-id="${m.id}" title="Edit this mix">✎</button>
+        </div>`;
+      }).join('') || `<div class="mut" style="font-size:12.5px;padding:4px 0">Nothing yet. Cook one up.</div>`}
+      <div style="margin-top:8px"><button class="ghostbtn" data-act="mixnew">+ New mix</button></div>
     </div>
 
     <h2>Extras</h2>
@@ -2347,6 +2394,32 @@ function sheetHtml(sh){
     return `<h3>Sync</h3><div>Live — every phone with the link sees scores as they land.</div>`;
   }
   if (t==='badge21') return `<h3>2 v 1</h3><div>Odd man out — one ball counts for the solo side. Totally legal (Rule 23). His allowance computes off the low man of the three.</div>`;
+  if (t==='mixedit'){
+    const raw = (S.mixes||{})[sh.id];
+    if (!raw) return `<h3>Mix gone</h3><div class="mut">Somebody deleted this mix from another phone.</div>
+      <div class="btnrow"><button class="bigbtn pri" data-act="sheet-close">Close</button></div>`;
+    const mx = sanitizeMix(raw);
+    const segSel = [3,6,9].map(s=>`<button class="selopt ${mx.seg===s?'on':''}" data-act="mixseg" data-id="${sh.id}" data-v="${s}">${s}-hole turns</button>`).join('');
+    const rotChips = mx.formats.map((f,i)=>
+      `<button class="selopt on" data-act="mixdel" data-id="${sh.id}" data-i="${i}">${FORMATS[f].name} ✕</button>`).join('');
+    const palette = Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles').map(f=>
+      `<button class="selopt" data-act="mixadd" data-id="${sh.id}" data-v="${f}">+ ${FORMATS[f].name}</button>`).join('');
+    const used = daysUsingMix(sh.id);
+    return `<h3>Mix designer</h3>
+      <div class="field"><label>Mix name</label><input type="text" maxlength="24" placeholder="e.g. The Gauntlet" value="${esc(raw.name||'')}" data-input="mixname" data-id="${sh.id}"></div>
+      <div class="mut" style="font-size:13px;margin:6px 0">The rotation — order matters:</div>
+      <div class="selrow">${segSel}</div>
+      <div class="selrow" style="margin-top:8px">${rotChips}</div>
+      <div class="selrow" style="margin-top:6px">${palette}</div>
+      ${mx.seg!==6 ? `<div class="togg"><span>Reverse the order on the back nine</span>
+        <button class="sw ${mx.flip?'on':''}" data-act="mixflip" data-id="${sh.id}" role="switch" aria-checked="${!!mx.flip}"></button></div>` : ''}
+      <div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.6">${mixSegsTxt(mx)}</div>
+      <div class="mut" style="font-size:12px;margin-top:8px">${used.length
+        ? `In play: ${used.map(d=>DAYMETA[d].name).join(', ')} — edits land there live.`
+        : 'Saved to the trip for everyone — not tied to a day until a day’s setup picks it.'}</div>
+      <div class="btnrow"><button class="bigbtn danger" data-act="mixdelete" data-id="${sh.id}">Delete</button>
+        <button class="bigbtn pri" data-act="sheet-close">Done</button></div>`;
+  }
   if (t==='ovf'){
     const m = theMatch(sh.mid); const dr = m ? mDer(m) : null;
     return `<h3>Match options</h3>
@@ -2902,11 +2975,39 @@ document.addEventListener('click', (ev)=>{
       op(`days/${a.d}/points`, Math.max(0.5, Math.min(5, cur + (+a.v)))); break;
     }
     case 'x2': op(`days/${a.d}/x2`, !dayCfg(a.d).x2); break;
-    case 'fmt': op(`days/${a.d}/format`, a.v); op(`days/${a.d}/allowancePct`, null); break;
-    case 'mixseg': { const mx = mixerCfg(dayCfg(a.d)); mx.seg = +a.v; op(`days/${a.d}/mixer`, mx); break; }
-    case 'mixflip': { const mx = mixerCfg(dayCfg(a.d)); mx.flip = !mx.flip; op(`days/${a.d}/mixer`, mx); break; }
-    case 'mixadd': { const mx = mixerCfg(dayCfg(a.d)); if (mx.formats.length < 6) mx.formats.push(a.v); op(`days/${a.d}/mixer`, mx); break; }
-    case 'mixdel': { const mx = mixerCfg(dayCfg(a.d)); if (mx.formats.length > 1) mx.formats.splice(+a.i, 1); op(`days/${a.d}/mixer`, mx); break; }
+    case 'fmt': {
+      op(`days/${a.d}/format`, a.v); op(`days/${a.d}/allowancePct`, null);
+      // a day going mixer with no rotation of its own picks up the library's first mix
+      if (a.v==='mixer' && !dayMixId(dayCfg(a.d)) && !(((S.days||{})[a.d]||{}).mixer) && mixes().length)
+        op(`days/${a.d}/mixId`, mixes()[0].id);
+      break;
+    }
+    case 'mixpick': op(`days/${a.d}/mixId`, a.id); break;
+    case 'mixnew': {
+      const id = 'mx'+uid();
+      const seed = a.d ? mixerCfg(dayCfg(a.d)) : sanitizeMix(MIXER_DEFAULT);
+      op(`mixes/${id}`, Object.assign({ name:'', ord: mixes().length }, seed));
+      if (a.d) op(`days/${a.d}/mixId`, id);
+      openSheet('mixedit', { id }); break;
+    }
+    case 'mixsave': { // promote a day's own pre-library rotation into the shared library
+      const id = 'mx'+uid();
+      op(`mixes/${id}`, Object.assign({ name:'', ord: mixes().length }, mixerCfg(dayCfg(a.d))));
+      op(`days/${a.d}/mixId`, id);
+      openSheet('mixedit', { id }); break;
+    }
+    case 'mixeditsheet': openSheet('mixedit', { id:a.id }); break;
+    case 'mixdelete': {
+      const used = daysUsingMix(a.id);
+      if (used.length && !window.confirm(`${used.map(d=>DAYMETA[d].name).join(' and ')} play${used.length===1?'s':''} this mix. Each day keeps a private copy of the rotation. Delete it from the library?`)) break;
+      used.forEach(d=>{ op(`days/${d}/mixer`, mixerCfg(dayCfg(d))); op(`days/${d}/mixId`, null); });
+      op(`mixes/${a.id}`, null);
+      closeSheet(); break;
+    }
+    case 'mixseg': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); mx.seg = +a.v; op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixflip': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); mx.flip = !mx.flip; op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixadd': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); if (mx.formats.length < 6) mx.formats.push(a.v); op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixdel': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); if (mx.formats.length > 1) mx.formats.splice(+a.i, 1); op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
     case 'seat': {
       const d = a.d, ck = a.ck, sIdx = +a.s;
       const dc = dayCfg(d);
@@ -3069,6 +3170,7 @@ document.addEventListener('change', (ev)=>{
       const cst = Object.assign({ name:'', pars:Array(18).fill(4), sis:[] }, dayCfg(a.d).custom||{});
       cst.name = v; op(`days/${a.d}/custom`, cst); break;
     }
+    case 'mixname': if ((S.mixes||{})[a.id]) op(`mixes/${a.id}/name`, v.trim().slice(0,24)); break;
     case 'tripname': op('config/tripName', v.trim() || 'No Gimmes 2026'); break;
     case 'tname': op(`config/teamNames/${a.t}`, (v.trim() || (a.t==='red'?'RED':'BLUE')).toUpperCase().slice(0,8)); break;
     case 'allow': op(`config/allowances/${a.k}`, Math.max(0, Math.min(200, +v||0))); break;
