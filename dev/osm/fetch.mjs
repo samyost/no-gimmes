@@ -17,7 +17,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // re: name regex for the OSM golf_course polygon; center: fallback [lat,lon]
 const COURSES = [
-  { key:'vail',      re:'Vail Golf',            center:[39.6440,-106.3200] },
+  { key:'vail',      re:'^Vail Golf',           center:[39.6440,-106.3200] },
   { key:'breck',     re:'Breckenridge Golf',    center:[39.5330,-106.0260] },
   { key:'river',     re:'River Course',         center:[39.6075,-105.9780] },
   { key:'ranch',     re:'Keystone Ranch',       center:[39.5805,-105.9995] },
