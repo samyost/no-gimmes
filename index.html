@@ -914,8 +914,17 @@ function mStrokes(m, fmtOverride){
     return si0;
   }
   // map the user-facing % to the engine's pctOverride: individual formats pass
-  // straight through; side formats scale the WHS combination relative to its default
-  const pct = dc.format === 'mixer' ? null : dayAllowancePct(d);
+  // straight through; side formats scale the WHS combination relative to its default.
+  // When the match's format differs from the day's (side bets, mixer segments),
+  // the day-level % doesn't apply — use the trip's per-format allowance table.
+  let pct;
+  if (dc.format !== 'mixer' && fmt === dc.format) pct = dayAllowancePct(d);
+  else {
+    const c2 = cfg();
+    pct = c2.flat100 ? 100
+        : ((c2.allowances||{})[fmt] != null ? c2.allowances[fmt]
+        : (WHS_DEFAULTS[fmt] != null ? WHS_DEFAULTS[fmt] : null));
+  }
   const spec = ENG.ALLOWANCES[fmt] || ENG.ALLOWANCES.singles;
   let pctOverride = null;
   if (pct != null){
@@ -1201,6 +1210,12 @@ function pillHtml(){
   return `<button class="pill ${cls}" data-pill data-act="pill">${st==='live'?dot:''}${st!=='live'?dot:''}<span>${st==='live'?'● LIVE':t}</span></button>`.replace('●&nbsp;','');
 }
 function teamName(side){ const tn = cfg().teamNames||{}; return esc(side==='A' ? (tn.red||'RED') : (tn.blue||'BLUE')); }
+// label for one side of a match: team name, or the fighter's own name on a side bet
+function sideLabel(m, side){
+  if (!m || !m.side) return teamName(side);
+  const pid = sideIds(m, side)[0];
+  return pid ? esc((player(pid).name||'?').split(' ')[0]).toUpperCase() : teamName(side);
+}
 function pName(pid){ const p = player(pid); return `${p.emoji||''} ${esc((p.name||'??').split(' ')[0])}`; }
 
 function avatarHtml(){
@@ -1241,7 +1256,8 @@ function cupHeaderHtml(){
   let holderLine = '';
   if (c.holder && c.retain != null)
     holderLine = `<div class="cupsub">${teamName(c.holder==='red'?'A':'B')} hold the cup — ${halfTxt(c.retain)} keeps it</div>`;
-  const fin = tripOver() && c.scheduled > 0 && allMatches().length && allMatches().every(m=>mDer(m).st.done);
+  const cupOnly = allMatches().filter(m=>!m.side);
+  const fin = tripOver() && c.scheduled > 0 && cupOnly.length && cupOnly.every(m=>mDer(m).st.done);
   let engraved = '';
   if (fin){
     const w = c.red>c.blue?'A':(c.blue>c.red?'B':null);
@@ -1281,6 +1297,7 @@ function chipHtml(m, dr, size){
     return `<span class="chip ${cls} fin">${pre}${r.text} ✓</span>`;
   }
   if (st.thru === 0){
+    if (m.side) return `<span class="chip tee">🥊</span>`;
     const dc = dayCfg(m.day);
     const t = (dc.times||{})[m.group||'a'] || '';
     return `<span class="chip tee">${fmtTime(t)}</span>`;
@@ -1389,7 +1406,7 @@ function renderBoard(d){
   else ctx1 = `${esc(cl)}${tee ? ' · '+esc(tee)+' tees' : ''}`;
   let subChip = '';
   if (dp.red+dp.blue > 0){
-    const sweep = dp.done && ms.length>1 && (dp.red===0 || dp.blue===0);
+    const sweep = dp.done && cupMatchesFor(d).length>1 && (dp.red===0 || dp.blue===0);
     subChip = `<div class="daysub sc"><span class="tRed">${half(dp.red)}</span>–<span class="tBlue">${half(dp.blue)}</span>${sweep?' <span class="mut">— a sweep.</span>':''}</div>`;
   }
   // tee groups
@@ -1487,12 +1504,13 @@ function bigStatusHtml(m, dr){
   if (st.done){
     const r = st.result;
     if (r.winner===null) return `<div class="finpanel H sc">HALVED · ½ EACH</div>`;
-    const txt = r.conceded ? `${teamName(r.winner)} WIN ${r.text} · CONCEDED` : `${teamName(r.winner)} WIN ${r.text}`;
+    const who = sideLabel(m, r.winner);
+    const txt = r.conceded ? `${who} WIN${m.side?'S':''} ${r.text} · CONCEDED` : `${who} WIN${m.side?'S':''} ${r.text}`;
     return `<div class="finpanel ${r.winner==='A'?'R':'B'} sc">${txt} ✓</div>`;
   }
   let txt, cls='';
   if (st.leader===null) txt='ALL SQUARE';
-  else { cls = st.leader==='A'?'R':'B'; txt = `${teamName(st.leader)} ${Math.abs(st.up)}UP`; }
+  else { cls = st.leader==='A'?'R':'B'; txt = `${sideLabel(m, st.leader)} ${Math.abs(st.up)}UP`; }
   const d = st.dormie ? ` <span class="st d">· DORMIE</span>` : '';
   return `<div class="bigstat"><div class="st sc ${cls}">${txt}${d}</div><span class="sp"></span><div class="thru">${st.thru?('THRU '+st.thru):''}</div></div>`;
 }
@@ -1536,31 +1554,32 @@ function padHtml(m, d){
   const bn = sideIds(m,'B').map(pid=>esc((player(pid).name||'').split(' ')[0]).toUpperCase()).join(' · ');
   if (done && !keepOn && !editing){
     const r = dr.st.result;
-    const rt = r.winner===null ? 'HALVED · ½ EACH' : `${teamName(r.winner)} WIN ${r.text} ✓`;
+    const rt = r.winner===null ? 'HALVED · ½ EACH' : `${sideLabel(m, r.winner)} WIN${m.side?'S':''} ${r.text} ✓`;
     return `<div class="pad"><div class="resultcard">
       <div class="r1 sc ${r.winner==='A'?'tRed':r.winner==='B'?'tBlue':''}">${rt}</div>
-      <div class="mut" style="font-size:13px">${halfTxt(dr.worth)} PT posted to the board</div>
+      <div class="mut" style="font-size:13px">${m.side ? 'Bragging rights only — the cup didn’t move.' : halfTxt(dr.worth)+' PT posted to the board'}</div>
       <div class="links"><button data-act="keepplay" data-id="${m.id}">Keep playing</button>
       <button data-act="fixhole" data-id="${m.id}">Fix a hole</button></div>
     </div></div>`;
   }
-  const editRib = editing ? `<div class="editrib"><span>EDITING HOLE ${n} — currently ${hd.winner==='A'?teamName('A'):hd.winner==='B'?teamName('B'):'HALVED'}</span><span class="sp"></span>
+  const editRib = editing ? `<div class="editrib"><span>EDITING HOLE ${n} — currently ${hd.winner==='A'?sideLabel(m,'A'):hd.winner==='B'?sideLabel(m,'B'):'HALVED'}</span><span class="sp"></span>
       <button data-act="clearhole" data-id="${m.id}" data-n="${n}" style="color:var(--ob)">Clear hole</button></div>` : '';
-  const funBan = (done && keepOn) ? `<div class="funban">For fun — ${dr.st.result.winner ? teamName(dr.st.result.winner)+' already won '+dr.st.result.text : 'match halved'}.</div>` : '';
+  const funBan = (done && keepOn) ? `<div class="funban">For fun — ${dr.st.result.winner ? sideLabel(m, dr.st.result.winner)+' already won '+dr.st.result.text : 'match halved'}.</div>` : '';
   let drawerHtml2 = '';
   let winRow;
+  const lblA = sideLabel(m, 'A'), lblB = sideLabel(m, 'B');
   if (drawer){
     drawerHtml2 = strokesDrawerHtml(m, d, n);
     winRow = `<div class="mini3 ${ui.lock?'locked':''}">
-      <button class="mR sc ${litSide(m,n)==='A'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A">${(teamName('A'))}</button>
+      <button class="mR sc ${litSide(m,n)==='A'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A">${lblA}</button>
       <button class="mH sc ${litSide(m,n)==='H'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="H">HALVE</button>
-      <button class="mB sc ${litSide(m,n)==='B'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B">${(teamName('B'))}</button>
+      <button class="mB sc ${litSide(m,n)==='B'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B">${lblB}</button>
     </div>`;
   } else {
     winRow = `<div class="winrow ${ui.lock?'locked':''}">
-      <button class="wbtn R" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A"><span class="wl">${(teamName('A'))}</span><span class="wn">${rn}</span></button>
+      <button class="wbtn R" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A"><span class="wl">${lblA}</span><span class="wn">${m.side?'':rn}</span></button>
       <div class="gutter"></div>
-      <button class="wbtn B" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B"><span class="wl">${(teamName('B'))}</span><span class="wn">${bn}</span></button>
+      <button class="wbtn B" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B"><span class="wl">${lblB}</span><span class="wn">${m.side?'':bn}</span></button>
     </div>
     <div class="${ui.lock?'locked':''}"><button class="halvebar sc" data-act="win" data-id="${m.id}" data-n="${n}" data-w="H">HALVE</button></div>`;
   }
@@ -1625,7 +1644,7 @@ function strokesDrawerHtml(m, d, n){
   const hasAny = Object.keys(stored).length > 0;
   if (dw === 'A' || dw === 'B'){
     const nets = ''; // detail omitted; margin below
-    ban = `<div class="dbanner ${dw==='A'?'r':'b'}">Derived: ${teamName(dw)} win${si.net?' (net)':''} — tap the lit button to post it</div>`;
+    ban = `<div class="dbanner ${dw==='A'?'r':'b'}">Derived: ${sideLabel(m, dw)} win${m.side?'s':''}${si.net?' (net)':''} — tap the lit button to post it</div>`;
   }
   else if (dw === 'H') ban = `<div class="dbanner h">HOLE HALVED${si.net?' — net tie':''} — tap HALVE to post it</div>`;
   else if (hasAny){
@@ -1863,7 +1882,7 @@ function renderSetupDay(d){
       <div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.6">${segs.join(' · ')}</div>
     </div>`;
   }
-  const x2html = dc.format==='singles' ? `<div class="togg"><span>Double singles <span class="mut" style="font-size:12.5px">— Singles ×2 → trip total ${halfTxt(cup().scheduled + (dc.x2?0:matchesFor(d).reduce((a,m)=>a+(dc.points||1),0)) - (dc.x2?matchesFor(d).reduce((a,m)=>a+(dc.points||1),0):0))} → recomputes live</span></span>
+  const x2html = dc.format==='singles' ? `<div class="togg"><span>Double singles <span class="mut" style="font-size:12.5px">— Singles ×2 → trip total ${halfTxt(cup().scheduled + (dc.x2 ? -1 : 1) * cupMatchesFor(d).length * (dc.points||1))} → recomputes live</span></span>
       <button class="sw ${dc.x2?'on':''}" data-act="x2" data-d="${d}" role="switch" aria-checked="${!!dc.x2}"></button></div>` : '';
 
   return `
@@ -2136,7 +2155,7 @@ function skinsSummary(){
       for (const m of ms){
         const hd = (m.holes||{})[n];
         if (!hd || !hd.strokes) continue;
-        const si = mStrokes(m, holeFormat(d, n));
+        const si = mStrokes(m, mFormat(m, n));
         const hcell = holesFor(d)[n-1];
         for (const [k,v] of Object.entries(hd.strokes)){
           if (v==='pickup'||v==null||k==='A'||k==='B') continue;
@@ -2374,10 +2393,13 @@ function sheetHtml(sh){
     return `<h3>How strokes fall</h3><div style="font-size:14.5px">${rows}</div>${missing}`;
   }
   if (t==='concede1'){
+    const m1 = theMatch(sh.mid);
+    const nA = m1 && m1.side ? pName(sideIds(m1,'A')[0]) : teamName('A');
+    const nB = m1 && m1.side ? pName(sideIds(m1,'B')[0]) : teamName('B');
     return `<h3>Who’s giving it up?</h3>
       <div class="btnrow">
-        <button class="bigbtn red" data-act="concede2" data-mid="${sh.mid}" data-by="A">${teamName('A')} concede</button>
-        <button class="bigbtn blue" data-act="concede2" data-mid="${sh.mid}" data-by="B">${teamName('B')} concede</button>
+        <button class="bigbtn red" data-act="concede2" data-mid="${sh.mid}" data-by="A">${nA} concede${m1&&m1.side?'s':''}</button>
+        <button class="bigbtn blue" data-act="concede2" data-mid="${sh.mid}" data-by="B">${nB} concede${m1&&m1.side?'s':''}</button>
       </div>`;
   }
   if (t==='concede2'){
@@ -2385,6 +2407,13 @@ function sheetHtml(sh){
     const recv = sh.by==='A'?'B':'A';
     const recvUp = recv==='A' ? dr.st.up : -dr.st.up;
     const margin = Math.max(1, recvUp);
+    if (m.side){
+      const giver = pName(sideIds(m, sh.by)[0]), taker = pName(sideIds(m, recv)[0]);
+      return `<h3>Confirm</h3>
+      <div>${giver} gives it up. ${taker} takes the grudge match ${margin}UP — bragging rights only, the cup doesn’t move.</div>
+      <div class="btnrow"><button class="bigbtn ghost" data-act="sheet-close">Back</button>
+      <button class="bigbtn pri" data-act="concede3" data-mid="${sh.mid}" data-by="${sh.by}">Post it</button></div>`;
+    }
     return `<h3>Confirm</h3>
       <div>${teamName(sh.by)} concede. ${teamName(recv)} win ${margin}UP — ${halfTxt(dr.worth)} point${dr.worth===1?'':'s'} to ${teamName(recv)}. This posts to the board.</div>
       <div class="btnrow"><button class="bigbtn ghost" data-act="sheet-close">Back</button>
@@ -2450,7 +2479,8 @@ function sheetHtml(sh){
       const busy = !m.side && used.has(pid) && !(sideIds(m, sh.side).includes(pid));
       const dup = m.side && other.has(pid);
       const t = effTeam(d,pid);
-      return `<button class="pchip ${t==='red'?'redx':t==='blue'?'bluex':''}" style="width:100%;${busy||dup?'opacity:.4':''}" data-act="pickplayer2" data-mid="${sh.mid}" data-side="${sh.side}" data-old="${sh.old||''}" data-p="${dup?'':pid}">
+      if (dup) return `<div class="pchip" style="width:100%;opacity:.4"><span class="em">${player(pid).emoji}</span><span class="nm">${esc(player(pid).name)}</span><span class="mut" style="margin-left:auto;font-size:11px">other corner</span></div>`;
+      return `<button class="pchip ${t==='red'?'redx':t==='blue'?'bluex':''}" style="width:100%;${busy?'opacity:.4':''}" data-act="pickplayer2" data-mid="${sh.mid}" data-side="${sh.side}" data-old="${sh.old||''}" data-p="${pid}">
         <span class="em">${player(pid).emoji}</span><span class="nm">${esc(player(pid).name)}</span>${busy?'<span class="mut" style="margin-left:auto;font-size:11px">in a match</span>':''}</button>`;
     }).join('');
     return `<h3>${m.side ? 'Pick a fighter' : (sh.side==='A'?teamName('A'):teamName('B'))+' slot'}</h3>
@@ -2786,7 +2816,9 @@ document.addEventListener('click', (ev)=>{
       op(`matches/${a.mid}/concededAt`, dr.st.thru || 1);
       op(`matches/${a.mid}/touched`, Date.now());
       ui.seenFinals[a.mid] = 'CONC';
-      closeSheet(); pointPost(); maybeClinch(); requestRender(); break;
+      closeSheet();
+      if (!m.side){ pointPost(); maybeClinch(); }
+      requestRender(); break;
     }
     case 'reopen': {
       const m = theMatch(a.mid); if (!m) break;
