@@ -448,6 +448,27 @@ a{color:var(--brass)}
 .final .cupline .pts.win{text-shadow:0 0 0}
 .engrave{text-align:center;font-family:'Saira Condensed';font-weight:800;font-size:20px;letter-spacing:.05em;
   padding:4px 0 2px;color:var(--brass);text-transform:uppercase}
+/* ---- lo-fi hole maps ---- */
+.hmap{margin:8px 14px 0;position:relative}
+.hmap svg{display:block;width:100%;height:auto;border:1px solid var(--pencil);border-radius:10px;background:var(--bone)}
+.hmap .mr{fill:var(--sage);opacity:.10}
+.hmap .mf{fill:var(--sage);opacity:.22}
+.hmap .mg{fill:var(--live);opacity:.30}
+.hmap .mt{fill:var(--pencil);opacity:.65}
+.hmap .mb{fill:var(--brass);opacity:.38}
+.hmap .mw{fill:var(--blue);opacity:.20}
+.hmap .mc{fill:none;stroke:var(--pencil);stroke-width:1.5;stroke-dasharray:4 5}
+.hmap .bmark circle{stroke:var(--card);stroke-width:1.5}
+.hmap .bmark.r circle{fill:var(--red)}
+.hmap .bmark.b circle{fill:var(--blue)}
+.hmap .bmark text{font-size:9px;text-anchor:middle;dominant-baseline:central}
+.hmap .mhint{position:absolute;right:9px;bottom:5px;font-size:10.5px;color:var(--sage);letter-spacing:.04em;pointer-events:none}
+.hmapfoot{display:flex;align-items:center;margin:3px 14px 0;font-size:12px;color:var(--sage)}
+.hmapfoot .sp{flex:1}
+.hmapfoot button{color:var(--ob);font-size:12px;padding:2px 4px}
+.hnote{margin:6px 14px 0;font-size:12.5px;color:var(--sage);display:flex;gap:7px;align-items:center;line-height:1.4}
+.hnote input{flex:1;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:7px 10px;font-size:13.5px}
+.hnotebtn{color:var(--brass);font-size:11.5px;border:1px dashed var(--pencil);border-radius:8px;padding:3px 8px;flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -498,6 +519,16 @@ COURSES.overland = {"name":"Overland Park Golf Course","short":"Overland Park","
 COURSES.wellshire = {"name":"Wellshire Golf Course","short":"Wellshire","par":71,"tees":[{"n":"Bronze","r":70.7,"s":128,"y":6659},{"n":"Bronze/Gold","r":69.7,"s":128,"y":6455},{"n":"Gold","r":69.1,"s":126,"y":6269},{"n":"Gold/Black","r":67.3,"s":123,"y":5881},{"n":"Black","r":66.1,"s":119,"y":5630},{"n":"Black/Silver","r":63.7,"s":117,"y":5174},{"n":"Silver","r":62.3,"s":114,"y":4794}],"def":"Bronze","holes":[{"p":5,"si":6,"y":{"Bronze":522}},{"p":3,"si":18,"y":{"Bronze":172}},{"p":4,"si":12,"y":{"Bronze":395}},{"p":4,"si":8,"y":{"Bronze":428}},{"p":4,"si":4,"y":{"Bronze":452}},{"p":4,"si":10,"y":{"Bronze":359}},{"p":4,"si":2,"y":{"Bronze":408}},{"p":4,"si":14,"y":{"Bronze":309}},{"p":3,"si":16,"y":{"Bronze":157}},{"p":5,"si":3,"y":{"Bronze":474}},{"p":3,"si":17,"y":{"Bronze":144}},{"p":4,"si":1,"y":{"Bronze":470}},{"p":4,"si":5,"y":{"Bronze":449}},{"p":3,"si":15,"y":{"Bronze":252}},{"p":4,"si":13,"y":{"Bronze":363}},{"p":4,"si":9,"y":{"Bronze":392}},{"p":4,"si":11,"y":{"Bronze":391}},{"p":5,"si":7,"y":{"Bronze":522}}]};
 COURSES.tbd    = { name:'Course TBD', short:'Course TBD', par:72, tees:[], def:null };
 COURSES.custom = { name:'Custom course', short:'Custom', par:72, tees:[], def:null };
+
+// Lo-fi hole maps traced from OpenStreetMap (see dev/osm). Keyed by course,
+// then hole number: {vb:[w,h], g:[[kind,'M…'],…]} — kinds: r rough, f fairway,
+// t tee, b bunker, w water, g green, c centerline. Courses without an entry
+// simply don't show a map.
+const HOLEMAPS = {};
+
+// Approximate course elevations (ft) for the thin-air "plays like" yardage.
+const ELEV = { vail:8150, breck:9324, river:9173, ranch:9300, willis:5414,
+               citypark:5320, evergreen:7220, kennedy:5610, overland:5260, wellshire:5420 };
 
 const GIMMES = {
   conc:  'Concessions only — someone has to say “that’s good”',
@@ -1549,6 +1580,62 @@ function bigStatusHtml(m, dr){
   const d = st.dormie ? ` <span class="st d">· DORMIE</span>` : '';
   return `<div class="bigstat"><div class="st sc ${cls}">${txt}${d}</div><span class="sp"></span><div class="thru">${st.thru?('THRU '+st.thru):''}</div></div>`;
 }
+// ---- lo-fi hole map + ball marks -------------------------------------------
+function holeMapHtml(m, d, n){
+  const dc = dayCfg(d);
+  const hm = (HOLEMAPS[dc.course]||{})[n];
+  if (!hm) return '';
+  const [w, hh] = hm.vb;
+  const shapes = hm.g.map(([k,p])=>`<path class="m${k}" d="${p}"/>`).join('');
+  // pin flag at the end of the centerline
+  let flag = '';
+  const cd = (hm.g.find(([k])=>k==='c')||[])[1] || '';
+  const last = cd.split('L').pop();
+  if (last){
+    const [fx, fy] = last.replace('M','').split(' ').map(Number);
+    if (isFinite(fx) && isFinite(fy))
+      flag = `<g transform="translate(${fx} ${fy})"><line y2="-10" stroke="var(--ink)" stroke-width="1.3"/><path d="M0 -10l6.5 2.4-6.5 2.4z" fill="var(--red)"/><circle r="1.7" fill="var(--ink)"/></g>`;
+  }
+  const balls = (dc.balls||{})[n] || {};
+  const me = LS.get('id', null);
+  const canTap = me && me !== 'watch';
+  const dots = Object.entries(balls).map(([pid,b])=>{
+    if (!b || b.x==null || !isPresent(d,pid)) return '';
+    const t = effTeam(d,pid)==='red' ? 'r' : 'b';
+    return `<g class="bmark ${t}" transform="translate(${(b.x*w).toFixed(1)} ${(b.y*hh).toFixed(1)})"><circle r="7"/><text>${player(pid).emoji}</text></g>`;
+  }).join('');
+  const mine = canTap && balls[me] && balls[me].x!=null;
+  return `<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${canTap?`data-maptap="1" data-d="${d}" data-n="${n}"`:''}>${shapes}${flag}${dots}</svg>
+    ${canTap && !mine ? `<div class="mhint">tap where your ball is</div>` : ''}</div>` +
+    (mine ? `<div class="hmapfoot"><span>your ball is marked — tap again to move it</span><span class="sp"></span><button data-act="ballclear" data-d="${d}" data-n="${n}">clear</button></div>` : '');
+}
+// ---- historical hole notes (shared, keyed to the physical hole) ------------
+function noteKey(d, n){
+  const dc = dayCfg(d);
+  if (dc.course==='tbd' || dc.course==='custom') return null;
+  if (dc.course==='breck'){
+    const h = holesFor(d)[n-1];
+    return h.nine ? 'breck_' + h.nine.toLowerCase() : null;
+  }
+  return dc.course;
+}
+function noteHoleNo(d, n){ return dayCfg(d).course==='breck' ? ((n-1)%9)+1 : n; }
+function holeNoteHtml(d, n){
+  const k = noteKey(d, n);
+  if (!k) return '';
+  const hn = noteHoleNo(d, n);
+  const txt = ((S.notes||{})[k]||{})[hn] || '';
+  if (ui.noteEdit === k+'/'+hn)
+    return `<div class="hnote"><input type="text" maxlength="90" value="${esc(txt)}" data-input="holenote" data-c="${k}" data-hn="${hn}" placeholder="local knowledge — e.g. driver is a trap, lay back"></div>`;
+  if (txt) return `<div class="hnote"><button class="hnotebtn" data-act="noteedit" data-c="${k}" data-hn="${hn}">✎</button><span>${esc(txt)}</span></div>`;
+  return `<div class="hnote"><button class="hnotebtn" data-act="noteedit" data-c="${k}" data-hn="${hn}">＋ hole note</button></div>`;
+}
+function playsLike(yds, courseKey){
+  const e = ELEV[courseKey];
+  if (!e || !yds) return null;
+  const pl = Math.round(yds * (1 - 0.0116 * e / 1000));
+  return pl < yds ? pl : null;
+}
 function holeCtxHtml(m, d){
   const n = curHole(m);
   const h = holesFor(d)[n-1];
@@ -1567,7 +1654,8 @@ function holeCtxHtml(m, d){
       }
     }
   }
-  const yds = h.yds ? ` · ${h.yds} YDS` : '';
+  const pl = playsLike(h.yds, dayCfg(d).course);
+  const yds = h.yds ? ` · ${h.yds} YDS${pl?` <span style="color:var(--sage);text-transform:none">(plays ~${pl})</span>`:''}` : '';
   const fmtTag = (dayCfg(d).format==='mixer' && !m.side) ? ` · <span class="brass">${FORMATS[hFmt].name}</span>` : '';
   const c = cfg();
   let junk = '';
@@ -1575,7 +1663,7 @@ function holeCtxHtml(m, d){
     const types = Object.entries(c.junkTypes||{}).filter(([k,v])=>v && (k!=='greenie' || h.par===3)).map(([k])=>k);
     junk = `<div class="junkchips">` + types.map(t=>`<button class="jchip" data-act="junk" data-id="${m.id}" data-t="${t}" data-n="${n}">${JUNKTYPES[t]}</button>`).join('') + `</div>`;
   }
-  return `<div class="hctx"><div class="h1 sc">HOLE ${n} · PAR ${h.par} · SI ${h.si}${yds}${fmtTag}</div>${pills}</div>${junk}`;
+  return `<div class="hctx"><div class="h1 sc">HOLE ${n} · PAR ${h.par} · SI ${h.si}${yds}${fmtTag}</div>${pills}</div>${holeMapHtml(m, d, n)}${holeNoteHtml(d, n)}${junk}`;
 }
 function padHtml(m, d){
   const dr = mDer(m);
@@ -2811,6 +2899,17 @@ function mixItUp(d){
 
 // ---- delegated events ------------------------------------------------------
 document.addEventListener('click', (ev)=>{
+  const mt = ev.target.closest('[data-maptap]');
+  if (mt){
+    const me = LS.get('id', null);
+    if (me && me !== 'watch'){
+      const r = mt.getBoundingClientRect();
+      const x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+      const y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
+      op(`days/${mt.dataset.d}/balls/${mt.dataset.n}/${me}`, { x:+x.toFixed(3), y:+y.toFixed(3) });
+    }
+    return;
+  }
   const el = ev.target.closest('[data-act]');
   if (!el) {
     if (!ev.target.closest('.seat,.pchip,.mslot')) { if (ui.pick){ ui.pick=null; requestRender(); } }
@@ -2836,6 +2935,9 @@ document.addEventListener('click', (ev)=>{
     case 'takeover-close': $takeover.className=''; $takeover.innerHTML=''; break;
     case 'snackbtn': { const f = ui.undoFn; ui.undoFn=null; $snack.innerHTML=''; if (f) f(); break; }
     case 'who': closeSheet(true); ui.screen='who'; requestRender(); break;
+    case 'ballclear': { const me = LS.get('id', null);
+      if (me && me !== 'watch') op(`days/${a.d}/balls/${a.n}/${me}`, null); break; }
+    case 'noteedit': ui.noteEdit = a.c + '/' + a.hn; requestRender(); break;
     case 'iam': {
       LS.set('id', a.p); ui.screen='board';
       const h = location.hash;
@@ -3182,6 +3284,7 @@ document.addEventListener('change', (ev)=>{
     case 'allow': op(`config/allowances/${a.k}`, Math.max(0, Math.min(200, +v||0))); break;
     case 'strokecap': op('config/strokeCap', Math.max(0, +v|0)); break;
     case 'dburl': LS.set('db', v.trim()); sse.es && sse.es.close(); sse.es=null; sseConnect(); scheduleFlush(); requestRender(); break;
+    case 'holenote': ui.noteEdit = null; op(`notes/${a.c}/${a.hn}`, v.trim().slice(0,90) || null); break;
   }
 });
 
