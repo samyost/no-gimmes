@@ -31,8 +31,14 @@ function getAt(segs) {
 }
 
 function prune(node) {
-  // Firebase deletes empty objects/nulls all the way up.
+  // Firebase deletes empty objects/nulls all the way up. Dense arrays are
+  // returned as arrays by the real RTDB, so preserve them here too.
   if (node === null || typeof node !== 'object') return node;
+  if (Array.isArray(node)) {
+    const a = node.map(prune);
+    while (a.length && (a[a.length - 1] === null || a[a.length - 1] === undefined)) a.pop();
+    return a.length ? a : null;
+  }
   const out = {};
   for (const [k, v] of Object.entries(node)) {
     const p = prune(v);

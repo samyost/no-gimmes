@@ -55,7 +55,7 @@ const ENG = (() => {
     const remaining = n - thru;
     const dormie = !result && up !== 0 && Math.abs(up) === remaining && remaining > 0;
     return {
-      up, thru, remaining, wonA, wonB, halved, dormie,
+      up, thru, remaining, wonA, wonB, halved, dormie, decidedAt,
       done: !!result, result,
       statusText: result ? result.text
         : up === 0 ? 'A/S'
@@ -92,11 +92,12 @@ const ENG = (() => {
   const ALLOWANCES = {
     singles:   { kind: 'individual', pct: 100 },
     fourball:  { kind: 'individual', pct: 90 },
-    shamble:   { kind: 'individual', pct: 90 },
+    shamble:   { kind: 'individual', pct: 85 },
     foursomes: { kind: 'side', calc: (lo, hi) => 0.5 * (lo + hi) },
     greensomes:{ kind: 'side', calc: (lo, hi) => 0.6 * lo + 0.4 * hi },
     chapman:   { kind: 'side', calc: (lo, hi) => 0.6 * lo + 0.4 * hi },
     scramble2: { kind: 'side', calc: (lo, hi) => 0.35 * lo + 0.15 * hi },
+    scramble:  { kind: 'side', calc: (lo, hi) => 0.35 * lo + 0.15 * hi },
   };
 
   // players: [{id, ch, side}] ch = course handicap (int, may be negative).
@@ -154,7 +155,7 @@ const ENG = (() => {
   // Returns 'A'|'B'|'H'|null (null = not derivable yet).
   function holeWinnerFromStrokes(fmt, entry, sidesPlayers, strokesInfo, si, holesInRound) {
     const sideNet = { A: null, B: null };
-    if (strokesInfo.kind === 'side' || fmt === 'foursomes' || fmt === 'greensomes' || fmt === 'chapman' || fmt === 'scramble2') {
+    if (strokesInfo.kind === 'side' || fmt === 'foursomes' || fmt === 'greensomes' || fmt === 'chapman' || fmt === 'scramble' || fmt === 'scramble2') {
       for (const s of ['A', 'B']) {
         const g = entry.sides && entry.sides[s];
         if (g == null) return null;
