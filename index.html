@@ -2131,6 +2131,8 @@ function render(){
   catch(e){ console.error(e); html = `<div class="empty" style="padding-top:80px">Something choked on the data.<br>
     <span class="mut" style="font-size:12px">${esc(String(e && e.message || e))}</span><br>
     <button class="cta" data-act="board">Back to the board</button></div>`; }
+  const rw0 = document.getElementById('railwrap');
+  ui.railScroll = rw0 ? rw0.scrollLeft : null;
   $app.innerHTML = html;
   // keep an open sheet's content live (points land while the Cup Sheet is up)
   if (ui.sheet && ui.sheet.type !== 'confirmtext' && !inputFocused()){
@@ -2170,10 +2172,13 @@ function postRender(){
     const m = theMatch(ui.matchId);
     if (m){
       const key = ui.matchId + ':' + curHole(m);
-      if (ui.railKey !== key){ // don't yank the rail back on unrelated re-renders
+      const rw = document.getElementById('railwrap');
+      if (ui.railKey !== key){
         ui.railKey = key;
         const cell = document.getElementById('cell'+curHole(m));
         if (cell) cell.scrollIntoView({ block:'nearest', inline:'center', behavior:'auto' });
+      } else if (rw && ui.railScroll != null){
+        rw.scrollLeft = ui.railScroll; // re-render rebuilt the rail — put it back where it was
       }
     }
   }
