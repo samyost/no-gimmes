@@ -40,7 +40,9 @@ watch it appear on the other. That's the whole stack verified.
 - **Setup** (gear): per-day attendance (4–8 players), per-day team draws (Red
   and Blue are permanent; membership can change daily), carts → two tee times,
   cart-vs-cart match maker, formats (four-ball, foursomes, greensomes, Chapman,
-  scramble, shamble, singles), gross/net with editable WHS allowances, points
+  scramble, shamble, singles, mixer — a different game every few holes, with
+  the rotations built as named mixes in a shared library, not tied to any day,
+  and each mixer day picking one), gross/net with editable WHS allowances, points
   per match, double singles, gimme policy, tie rule, junk dots, skins.
 - **Offline**: scores save on the phone instantly and sync when signal returns
   (the pill in the corner tells the truth: `LIVE` / `3 QUEUED`).
@@ -65,8 +67,9 @@ A minimal custom-course card covers everywhere else.
 ## Development
 
 ```
-node dev/engine.test.mjs   # 47 unit tests for the scoring engine
-node dev/sync.test.mjs     # 22 two-browser integration tests (needs: cd dev && npm i)
+node dev/engine.test.mjs   # unit tests for the scoring engine
+node dev/features.test.mjs # mixer / mix library / side-bet browser tests (needs: cd dev && npm i)
+node dev/sync.test.mjs     # two-browser integration tests (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
 ```
 
