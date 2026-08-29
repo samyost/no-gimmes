@@ -98,7 +98,16 @@ for (const h of holes.sort((a,b) => (+a.tags.ref||0) - (+b.tags.ref||0))){
   const len = Math.hypot(b[0]-a[0], b[1]-a[1]) || 1;
   const ux = (b[0]-a[0])/len, uy = (b[1]-a[1])/len, nx = -uy, ny = ux;
   const rot = p => { const dx = p[0]-a[0], dy = p[1]-a[1]; return [dx*ux+dy*uy, dx*nx+dy*ny]; };
-  const near = projFeats.filter(f => f.pts.some(p => lineDist2(p, line) < CORRIDOR*CORRIDOR));
+  // water/rough may hug several holes — any vertex in the corridor keeps them;
+  // fairway/green/tee/bunker belong to one hole — ask for the centroid, or
+  // most of the polygon, to sit inside the corridor to kill neighbor bleed
+  const near = projFeats.filter(f => {
+    const inC = f.pts.filter(p => lineDist2(p, line) < CORRIDOR*CORRIDOR).length;
+    if (!inC) return false;
+    if (f.kind === 'w' || f.kind === 'r') return true;
+    const cx = f.pts.reduce((a,p)=>a+p[0],0)/f.pts.length, cy = f.pts.reduce((a,p)=>a+p[1],0)/f.pts.length;
+    return lineDist2([cx,cy], line) < (CORRIDOR-5)*(CORRIDOR-5) || inC / f.pts.length >= 0.4;
+  });
   const shapes = [];
   let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
   const clip = [];
@@ -106,11 +115,18 @@ for (const h of holes.sort((a,b) => (+a.tags.ref||0) - (+b.tags.ref||0))){
     const pts = simplify(f.pts.map(rot), SIMPLIFY);
     if (pts.length < 3) continue;
     clip.push({ kind: f.kind, pts });
-    if (f.kind !== 'w') // water can be huge; don't let it drive the frame
+    if (f.kind !== 'w' && f.kind !== 'r') // water/rough can be huge; don't let them drive the frame
       for (const p of pts){ minx=Math.min(minx,p[0]); maxx=Math.max(maxx,p[0]); miny=Math.min(miny,p[1]); maxy=Math.max(maxy,p[1]); }
   }
   const cl = simplify(line.map(rot), SIMPLIFY);
   for (const p of cl){ minx=Math.min(minx,p[0]); maxx=Math.max(maxx,p[0]); miny=Math.min(miny,p[1]); maxy=Math.max(maxy,p[1]); }
+  // the frame follows the centerline's corridor; a neighbor polygon with one
+  // vertex inside it must not drag the frame out — overflow clips at the edge
+  let cminx=Infinity, cminy=Infinity, cmaxx=-Infinity, cmaxy=-Infinity;
+  for (const p of cl){ cminx=Math.min(cminx,p[0]); cmaxx=Math.max(cmaxx,p[0]); cminy=Math.min(cminy,p[1]); cmaxy=Math.max(cmaxy,p[1]); }
+  const cross = Math.min(55, Math.max(30, len * 0.3)); // short par 3s stay tight
+  minx = Math.max(minx, cminx - 45); maxx = Math.min(maxx, cmaxx + 45);
+  miny = Math.max(miny, cminy - cross); maxy = Math.min(maxy, cmaxy + cross);
   const pad = 12;
   minx -= pad; miny -= pad; maxx += pad; maxy += pad;
   const s = W / (maxx - minx), Hgt = Math.round((maxy - miny) * s * 10) / 10;
