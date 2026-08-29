@@ -1,0 +1,24 @@
+name: Fetch OSM course geometry
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Query Overpass for all courses
+        run: node dev/osm/fetch.mjs
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dev/osm
+          git commit -m "Fetch OSM course geometry" || echo "nothing to commit"
+          git push
