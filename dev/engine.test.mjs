@@ -83,10 +83,34 @@ const O9 = Array.from({ length: 9 }, (_, i) => i + 1);
   s = ENG.matchState(seq([...Array(10).fill('A'), 'B', 'B']), O18, null);
   eq('for-fun after closeout', [s.result.text, s.result.winner], ['10&8', 'A']);
 
-  // gap: holes 1,2 and 4 entered — status counts only thru 2
+  // gap: holes 1,2 and 4 entered — every scored hole counts
   const gap = { 1: { w: 'A' }, 2: { w: 'A' }, 4: { w: 'B' } };
   s = ENG.matchState(gap, O18, null);
-  eq('gap stops thru', [s.thru, s.up], [2, 2]);
+  eq('gap holes all count', [s.thru, s.up], [3, 1]);
+
+  // closure works across a gap: 3 blank, 4-14 all A → 11 up, 7 unscored → decided
+  const gapClose = {};
+  [1,2].forEach(n=>gapClose[n]={w:'H'});
+  for (let n=4;n<=14;n++) gapClose[n]={w:'A'};
+  s = ENG.matchState(gapClose, O18, null);
+  eq('closure across gap', [s.done, s.result.winner, s.result.margin, s.decidedAt], [true, 'A', 9, 12]);
+
+  // clearing a mid-match hole un-decides a closed match
+  const almost = {}; for (let n=1;n<=13;n++) almost[n]={w:'A'}; // 13&5 → done
+  s = ENG.matchState(almost, O18, null);
+  eq('13 straight closes', s.done, true);
+  delete almost[3];
+  s = ENG.matchState(almost, O18, null);
+  eq('cleared hole reopens when margin allows', [s.thru, s.up, s.done], [12, 12, true]); // 12 up, 6 unscored → still done
+  for (let n=8;n<=13;n++) delete almost[n];
+  s = ENG.matchState(almost, O18, null);
+  eq('enough cleared → live again', [s.thru, s.up, s.done], [6, 6, false]);
+
+  // conceding while AHEAD records minimum 1UP for the receiver
+  s = ENG.matchState(seq(['A', 'A']), O18, { by: 'A', afterThru: 2 });
+  eq('concede while ahead', [s.result.winner, s.result.margin, s.result.text], ['B', 1, '1UP']);
+  s = ENG.matchState(seq(['B', 'B', 'H']), O18, { by: 'A', afterThru: 3 });
+  eq('concede while behind', [s.result.winner, s.result.margin, s.result.text], ['B', 2, '2UP']);
 
   // 9-hole match closes out
   s = ENG.matchState(seq(['A', 'A', 'A', 'A', 'A']), O9, null);

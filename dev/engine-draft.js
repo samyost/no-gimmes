@@ -12,43 +12,52 @@ const ENG = (() => {
   // Returns the full derived state; "for fun" holes after the match is decided
   // are ignored for the result but still counted in wonA/wonB display tallies.
   function matchState(holes, order, concession) {
+    // Full-pass semantics: EVERY scored hole counts, gaps included — a hole
+    // cleared or skipped mid-round must not hide later results. `remaining`
+    // is the count of unscored holes at that point in the walk (earlier gaps
+    // included), which is exactly the set the trailing side could still win.
     const n = order.length;
     let up = 0; // + means A leads
-    let thru = 0; // holes with a result, counting in play order up to first gap
-    let decidedAt = 0; // holes played when the match became decided (0 = live)
+    let thru = 0; // holes decided so far (count, not prefix)
+    let decidedAt = 0; // hole number (in play order) where the match was decided
     let result = null; // {winner:'A'|'B'|null, text, margin, closed}
     let wonA = 0, wonB = 0, halved = 0;
-    let i = 0;
-    for (; i < n; i++) {
+    for (let i = 0; i < n; i++) {
       const h = holes[order[i]];
-      if (!h || !h.w) break;
+      if (!h || !h.w) continue;
       if (h.w === 'A') { wonA++; up++; } else if (h.w === 'B') { wonB++; up--; } else halved++;
-      thru = i + 1;
+      thru++;
       const remaining = n - thru;
       if (!result && Math.abs(up) > remaining) {
-        decidedAt = thru;
+        decidedAt = order[i];
         const margin = Math.abs(up);
+        const toPlay = n - 1 - i; // holes after the closing hole, in sequence
         result = {
           winner: up > 0 ? 'A' : 'B',
           margin,
           closed: remaining > 0,
-          text: remaining > 0 ? `${margin}&${remaining}` : (margin === 1 ? '1UP' : `${margin}UP`),
+          text: remaining > 0 && toPlay > 0 ? `${margin}&${toPlay}` : (margin === 1 ? '1UP' : `${margin}UP`),
         };
       }
       if (!result && thru === n) {
-        decidedAt = thru;
+        decidedAt = order[i];
         result = up === 0
           ? { winner: null, margin: 0, closed: false, text: 'HALVED' }
           : { winner: up > 0 ? 'A' : 'B', margin: Math.abs(up), closed: false, text: `${Math.abs(up)}UP` };
       }
     }
     if (concession && !result) {
+      // margin is stated for the RECEIVING side; conceding while level or
+      // ahead records the minimum 1UP for the receiver.
+      const winner = concession.by === 'A' ? 'B' : 'A';
+      const winnerUp = winner === 'A' ? up : -up;
+      const margin = Math.max(1, winnerUp);
       result = {
-        winner: concession.by === 'A' ? 'B' : 'A',
-        margin: Math.abs(up),
+        winner,
+        margin,
         closed: true,
         conceded: true,
-        text: 'CONC',
+        text: `${margin}UP`,
       };
       decidedAt = thru;
     }

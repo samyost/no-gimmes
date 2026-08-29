@@ -92,6 +92,10 @@ try {
   await p2.locator('.whofoot button').click(); // spectator
   ok('spectator lands on board', await until(()=>p2.evaluate(()=>location.hash.includes('#/day/sat'))));
 
+  // ---- unstarted matches must not project (bone gap in the bar) ----
+  const proj0 = await p2.evaluate(()=>{ const c = cup(); return c.pRed + c.pBlue; });
+  ok('no projection before tee-off', proj0 === 0);
+
   // ---- net dots present (Vail Black, fourball 90% off low: Hawk hcp 2 low) ----
   const dotCount = await p1.locator('.cell .sdots i').count();
   ok('stroke dots painted on rail', dotCount > 0);
@@ -102,6 +106,9 @@ try {
   ok('status 1UP on scorer', await until(()=>p1.locator('.bigstat').textContent().then(t=>t.includes('RED 1UP'))));
   ok('undo snackbar', await until(()=>p1.locator('#snack').textContent().then(t=>t.includes('UNDO'))));
   ok('p2 sees 1UP chip via SSE', await until(()=>p2.locator('.mrow .chip').first().textContent().then(t=>t.trim()==='1UP')));
+  await sleep(1500); // let the SSE echo of p1's own write come back
+  const selfEcho = await p1.locator('#snack').textContent();
+  ok('no self-echo conflict toast', !/also scored/.test(selfEcho));
 
   // auto-advance: current hole is now 2
   ok('auto-advanced to hole 2', await until(()=>p1.locator('.hctx .h1').textContent().then(t=>t.includes('HOLE 2'))));

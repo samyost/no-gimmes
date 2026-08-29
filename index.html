@@ -158,6 +158,8 @@ a{color:var(--brass)}
 .hs.A{background:var(--red);border-color:var(--red)} .hs.B{background:var(--blue);border-color:var(--blue)}
 .hs.H{background:var(--sagebrush);border-color:var(--sagebrush)}
 .hs.x{opacity:.4}
+.hs.drift{outline:2px solid var(--warn);outline-offset:-1px}
+.cell .fill.drift{outline:2px solid var(--warn);outline-offset:-1px}
 .hs.ov::after{content:'';position:absolute;right:0;top:0;border-style:solid;border-width:0 3px 3px 0;border-color:transparent var(--cream) transparent transparent}
 .glow{animation:glowp 2s ease-out}
 @keyframes glowp{0%{background-color:var(--red-wash)}100%{background-color:var(--card)}}
@@ -314,9 +316,9 @@ a{color:var(--brass)}
 .bigbtn.ghost{border:2px solid var(--ink)}
 .bigbtn.danger{background:var(--ob);color:#FCF8EF}
 #snack{position:fixed;left:0;right:0;bottom:calc(150px + env(safe-area-inset-bottom));z-index:70;display:flex;justify-content:center;pointer-events:none}
-.snackin{pointer-events:auto;display:flex;align-items:center;gap:14px;background:var(--ink);color:var(--bone);
+.snackin{pointer-events:none;display:flex;align-items:center;gap:14px;background:var(--ink);color:var(--bone);
   border-radius:10px;padding:10px 16px;font-size:14.5px;max-width:92%;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.snackin button{color:var(--brass);font-family:'Saira Condensed';font-weight:700;letter-spacing:.08em;font-size:14px}
+.snackin button{pointer-events:auto;color:var(--brass);font-family:'Saira Condensed';font-weight:700;letter-spacing:.08em;font-size:14px}
 #takeover{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;text-align:center;padding:30px}
 #takeover.open{display:flex;animation:fadein .4s ease-out}
 @keyframes fadein{from{opacity:0}}
@@ -508,43 +510,52 @@ const ENG = (() => {
   // Returns the full derived state; "for fun" holes after the match is decided
   // are ignored for the result but still counted in wonA/wonB display tallies.
   function matchState(holes, order, concession) {
+    // Full-pass semantics: EVERY scored hole counts, gaps included — a hole
+    // cleared or skipped mid-round must not hide later results. `remaining`
+    // is the count of unscored holes at that point in the walk (earlier gaps
+    // included), which is exactly the set the trailing side could still win.
     const n = order.length;
     let up = 0; // + means A leads
-    let thru = 0; // holes with a result, counting in play order up to first gap
-    let decidedAt = 0; // holes played when the match became decided (0 = live)
+    let thru = 0; // holes decided so far (count, not prefix)
+    let decidedAt = 0; // hole number (in play order) where the match was decided
     let result = null; // {winner:'A'|'B'|null, text, margin, closed}
     let wonA = 0, wonB = 0, halved = 0;
-    let i = 0;
-    for (; i < n; i++) {
+    for (let i = 0; i < n; i++) {
       const h = holes[order[i]];
-      if (!h || !h.w) break;
+      if (!h || !h.w) continue;
       if (h.w === 'A') { wonA++; up++; } else if (h.w === 'B') { wonB++; up--; } else halved++;
-      thru = i + 1;
+      thru++;
       const remaining = n - thru;
       if (!result && Math.abs(up) > remaining) {
-        decidedAt = thru;
+        decidedAt = order[i];
         const margin = Math.abs(up);
+        const toPlay = n - 1 - i; // holes after the closing hole, in sequence
         result = {
           winner: up > 0 ? 'A' : 'B',
           margin,
           closed: remaining > 0,
-          text: remaining > 0 ? `${margin}&${remaining}` : (margin === 1 ? '1UP' : `${margin}UP`),
+          text: remaining > 0 && toPlay > 0 ? `${margin}&${toPlay}` : (margin === 1 ? '1UP' : `${margin}UP`),
         };
       }
       if (!result && thru === n) {
-        decidedAt = thru;
+        decidedAt = order[i];
         result = up === 0
           ? { winner: null, margin: 0, closed: false, text: 'HALVED' }
           : { winner: up > 0 ? 'A' : 'B', margin: Math.abs(up), closed: false, text: `${Math.abs(up)}UP` };
       }
     }
     if (concession && !result) {
+      // margin is stated for the RECEIVING side; conceding while level or
+      // ahead records the minimum 1UP for the receiver.
+      const winner = concession.by === 'A' ? 'B' : 'A';
+      const winnerUp = winner === 'A' ? up : -up;
+      const margin = Math.max(1, winnerUp);
       result = {
-        winner: concession.by === 'A' ? 'B' : 'A',
-        margin: Math.abs(up),
+        winner,
+        margin,
         closed: true,
         conceded: true,
-        text: 'CONC',
+        text: `${margin}UP`,
       };
       decidedAt = thru;
     }
@@ -727,12 +738,14 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 // every array read from the tree goes through this.
 function arr(v){ return Array.isArray(v) ? v : (v && typeof v==='object' ? Object.values(v) : []); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function half(n){ // format points with the ½ glyph
+function half(n){ // format points with the ½ glyph (non-half fractions render as plain decimals)
   const w = Math.floor(n), f = n - w;
-  if (f > 0.25 && f < 0.75) return (w ? w : '') + '<span class="frac">½</span>' || '½';
-  return String(n);
+  if (Math.abs(f - 0.5) < 0.001) return (w ? w : '') + '<span class="frac">½</span>';
+  return f > 0.001 ? String(n) : String(w);
 }
-function halfTxt(n){ const w=Math.floor(n); return (n-w>0.25) ? (w? w+'½':'½') : String(n); }
+function halfTxt(n){ const w=Math.floor(n), f=n-w;
+  if (Math.abs(f - 0.5) < 0.001) return w ? w+'½' : '½';
+  return f > 0.001 ? String(n) : String(w); }
 
 // ---- defaults & seeding ----------------------------------------------------
 function defConfig(){
@@ -769,16 +782,24 @@ function dayCfg(d){ const base = defDay(d); const s = (S.days||{})[d] || {}; con
   out.times = Object.assign({}, base.times, s.times||{}); out.carts = Object.assign({}, s.carts||{}); return out; }
 function isPresent(d, pid){ const a = dayCfg(d).att; return a[pid] !== false; }
 function presentIds(d){ return namedPlayers().filter(p=>isPresent(d,p.id)).map(p=>p.id); }
-function effTeam(d, pid){ const t = dayCfg(d).teamOf[pid]; if (t) return t; return (S.usualTeams||{})[pid] || null; }
+function effTeam(d, pid){
+  // seed = the nearest earlier day's explicit assignment, else the usual-teams draft
+  for (let i = DAYS.indexOf(d); i >= 0; i--){
+    const t = (((S.days||{})[DAYS[i]]||{}).teamOf||{})[pid];
+    if (t) return t;
+  }
+  return (S.usualTeams||{})[pid] || null;
+}
 function dayNet(d){ const dc = dayCfg(d); return dc.net == null ? cfg().net : dc.net; }
 function dayAllowancePct(d){
+  // For EVERY format this returns the effective "% of handicap" number the user
+  // sees and edits. Side formats treat it as a scale of the WHS combination
+  // (50 combined, 60/40, 35/15): value == WHS default → the exact WHS combo.
   const dc = dayCfg(d), c = cfg();
   if (dc.allowancePct != null) return dc.allowancePct;
   if (c.flat100) return 100;
   const a = c.allowances || WHS_DEFAULTS;
-  const spec = ENG.ALLOWANCES[dc.format] || ENG.ALLOWANCES.singles;
-  if (spec.kind === 'individual') return a[dc.format] != null ? a[dc.format] : WHS_DEFAULTS[dc.format];
-  return null; // side formats: engine's combination math; explicit override only via dc.allowancePct
+  return a[dc.format] != null ? a[dc.format] : (WHS_DEFAULTS[dc.format] != null ? WHS_DEFAULTS[dc.format] : 100);
 }
 
 // ---- course resolution -----------------------------------------------------
@@ -858,12 +879,29 @@ function mStrokes(m){
               ...sideIds(m,'B').map(id=>({id, ch:playingCH(d, player(id)), side:'B'}))];
   const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
   const net = dayNet(d) && anyH && dc.course !== 'tbd';
-  let si = ENG.playingStrokes(ps, dc.format, { net, pctOverride: dayAllowancePct(d) == null ? null : dayAllowancePct(d) });
+  // map the user-facing % to the engine's pctOverride: individual formats pass
+  // straight through; side formats scale the WHS combination relative to its default
+  const pct = dayAllowancePct(d);
+  const spec = ENG.ALLOWANCES[dc.format] || ENG.ALLOWANCES.singles;
+  let pctOverride = null;
+  if (pct != null){
+    if (spec.kind === 'individual') pctOverride = pct;
+    else { const base = WHS_DEFAULTS[dc.format] || 100; if (Math.abs(pct - base) > 0.001) pctOverride = pct * 100 / base; }
+  }
+  let si = ENG.playingStrokes(ps, dc.format, { net, pctOverride });
   const cap = cfg().strokeCap|0;
   if (cap > 0){ for (const k in si.players) si.players[k] = Math.min(si.players[k], cap);
                 si.sides.A = Math.min(si.sides.A, cap); si.sides.B = Math.min(si.sides.B, cap); }
   si.net = net;
+  si.missingHcp = net ? ps.filter(p=>{ const pl = player(p.id); return pl.hcp == null || pl.hcp === ''; }).map(p=>p.id) : [];
   return si;
+}
+// stroke-committed hole whose derivation later flipped (tee/hcp/rotation change)
+function drifted(m, holeNo){
+  const h = (m.holes||{})[holeNo];
+  if (!h || !h.winner || h.via !== 'strokes' || !h.strokes) return false;
+  const dw = derivedWinner(m, holeNo);
+  return dw != null && dw !== h.winner;
 }
 function holeDots(m, si, holeNo, d){
   const hs = holesFor(d), h = hs[holeNo-1];
@@ -912,7 +950,8 @@ function cup(){
   for (const m of allMatches()){
     const dr = mDer(m); scheduled += dr.worth;
     red += dr.pts[0]; blue += dr.pts[1];
-    pRed += dr.proj[0]; pBlue += dr.proj[1];
+    // only STARTED matches project — unstarted ones are the bone gap in the bar
+    if (dr.st.done || dr.st.thru > 0){ pRed += dr.proj[0]; pBlue += dr.proj[1]; }
     if (!dr.st.done && dr.st.leader==='A') liveLed.red++;
     if (!dr.st.done && dr.st.leader==='B') liveLed.blue++;
   }
@@ -966,8 +1005,9 @@ function dbConfigured(){ return !!dbUrl(); }
 function pathUrl(p){ return dbUrl() + '/' + CONFIG.dbPath + (p ? '/'+p : '') + '.json'; }
 
 function applyPath(path, value){
-  if (!path){ S = (value && typeof value==='object') ? value : {}; return; }
+  if (!path){ S = (value && typeof value==='object' && !Array.isArray(value)) ? value : {}; return; }
   const segs = path.split('/');
+  if (segs.some(s => s === '__proto__' || s === 'constructor' || s === 'prototype')) return;
   let node = S;
   for (let i=0;i<segs.length-1;i++){
     const k = segs[i];
@@ -999,12 +1039,17 @@ async function flushLoop(){
   if (flushing || !dbConfigured()) return;
   flushing = true;
   while (pend.length){
-    updatePill(pend.length ? 'sy' : 'live');
+    updatePill('sy');
     const o = pend[0];
     try {
-      const res = await fetch(pathUrl(o.path), { method:'PUT', body: JSON.stringify(o.value), headers:{'Content-Type':'application/json'} });
+      const ctl = new AbortController();
+      const tt = setTimeout(()=>ctl.abort(), 15000);
+      const res = await fetch(pathUrl(o.path), { method:'PUT', body: JSON.stringify(o.value), headers:{'Content-Type':'application/json'}, signal: ctl.signal });
+      clearTimeout(tt);
       if (!res.ok) throw new Error('HTTP '+res.status);
-      pend.shift(); LS.set('pend', pend);
+      // dequeue only if the op we actually sent is still at the head — op()
+      // may have coalesced/replaced it during the await
+      if (pend[0] && pend[0].id === o.id){ pend.shift(); LS.set('pend', pend); }
       flushBackoff = 2000;
     } catch(e) {
       flushing = false;
@@ -1019,18 +1064,19 @@ async function flushLoop(){
 }
 function updatePill(state){
   if (!dbConfigured()) state = 'rm';
-  else if (pend.length) state = 'q';
+  else if (pend.length && state !== 'sy') state = 'q';
   ui.sync = state;
   document.querySelectorAll('[data-pill]').forEach(el => { el.outerHTML = pillHtml(); });
 }
 
-const sse = { es:null, ok:false, errs:0, poll:null };
+const sse = { es:null, ok:false, errs:0, poll:null, snapped:false };
 function sseConnect(){
   if (!dbConfigured() || sse.es) return;
+  sse.errs = 0;
   try {
     const es = new EventSource(pathUrl(''));
     sse.es = es;
-    es.addEventListener('put', ev => { sse.ok = true; sse.errs = 0; remoteEvent('put', JSON.parse(ev.data)); });
+    es.addEventListener('put', ev => { sse.ok = true; sse.errs = 0; sse.snapped = true; remoteEvent('put', JSON.parse(ev.data)); });
     es.addEventListener('patch', ev => { remoteEvent('patch', JSON.parse(ev.data)); });
     es.addEventListener('keep-alive', ()=>{ sse.ok = true; });
     es.onerror = () => {
@@ -1047,21 +1093,33 @@ function startPoll(){
     if (document.hidden || !dbConfigured()) return;
     try {
       const res = await fetch(pathUrl(''));
-      if (res.ok) remoteEvent('put', { path:'/', data: await res.json() });
+      if (res.ok){ sse.snapped = true; remoteEvent('put', { path:'/', data: await res.json() }); }
     } catch(e){}
   }, 15000);
 }
 function stopPoll(){ clearInterval(sse.poll); sse.poll = null; }
 
+function getAtPath(path){
+  if (!path) return S;
+  let node = S;
+  for (const k of path.split('/')){
+    if (node == null || typeof node !== 'object') return undefined;
+    node = node[k];
+  }
+  return node;
+}
 function remoteEvent(kind, ev){
   const before = snapshotForDiff();
   const p = (ev.path||'/').replace(/^\//,'');
+  const localBefore = JSON.stringify(getAtPath(p) === undefined ? null : getAtPath(p));
+  const incoming = JSON.stringify(ev.data === undefined ? null : ev.data);
   if (kind === 'put') applyPath(p, ev.data);
   else if (ev.data && typeof ev.data === 'object') for (const [k,v] of Object.entries(ev.data)) applyPath(p ? p+'/'+k : k, v);
   // local pending edits win until flushed
   for (const o of pend) applyPath(o.path, o.value);
   LS.set('cache', S);
-  afterRemote(before, p);
+  ui.remoteTick = Date.now();
+  afterRemote(before, p, localBefore !== incoming, incoming);
   requestRender();
 }
 function snapshotForDiff(){
@@ -1070,7 +1128,7 @@ function snapshotForDiff(){
   const c = cup();
   return { finals, red: c.red, blue: c.blue };
 }
-function afterRemote(before, evPath){
+function afterRemote(before, evPath, changed, incoming){
   const after = snapshotForDiff();
   for (const [id, txt] of Object.entries(after.finals)){
     if (before.finals[id] !== txt && ui.seenFinals[id] !== txt){
@@ -1079,17 +1137,20 @@ function afterRemote(before, evPath){
       maybeClinch();
     }
   }
-  // conflict toast: a remote write landed on the hole being actively viewed/edited
+  // conflict toast only for a GENUINE conflict: the remote value differs from
+  // what this phone had AND this phone has its own unsent edit at that path
+  // (self-echoes and identical writes stay silent)
   const mId = ui.matchId;
-  if (ui.screen === 'match' && mId && evPath.startsWith('matches/'+mId+'/holes/')){
+  if (changed && ui.screen === 'match' && mId && evPath.startsWith('matches/'+mId+'/holes/')){
     const hn = evPath.split('/')[3];
-    if (String(ui.hole[mId]) === String(hn)) toastSnack(`Another phone also scored ${hn} — showing latest`);
+    const ours = pend.some(o => (o.path === evPath || o.path.startsWith(evPath+'/')) && JSON.stringify(o.value) !== incoming);
+    if (ours && String(ui.hole[mId]) === String(hn)) toastSnack(`Another phone also scored ${hn} — showing latest`);
   }
 }
 function pointPost(){
   try{ navigator.vibrate && navigator.vibrate(30); }catch(e){}
-  document.querySelectorAll('.tug .aR,.tug .aB').forEach(el=>{ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); });
-  document.querySelectorAll('.cupline .pts').forEach(el=>{ el.classList.remove('ticked'); void el.offsetWidth; el.classList.add('ticked'); });
+  ui.flashCup = true; // applied in postRender so the full re-render can't wipe it
+  requestRender();
 }
 /* ===END SYNC=== */
 
@@ -1102,7 +1163,7 @@ function pillHtml(){
   const [t, cls, dot] = m[st] || m.live;
   return `<button class="pill ${cls}" data-pill data-act="pill">${st==='live'?dot:''}${st!=='live'?dot:''}<span>${st==='live'?'● LIVE':t}</span></button>`.replace('●&nbsp;','');
 }
-function teamName(side){ const tn = cfg().teamNames||{}; return side==='A' ? (tn.red||'RED') : (tn.blue||'BLUE'); }
+function teamName(side){ const tn = cfg().teamNames||{}; return esc(side==='A' ? (tn.red||'RED') : (tn.blue||'BLUE')); }
 function pName(pid){ const p = player(pid); return `${p.emoji||''} ${esc((p.name||'??').split(' ')[0])}`; }
 
 function avatarHtml(){
@@ -1148,14 +1209,14 @@ function cupHeaderHtml(){
   if (fin){
     const w = c.red>c.blue?'A':(c.blue>c.red?'B':null);
     engraved = w ? `<div class="engrave">${teamName(w)} WIN THE 2026 CUP · ${halfTxt(Math.max(c.red,c.blue))}–${halfTxt(Math.min(c.red,c.blue))}</div>`
-                 : `<div class="engrave">${halfTxt(c.red)}–${halfTxt(c.blue)} · ${esc(TIEBREAKS[cfg().tieRule].label)}</div>`;
+                 : `<div class="engrave">${esc(TIEBREAKS[cfg().tieRule].end(halfTxt(c.red)+'–'+halfTxt(c.blue)))}</div>`;
   }
   return `<div class="cuphead" data-act="cupsheet" role="button" aria-label="Open cup sheet">
     ${engraved}
     <div class="cupline">
-      <span class="tn tRed sc">${esc(teamName('A'))}</span><span class="pts tRed sc">${half(c.red)}</span>
+      <span class="tn tRed sc">${teamName('A')}</span><span class="pts tRed sc">${half(c.red)}</span>
       <span class="dash sc">—</span>
-      <span class="pts tBlue sc">${half(c.blue)}</span><span class="tn tBlue sc">${esc(teamName('B'))}</span>
+      <span class="pts tBlue sc">${half(c.blue)}</span><span class="tn tBlue sc">${teamName('B')}</span>
     </div>
     ${tugHtml(c)}
     <div class="cupsub">${sub}</div>${holderLine}
@@ -1180,8 +1241,7 @@ function chipHtml(m, dr, size){
     if (r.winner === null) return `<span class="chip halv fin">HALVED</span>`;
     const cls = r.winner==='A'?'R':'B';
     const pre = r.conceded ? `<span class="pre">CONC</span>` : '';
-    const txt = r.conceded ? `${st.up===0?'1UP':Math.abs(st.up)+'UP'}` : r.text;
-    return `<span class="chip ${cls} fin">${pre}${txt} ✓</span>`;
+    return `<span class="chip ${cls} fin">${pre}${r.text} ✓</span>`;
   }
   if (st.thru === 0){
     const dc = dayCfg(m.day);
@@ -1217,9 +1277,10 @@ function rulesChipsHtml(d){
   const dc = dayCfg(d), c = cfg();
   const chips = [];
   chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${FORMATS[dc.format].name}</button>`);
-  const net = dayNet(d);
+  const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
+  const net = dayNet(d) && anyH && dc.course !== 'tbd';
   const pct = dayAllowancePct(d);
-  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${net? 'NET'+(pct!=null?' '+pct+'%':'') : 'GROSS'}</button>`);
+  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${net? 'NET '+pct+'%' : (dayNet(d) ? 'GROSS (no hcps yet)' : 'GROSS')}</button>`);
   const worth = (dc.points||1) * ((dc.x2 && dc.format==='singles')?2:1);
   chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${halfTxt(worth)} PT${worth===1?'':'S'}</button>`);
   chips.push(`<button class="rchip" data-act="settings">${{conc:'CONCESSIONS ONLY',leather:'INSIDE THE LEATHER',two:'GIMMES 2FT',three:'GIMMES 3FT',none:'NO GIMMES'}[c.gimme]}</button>`);
@@ -1230,7 +1291,7 @@ function holeStripHtml(m){
   for (let n=1;n<=18;n++){
     const h = (m.holes||{})[n];
     let cls = '';
-    if (h && h.winner){ cls = h.winner; if (h.exhibition) cls += ' x'; if (overridden(m,n)) cls += ' ov'; }
+    if (h && h.winner){ cls = h.winner; if (h.exhibition) cls += ' x'; if (overridden(m,n)) cls += ' ov'; if (drifted(m,n)) cls += ' drift'; }
     cells += `<span class="hs ${cls}"></span>`;
   }
   return `<div class="holestrip">${cells}</div>`;
@@ -1262,7 +1323,12 @@ function matchRowHtml(m){
     if (age > 10 && age < 360) thru += ` <span class="stale">· ${age<100?Math.round(age)+'m':Math.round(age/60)+'h'}</span>`;
     thru = `<div class="thru">${thru}</div>`;
   }
-  return `<button class="mrow" data-act="match" data-id="${m.id}">
+  const sig = st.done ? 'F'+ (st.result?st.result.text:'') : st.statusText + ':' + st.thru;
+  ui.rowSeen = ui.rowSeen || {};
+  const remoteFresh = ui.remoteTick && (Date.now() - ui.remoteTick) < 1500;
+  const glowCls = (ui.rowSeen[m.id] && ui.rowSeen[m.id] !== sig && remoteFresh) ? (st.leader==='B' ? ' glowB' : ' glow') : '';
+  ui.rowSeen[m.id] = sig;
+  return `<button class="mrow${glowCls}" data-act="match" data-id="${m.id}">
     <span class="ptlab sc">${halfTxt(worth)} PT</span>
     <div class="top">
       <div class="mside R ${lead==='A'?'lead':''}">${nameLine('A')}</div>
@@ -1351,7 +1417,7 @@ function railHtml(m, d){
     let fill = '', sg = '';
     if (hd && hd.strokes) sg = `<span class="sg">⛳</span>`;
     let fcls = '';
-    if (hd && hd.winner){ fcls = hd.winner + (hd.exhibition?' x':'') + (overridden(m,h.no)?' ov':''); }
+    if (hd && hd.winner){ fcls = hd.winner + (hd.exhibition?' x':'') + (overridden(m,h.no)?' ov':'') + (drifted(m,h.no)?' drift':''); }
     out += `<button class="cell ${h.no===cur?'cur':''}" data-act="hole" data-id="${m.id}" data-n="${h.no}" id="cell${h.no}">
       <div class="hn sc">${h.no}</div><div class="hp">P${h.par}</div>
       <div class="sdots">${dh}</div>
@@ -1375,7 +1441,7 @@ function bigStatusHtml(m, dr){
   if (st.done){
     const r = st.result;
     if (r.winner===null) return `<div class="finpanel H sc">HALVED · ½ EACH</div>`;
-    const txt = r.conceded ? `${teamName(r.winner)} WIN ${st.up===0?'1UP':Math.abs(st.up)+'UP'} · CONCEDED` : `${teamName(r.winner)} WIN ${r.text}`;
+    const txt = r.conceded ? `${teamName(r.winner)} WIN ${r.text} · CONCEDED` : `${teamName(r.winner)} WIN ${r.text}`;
     return `<div class="finpanel ${r.winner==='A'?'R':'B'} sc">${txt} ✓</div>`;
   }
   let txt, cls='';
@@ -1422,7 +1488,7 @@ function padHtml(m, d){
   const bn = sideIds(m,'B').map(pid=>esc((player(pid).name||'').split(' ')[0]).toUpperCase()).join(' · ');
   if (done && !keepOn && !editing){
     const r = dr.st.result;
-    const rt = r.winner===null ? 'HALVED · ½ EACH' : `${teamName(r.winner)} WIN ${r.conceded ? (Math.abs(dr.st.up)||1)+'UP' : r.text} ✓`;
+    const rt = r.winner===null ? 'HALVED · ½ EACH' : `${teamName(r.winner)} WIN ${r.text} ✓`;
     return `<div class="pad"><div class="resultcard">
       <div class="r1 sc ${r.winner==='A'?'tRed':r.winner==='B'?'tBlue':''}">${rt}</div>
       <div class="mut" style="font-size:13px">${halfTxt(dr.worth)} PT posted to the board</div>
@@ -1438,15 +1504,15 @@ function padHtml(m, d){
   if (drawer){
     drawerHtml2 = strokesDrawerHtml(m, d, n);
     winRow = `<div class="mini3 ${ui.lock?'locked':''}">
-      <button class="mR sc ${litSide(m,n)==='A'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A">${esc(teamName('A'))}</button>
+      <button class="mR sc ${litSide(m,n)==='A'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A">${(teamName('A'))}</button>
       <button class="mH sc ${litSide(m,n)==='H'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="H">HALVE</button>
-      <button class="mB sc ${litSide(m,n)==='B'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B">${esc(teamName('B'))}</button>
+      <button class="mB sc ${litSide(m,n)==='B'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B">${(teamName('B'))}</button>
     </div>`;
   } else {
     winRow = `<div class="winrow ${ui.lock?'locked':''}">
-      <button class="wbtn R" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A"><span class="wl">${esc(teamName('A'))}</span><span class="wn">${rn}</span></button>
+      <button class="wbtn R" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A"><span class="wl">${(teamName('A'))}</span><span class="wn">${rn}</span></button>
       <div class="gutter"></div>
-      <button class="wbtn B" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B"><span class="wl">${esc(teamName('B'))}</span><span class="wn">${bn}</span></button>
+      <button class="wbtn B" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B"><span class="wl">${(teamName('B'))}</span><span class="wn">${bn}</span></button>
     </div>
     <div class="${ui.lock?'locked':''}"><button class="halvebar sc" data-act="win" data-id="${m.id}" data-n="${n}" data-w="H">HALVE</button></div>`;
   }
@@ -1497,8 +1563,8 @@ function strokesDrawerHtml(m, d, n){
   if (oneBall){
     const emA = sideIds(m,'A').map(pid=>player(pid).emoji).join('');
     const emB = sideIds(m,'B').map(pid=>player(pid).emoji).join('');
-    rows += qrow('A', emA+' '+esc(teamName('A')), 'r', stored.A, dots.A);
-    rows += qrow('B', emB+' '+esc(teamName('B')), 'b', stored.B, dots.B);
+    rows += qrow('A', emA+' '+(teamName('A')), 'r', stored.A, dots.A);
+    rows += qrow('B', emB+' '+(teamName('B')), 'b', stored.B, dots.B);
   } else {
     for (const side of ['A','B'])
       for (const pid of sideIds(m, side))
@@ -1536,6 +1602,7 @@ function ledgerHtml(m, d){
     let res = w==='A'?teamName('A'):w==='B'?teamName('B'):w==='H'?'HALVED':'—';
     let notes = [];
     if (overridden(m, h.no)) notes.push(`set by hand — strokes say ${teamName(derivedWinner(m,h.no))}`);
+    if (drifted(m, h.no)) notes.push(`strokes now say ${teamName(derivedWinner(m,h.no))} — scored before a settings change`);
     if (hd.exhibition) notes.push('for fun');
     if (m.concededAt === h.no) notes.push(`Conceded by ${teamName(m.concededBy)} on ${h.no}`);
     let sk = '';
@@ -1563,7 +1630,8 @@ function renderMatch(id){
   const ms = matchesFor(d);
   const idx = ms.findIndex(x=>x.id===id);
   const dots = ms.map((x,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
-  const net = mStrokes(m).net;
+  const msi = mStrokes(m);
+  const net = msi.net;
   const pctL = dayAllowancePct(d);
   return `
   ${cupStripHtml('board')}
@@ -1577,6 +1645,7 @@ function renderMatch(id){
     </div>
     <div class="mmeta"><span>MATCH ${idx+1} · ${FORMATS[dc.format].name} · ${net?'NET':'GROSS'} · ${halfTxt(dr.worth)} PT · ${DAYMETA[d].label}${courseLabel(d)?' · '+esc(courseLabel(d).split('·')[0]):''}</span>
       <span class="dots">${dots}</span></div>
+    ${msi.missingHcp && msi.missingHcp.length ? `<div class="warnchip" style="margin-top:4px">No index: ${msi.missingHcp.map(pid=>esc((player(pid).name||'').split(' ')[0])).join(', ')} — playing off scratch</div>` : ''}
   </div>
   ${bigStatusHtml(m, dr)}
   </div>
@@ -1631,6 +1700,8 @@ function renderSetupDay(d){
     const sum = t => present.filter(pid=>effTeam(d,pid)===t).reduce((a,pid)=>a+(+player(pid).hcp||0),0).toFixed(1);
     balance = `<div class="mut" style="font-size:12.5px;margin-top:6px">Σ index: ${teamName('A')} ${sum('red')} · ${teamName('B')} ${sum('blue')}</div>`;
   }
+  const noIdx = dayNet(d) ? present.filter(pid=>{ const pl=player(pid); return pl.hcp==null||pl.hcp===''; }) : [];
+  const noIdxChip = (noIdx.length && anyHcp) ? `<div class="warnchip" style="margin-top:6px">No index: ${noIdx.map(pid=>esc((player(pid).name||'').split(' ')[0])).join(', ')} — they play off scratch on a net day.</div>` : '';
   const prevD = DAYS[DAYS.indexOf(d)-1];
 
   // Block 3: course & tees
@@ -1659,7 +1730,14 @@ function renderSetupDay(d){
       <div class="field"><label>Course name</label><input type="text" class="wide" value="${esc(cst.name||'')}" data-input="customname" data-d="${d}"></div>
       <div class="mut" style="font-size:12.5px;margin:4px 0">Pars — tap to cycle 3→4→5:</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${parGrid}</div>
-      ${dayNet(d) && !arr(cst.sis).length ? `<div class="mut" style="font-size:12.5px;margin-top:6px">No stroke index — net strokes will fall 1–18 by hole number unless you enter one.</div>`:''}
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">Stroke index (optional) — tap holes hardest-first; each tap assigns the next rank:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${Array.from({length:18},(_,i)=>{
+        const sis = arr(cst.sis);
+        const r = sis[i];
+        return `<button class="qn" style="width:40px;height:40px;${r?'border-color:var(--brass);color:var(--brass)':''}" data-act="setsi" data-d="${d}" data-i="${i}">${r||(i+1+'°')}</button>`;
+      }).join('')}</div>
+      <div style="margin-top:4px"><button class="ghostbtn" data-act="resetsi" data-d="${d}">Clear stroke index</button>
+      ${dayNet(d) && !arr(cst.sis).filter(Boolean).length ? `<span class="mut" style="font-size:12px">Until entered, net strokes fall 1–18 by hole number.</span>`:''}</div>
     </div>`;
   }
   const netTbd = (dayNet(d) && dc.course==='tbd') ? `<div class="mut" style="font-size:13px;margin-top:6px">Net needs a course card. Pick the course or play it gross.</div>` : '';
@@ -1680,7 +1758,7 @@ function renderSetupDay(d){
       const pid = seats[s];
       const selCls = ui.pick && ui.pick.kind==='seat' && ui.pick.ck===ck && ui.pick.s===s ? 'sel' : '';
       if (pid) seatBtns.push(`<button class="seat filled ${selCls}" data-act="seat" data-d="${d}" data-ck="${ck}" data-s="${s}"><span class="em">${player(pid).emoji}</span> ${esc(player(pid).name)}</button>`);
-      else if (s<2 || nPresent>cartN*2) seatBtns.push(`<button class="seat ${selCls}" data-act="seat" data-d="${d}" data-ck="${ck}" data-s="${s}"><span class="mut">${s===2?'+1 on the back':'empty seat'}</span></button>`);
+      else if (s<2 || bench.length>0) seatBtns.push(`<button class="seat ${selCls}" data-act="seat" data-d="${d}" data-ck="${ck}" data-s="${s}"><span class="mut">${s===2?'+1 on the back':'empty seat'}</span></button>`);
     }
     const tag = seats.length===1?' · SOLO':'';
     cartCards += `<div class="cartcard"><h5>CART ${i}${tag}<button class="grp" data-act="cartgroup" data-d="${d}" data-ck="${ck}">${(cart.group||'a').toUpperCase()} ⇄</button></h5>${seatBtns.join('')}</div>`;
@@ -1727,9 +1805,9 @@ function renderSetupDay(d){
     <h2>2 · Teams today ${uneven}</h2>
     <div class="block">
       <div class="teamcols">
-        <div class="tcol red"><h4 class="sc">${esc(teamName('A'))}</h4>${col('red')}</div>
-        <div class="tcol blue"><h4 class="sc">${esc(teamName('B'))}</h4>${col('blue')}</div>
-      </div>${unHtml}${balance}
+        <div class="tcol red"><h4 class="sc">${teamName('A')}</h4>${col('red')}</div>
+        <div class="tcol blue"><h4 class="sc">${teamName('B')}</h4>${col('blue')}</div>
+      </div>${unHtml}${balance}${noIdxChip}
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
         ${prevD?`<button class="ghostbtn" data-act="copyteams" data-d="${d}">Copy ${DAYMETA[prevD].name}’s teams</button>`:''}
         <span class="mut" style="font-size:12px;align-self:center">Tap a player to flip his side. Sides are just for today.</span>
@@ -1817,8 +1895,8 @@ function renderSettings(){
     <h2>“Usual teams” draft <span class="ct">seeds Friday — each day picks its own sides</span></h2>
     <div class="block">
       <div class="teamcols">
-        <div class="tcol red"><h4 class="sc">${esc(teamName('A'))}</h4>${usual('red')}</div>
-        <div class="tcol blue"><h4 class="sc">${esc(teamName('B'))}</h4>${usual('blue')}</div>
+        <div class="tcol red"><h4 class="sc">${teamName('A')}</h4>${usual('red')}</div>
+        <div class="tcol blue"><h4 class="sc">${teamName('B')}</h4>${usual('blue')}</div>
       </div>
       ${unassigned.length?`<div class="selrow" style="margin-top:8px">${unassigned.map(p=>`<button class="pchip" style="width:auto" data-act="usual" data-p="${p.id}"><span class="em">${p.emoji}</span><span class="nm">${esc(p.name)}</span></button>`).join('')}</div>`:''}
       <div style="margin-top:8px"><button class="ghostbtn" data-act="flipforit">Flip for it</button>
@@ -1905,7 +1983,7 @@ function hubSheetHtml(){
   const hcps = named.filter(p=>p.hcp!=null&&p.hcp!=='').length;
   const dayRow = d => {
     const dc = dayCfg(d), ms = matchesFor(d);
-    const bits = [courseLabel(d)||'TBD course'];
+    const bits = [esc(courseLabel(d)||'TBD course')];
     if (namedPlayers().length) bits.push(`${presentIds(d).length} playing`);
     bits.push(FORMATS[dc.format].name.toLowerCase());
     bits.push(ms.length ? ms.length+' match'+(ms.length>1?'es':'') : 'not set up');
@@ -1947,8 +2025,8 @@ function cupSheetHtml(){
   const projLine = (c.pRed!==c.red||c.pBlue!==c.blue) ?
     `<div class="mut" style="text-align:center;font-size:13px">Projected ${halfTxt(c.pRed)}–${halfTxt(c.pBlue)}${c.liveLed.red?` · ${teamName('A')} lead ${c.liveLed.red} live`:''}${c.liveLed.blue?` · ${teamName('B')} lead ${c.liveLed.blue} live`:''}</div>` : '';
   return `<h3>The Cup</h3>
-    <div class="cupline"><span class="tn tRed sc">${esc(teamName('A'))}</span><span class="pts tRed sc">${half(c.red)}</span>
-      <span class="dash sc">—</span><span class="pts tBlue sc">${half(c.blue)}</span><span class="tn tBlue sc">${esc(teamName('B'))}</span></div>
+    <div class="cupline"><span class="tn tRed sc">${(teamName('A'))}</span><span class="pts tRed sc">${half(c.red)}</span>
+      <span class="dash sc">—</span><span class="pts tBlue sc">${half(c.blue)}</span><span class="tn tBlue sc">${(teamName('B'))}</span></div>
     ${tugHtml(c)}${projLine}
     <h4 style="margin:14px 0 4px" class="sc caps">MVP</h4>${mvpT||'<div class="mut">No matches finished yet.</div>'}
     <h4 style="margin:14px 0 4px" class="sc caps">By day</h4><div class="selrow">${byday}</div>
@@ -2019,6 +2097,12 @@ function renderKickoff(){
 }
 /* ===END VIEWS 2=== */
 
+function renderConnecting(){
+  return `<div class="whowrap"><div class="wm"><span class="wordmark sc" style="font-size:26px">NO GIMMES</span></div>
+    <h1 class="sc">Pulling up the trip…</h1>
+    <div class="whosub">Fetching the latest from the mountain. Hang tight.</div></div>`;
+}
+
 /* ===APP: router, actions, boot=== */
 const $app = document.getElementById('app');
 const $sheetlayer = document.getElementById('sheetlayer');
@@ -2040,27 +2124,57 @@ function requestRender(){
 }
 document.addEventListener('focusout', ()=>{ if (renderDeferred){ renderDeferred=false; setTimeout(requestRender, 60); } });
 
+let bootT = Date.now(), connT = null;
 function render(){
-  const me = LS.get('id', null);
-  if (!rosterReady()){
-    $app.innerHTML = renderKickoff();
-    return;
-  }
-  if (!me || ui.screen==='who'){ $app.innerHTML = renderWho(); return; }
-  let html = '';
-  if (ui.screen === 'match' && ui.matchId) html = renderMatch(ui.matchId);
-  else if (ui.screen === 'setup' && ui.day) html = renderSetupDay(ui.day);
-  else if (ui.screen === 'settings') html = renderSettings();
-  else html = renderBoard(ui.day || resolveDay());
+  let html;
+  try { html = renderScreen(); }
+  catch(e){ console.error(e); html = `<div class="empty" style="padding-top:80px">Something choked on the data.<br>
+    <span class="mut" style="font-size:12px">${esc(String(e && e.message || e))}</span><br>
+    <button class="cta" data-act="board">Back to the board</button></div>`; }
   $app.innerHTML = html;
-  postRender();
+  // keep an open sheet's content live (points land while the Cup Sheet is up)
+  if (ui.sheet && ui.sheet.type !== 'confirmtext' && !inputFocused()){
+    try { $sheetbox.innerHTML = sheetHtml(ui.sheet); } catch(e){}
+  }
+  try { postRender(); } catch(e){ console.error(e); }
+}
+function renderScreen(){
+  const seeded = Object.keys(S.players||{}).length > 0;
+  if (!seeded){
+    // a joining phone must never see the kickoff just because the first sync
+    // hasn't landed yet — wait for the snapshot (or 6s) before offering it
+    if (dbConfigured() && !sse.snapped && Date.now() - bootT < 6000){
+      clearTimeout(connT); connT = setTimeout(requestRender, 1200);
+      return renderConnecting();
+    }
+    return renderKickoff();
+  }
+  const me = LS.get('id', null);
+  if (me && me !== 'watch' && !(S.players||{})[me]) LS.del('id'); // deleted identity → re-ask
+  const me2 = LS.get('id', null);
+  if ((!me2 && rosterReady() && ui.screen !== 'settings' && ui.screen !== 'setup') || ui.screen === 'who') return renderWho();
+  if (ui.screen === 'match' && ui.matchId) return renderMatch(ui.matchId);
+  if (ui.screen === 'setup' && ui.day) return renderSetupDay(ui.day);
+  if (ui.screen === 'settings') return renderSettings();
+  return renderBoard(ui.day || resolveDay());
 }
 function postRender(){
+  const ch = document.querySelector('.cuphead');
+  if (ch) document.documentElement.style.setProperty('--cuph', ch.offsetHeight + 'px');
+  if (ui.flashCup){
+    ui.flashCup = false;
+    document.querySelectorAll('.tug .aR,.tug .aB').forEach(el=>el.classList.add('flash'));
+    document.querySelectorAll('.cupline .pts,.cupstrip .mini').forEach(el=>el.classList.add('ticked'));
+  }
   if (ui.screen === 'match' && ui.matchId){
     const m = theMatch(ui.matchId);
     if (m){
-      const cell = document.getElementById('cell'+curHole(m));
-      if (cell) cell.scrollIntoView({ block:'nearest', inline:'center', behavior:'auto' });
+      const key = ui.matchId + ':' + curHole(m);
+      if (ui.railKey !== key){ // don't yank the rail back on unrelated re-renders
+        ui.railKey = key;
+        const cell = document.getElementById('cell'+curHole(m));
+        if (cell) cell.scrollIntoView({ block:'nearest', inline:'center', behavior:'auto' });
+      }
     }
   }
 }
@@ -2086,10 +2200,12 @@ window.addEventListener('hashchange', ()=>{ parseRoute(); requestRender(); });
 
 // ---- sheets ---------------------------------------------------------------
 function openSheet(type, data){
+  const already = !!ui.sheet;
   ui.sheet = Object.assign({ type }, data||{});
   $sheetbox.innerHTML = sheetHtml(ui.sheet);
+  $sheetbox.scrollTop = 0;
   $sheetlayer.classList.add('open');
-  try{ history.pushState({ngSheet:true}, ''); }catch(e){}
+  if (!already) try{ history.pushState({ngSheet:true}, ''); }catch(e){}
 }
 function closeSheet(silent){
   if (!ui.sheet) return;
@@ -2144,19 +2260,21 @@ function sheetHtml(sh){
         rows += `<div style="padding:4px 0"><b>${pName(pid)}</b> — ${n} stroke${n>1?'s':''}: holes ${list}</div>`; }
       if (!rows) rows = '<div class="mut">Everyone plays off the low man — no strokes in this match.</div>';
     }
-    return `<h3>How strokes fall</h3><div style="font-size:14.5px">${rows}</div>`;
+    const missing = (si.missingHcp||[]).map(pid=>`<div class="warnchip" style="margin-top:6px">${pName(pid)} has no index — plays off scratch here.</div>`).join('');
+    return `<h3>How strokes fall</h3><div style="font-size:14.5px">${rows}</div>${missing}`;
   }
   if (t==='concede1'){
     return `<h3>Who’s giving it up?</h3>
       <div class="btnrow">
-        <button class="bigbtn red" data-act="concede2" data-mid="${sh.mid}" data-by="A">${esc(teamName('A'))} concede</button>
-        <button class="bigbtn blue" data-act="concede2" data-mid="${sh.mid}" data-by="B">${esc(teamName('B'))} concede</button>
+        <button class="bigbtn red" data-act="concede2" data-mid="${sh.mid}" data-by="A">${teamName('A')} concede</button>
+        <button class="bigbtn blue" data-act="concede2" data-mid="${sh.mid}" data-by="B">${teamName('B')} concede</button>
       </div>`;
   }
   if (t==='concede2'){
     const m = theMatch(sh.mid); const dr = mDer(m);
     const recv = sh.by==='A'?'B':'A';
-    const margin = dr.st.up===0?1:Math.abs(dr.st.up);
+    const recvUp = recv==='A' ? dr.st.up : -dr.st.up;
+    const margin = Math.max(1, recvUp);
     return `<h3>Confirm</h3>
       <div>${teamName(sh.by)} concede. ${teamName(recv)} win ${margin}UP — ${halfTxt(dr.worth)} point${dr.worth===1?'':'s'} to ${teamName(recv)}. This posts to the board.</div>
       <div class="btnrow"><button class="bigbtn ghost" data-act="sheet-close">Back</button>
@@ -2258,6 +2376,9 @@ function sheetHtml(sh){
 function snack(text, btn, fn){
   clearTimeout(ui.snackT);
   ui.undoFn = fn || null;
+  const pad = document.querySelector('.pad');
+  $snack.style.bottom = pad ? Math.max(12, Math.round(innerHeight - pad.getBoundingClientRect().top) + 8) + 'px'
+                            : 'calc(20px + env(safe-area-inset-bottom))';
   $snack.innerHTML = `<div class="snackin"><span>${text}</span>${btn?`<button data-act="snackbtn">${btn}</button>`:''}</div>`;
   ui.snackT = setTimeout(()=>{ $snack.innerHTML=''; ui.undoFn=null; }, 6000);
 }
@@ -2297,14 +2418,18 @@ function commitHole(mid, n, w, viaExplicit){
   const prev = (m.holes||{})[n] ? JSON.parse(JSON.stringify(m.holes[n])) : null;
   const drawerOpen = LS.get('drawer_'+mid, false);
   const via = viaExplicit || ((drawerOpen && litSide(m,n)===w) ? 'strokes' : 'tap');
-  if (prev && prev.winner === w){
-    snack(`Hole ${n} again?`, 'CLEAR HOLE', ()=>{ op(`matches/${mid}/holes/${n}`, prev.strokes?{strokes:prev.strokes}:null); ui.hole[mid]=n; requestRender(); });
+  const willExh = !!(before.st.done && n > (before.st.decidedAt || 0));
+  // same-result tap offers CLEAR — unless it would change the hole's
+  // exhibition status (re-tapping a for-fun hole after a reopen makes it real)
+  if (prev && prev.winner === w && !!prev.exhibition === willExh){
+    snack(`Hole ${n} again?`, 'CLEAR HOLE', ()=>{ clearHole(mid, n); });
     return;
   }
-  const hole = Object.assign({}, prev||{}, { winner: w, via });
-  delete hole.exhibition;
-  if (before.st.done && before.st.decidedAt && n > before.st.decidedAt) hole.exhibition = true;
-  op(`matches/${mid}/holes/${n}`, hole);
+  // narrow per-field writes so a concurrent stroke entry on the same hole
+  // from another phone is never clobbered by a whole-hole PUT
+  op(`matches/${mid}/holes/${n}/winner`, w);
+  op(`matches/${mid}/holes/${n}/via`, via);
+  op(`matches/${mid}/holes/${n}/exhibition`, willExh ? true : null);
   op(`matches/${mid}/touched`, Date.now());
   const after = mDer(theMatch(mid));
   ui.lock = true;
@@ -2322,6 +2447,11 @@ function commitHole(mid, n, w, viaExplicit){
     const label = w==='A'?teamName('A'):w==='B'?teamName('B'):'HALVED';
     const txt = editing ? `Hole ${n} changed: now ${label}` : `Hole ${n}: ${label}`;
     snack(txt, 'UNDO', ()=>{ op(`matches/${mid}/holes/${n}`, prev); ui.hole[mid]=n; requestRender(); });
+    if (!before.st.dormie && after.st.dormie && !LS.get('dormie_'+mid, false)){
+      LS.set('dormie_'+mid, true);
+      const trailing = after.st.leader==='A' ? teamName('B') : teamName('A');
+      setTimeout(()=>toastSnack(`DORMIE. ${trailing} can’t win it — only save the half.`), 900);
+    }
   }
   if (editing){ ui.hole[mid] = null; }
   else if (!after.st.done){
@@ -2332,20 +2462,26 @@ function commitHole(mid, n, w, viaExplicit){
 }
 function clearHole(mid, n){
   const m = theMatch(mid); if (!m) return;
-  const prev = (m.holes||{})[n];
+  const before = mDer(m);
+  const prev = (m.holes||{})[n] ? JSON.parse(JSON.stringify(m.holes[n])) : null;
   op(`matches/${mid}/holes/${n}`, prev && prev.strokes ? { strokes: prev.strokes } : null);
+  op(`matches/${mid}/touched`, Date.now());
+  const after = mDer(theMatch(mid));
+  if (before.st.done && !after.st.done){
+    const wteam = before.st.result.winner;
+    snack(`Match reopened — ${wteam ? teamName(wteam)+'’s point came off the board' : 'the half came off the board'}`, 'UNDO',
+      ()=>{ op(`matches/${mid}/holes/${n}`, prev); requestRender(); });
+  } else {
+    snack(`Hole ${n} cleared`, 'UNDO', ()=>{ op(`matches/${mid}/holes/${n}`, prev); requestRender(); });
+  }
   ui.hole[mid] = n;
   requestRender();
 }
 function setGross(mid, n, k, v){
   const m = theMatch(mid); if (!m) return;
-  const hole = Object.assign({}, (m.holes||{})[n] || {});
-  const strokes = Object.assign({}, hole.strokes || {});
-  if (strokes[k] === v || v < 1 || v > 15){ delete strokes[k]; }
-  else strokes[k] = v;
-  if (Object.keys(strokes).length) hole.strokes = strokes; else delete hole.strokes;
-  if (!hole.winner) delete hole.via;
-  op(`matches/${mid}/holes/${n}`, Object.keys(hole).length ? hole : null);
+  const cur = (((m.holes||{})[n]||{}).strokes||{})[k];
+  const clear = cur === v || v < 1 || v > 15;
+  op(`matches/${mid}/holes/${n}/strokes/${k}`, clear ? null : v);
 }
 
 // ---- setup actions ---------------------------------------------------------
@@ -2392,14 +2528,15 @@ function makeMatches(d){
   if (leftovers.length){
     const reds = leftovers.filter(pid=>effTeam(d,pid)==='red');
     const blues = leftovers.filter(pid=>effTeam(d,pid)==='blue');
-    const canA = (reds.length===2 && blues.length===1) || (reds.length===1 && blues.length===2) ||
-                 (reds.length===1 && blues.length===1);
-    if (reds.length===1 && blues.length===1){
-      op('matches/m'+uid(), { day:d, group: 'b', ord:ord++, red:reds, blue:blues, holes:{} });
-    } else if (leftovers.length){
-      const solo = reds.length===1 ? reds[0] : blues.length===1 ? blues[0] : null;
-      openSheet('oddman', { d, left:leftovers, canA: canA && !!solo,
-        aLabel: solo ? `${(player(solo).name||'').split(' ')[0]} against two balls. Hero or martyr.` : '' });
+    if (reds.length && blues.length){
+      const solo = reds.length===1 && blues.length>1 ? reds[0] : blues.length===1 && reds.length>1 ? blues[0] : null;
+      openSheet('oddman', { d, left:leftovers, canA:true,
+        aLabel: solo ? `${esc((player(solo).name||'').split(' ')[0])} against two balls. Hero or martyr.`
+                     : (reds.length===1 && blues.length===1 ? `${pName(reds[0])} vs ${pName(blues[0])} — make it a match` : 'pair them up') });
+      return;
+    }
+    if (leftovers.length){
+      openSheet('oddman', { d, left:leftovers, canA:false, aLabel:'' });
       return;
     }
   }
@@ -2456,11 +2593,11 @@ document.addEventListener('click', (ev)=>{
   if (clearPick && ui.pick){ ui.pick = null; }
   switch(act){
     // navigation
-    case 'day': closeSheet(); navigate('#/day/'+a.d); break;
-    case 'board': closeSheet(); navigate('#/day/'+(ui.day||resolveDay())); break;
-    case 'match': navigate('#/match/'+a.id); break;
-    case 'setup': closeSheet(); navigate('#/day/'+(a.d||ui.day||resolveDay())+'/setup'); break;
-    case 'settings': closeSheet(); navigate('#/settings'); break;
+    case 'day': closeSheet(true); navigate('#/day/'+a.d); break;
+    case 'board': closeSheet(true); navigate('#/day/'+(ui.day||resolveDay())); break;
+    case 'match': closeSheet(true); navigate('#/match/'+a.id); break;
+    case 'setup': closeSheet(true); navigate('#/day/'+(a.d||ui.day||resolveDay())+'/setup'); break;
+    case 'settings': closeSheet(true); navigate('#/settings'); break;
     case 'hub': openSheet('hub'); break;
     case 'cupsheet': openSheet('cup'); break;
     case 'gloss': openSheet('gloss'); break;
@@ -2469,9 +2606,29 @@ document.addEventListener('click', (ev)=>{
     case 'sheet-close': closeSheet(); break;
     case 'takeover-close': $takeover.className=''; $takeover.innerHTML=''; break;
     case 'snackbtn': { const f = ui.undoFn; ui.undoFn=null; $snack.innerHTML=''; if (f) f(); break; }
-    case 'who': ui.screen='who'; closeSheet(); requestRender(); break;
-    case 'iam': LS.set('id', a.p); ui.screen='board'; landHome(true); break;
-    case 'kickoff': op('', seedTree()); navigate('#/settings'); break;
+    case 'who': closeSheet(true); ui.screen='who'; requestRender(); break;
+    case 'iam': {
+      LS.set('id', a.p); ui.screen='board';
+      const h = location.hash;
+      if (/^#\/(match|settings|day)/.test(h)){ parseRoute(); requestRender(); }
+      else landHome(true);
+      break;
+    }
+    case 'kickoff': (async ()=>{
+      if (Object.keys(S.players||{}).length){ requestRender(); return; }
+      if (dbConfigured()){
+        try {
+          const ctl = new AbortController(); const tt = setTimeout(()=>ctl.abort(), 8000);
+          const res = await fetch(pathUrl(''), { signal: ctl.signal });
+          clearTimeout(tt);
+          const data = await res.json();
+          if (data && typeof data === 'object' && Object.keys(data).length){
+            sse.snapped = true; remoteEvent('put', { path:'/', data }); return; // trip already exists — join it
+          }
+        } catch(e){ toastSnack('Can’t reach the database — check signal and try again.'); return; }
+      }
+      op('', seedTree()); navigate('#/settings');
+    })(); break;
     case 'scroll': { const t = document.getElementById(a.t); if (t) t.scrollIntoView({behavior:'smooth'}); break; }
 
     // scoring
@@ -2491,11 +2648,8 @@ document.addEventListener('click', (ev)=>{
     case 'gross': setGross(a.id, +a.n, a.k, +a.v); break;
     case 'pickup': {
       const m = theMatch(a.id); if (!m) break;
-      const hole = Object.assign({}, (m.holes||{})[+a.n]||{});
-      const strokes = Object.assign({}, hole.strokes||{});
-      if (strokes[a.k]==='pickup') delete strokes[a.k]; else strokes[a.k]='pickup';
-      if (Object.keys(strokes).length) hole.strokes = strokes; else delete hole.strokes;
-      op(`matches/${a.id}/holes/${a.n}`, Object.keys(hole).length?hole:null); break;
+      const cur = (((m.holes||{})[+a.n]||{}).strokes||{})[a.k];
+      op(`matches/${a.id}/holes/${a.n}/strokes/${a.k}`, cur==='pickup' ? null : 'pickup'); break;
     }
     case 'clearhole': clearHole(a.id, +a.n); break;
     case 'keepplay': ui['keep_'+a.id]=true; closeSheet(); requestRender(); break;
@@ -2516,7 +2670,6 @@ document.addEventListener('click', (ev)=>{
     }
     case 'reopen': {
       const m = theMatch(a.mid); if (!m) break;
-      closeSheet();
       if (m.concededBy) openSheet('reopen-conc', { mid:a.mid });
       else openSheet('reopen-derived', { mid:a.mid });
       break;
@@ -2555,6 +2708,26 @@ document.addEventListener('click', (ev)=>{
     case 'course': op(`days/${a.d}/course`, a.v); op(`days/${a.d}/tee`, null); break;
     case 'rot': op(`days/${a.d}/rot`, a.v); break;
     case 'tee': op(`days/${a.d}/tee`, a.v); break;
+    case 'setsi': {
+      const dc = dayCfg(a.d);
+      const cst = Object.assign({ name:'', pars:Array(18).fill(4), sis:[] }, dc.custom||{});
+      let sis = arr(cst.sis); if (sis.length < 18) sis = Array.from({length:18},(_,j)=>sis[j]||0);
+      const i = +a.i;
+      if (sis[i]) sis[i] = 0;
+      else {
+        const used = new Set(sis.filter(Boolean));
+        let next = 1; while (used.has(next) && next <= 18) next++;
+        if (next <= 18) sis[i] = next;
+      }
+      cst.sis = sis;
+      op(`days/${a.d}/custom`, cst); break;
+    }
+    case 'resetsi': {
+      const dc = dayCfg(a.d);
+      const cst = Object.assign({ name:'', pars:Array(18).fill(4), sis:[] }, dc.custom||{});
+      cst.sis = [];
+      op(`days/${a.d}/custom`, cst); break;
+    }
     case 'cyclepar': {
       const dc = dayCfg(a.d);
       const cst = Object.assign({ name:'', pars:Array(18).fill(4), sis:[] }, dc.custom||{});
@@ -2577,7 +2750,7 @@ document.addEventListener('click', (ev)=>{
       op(`days/${a.d}/points`, Math.max(0.5, Math.min(5, cur + (+a.v)))); break;
     }
     case 'x2': op(`days/${a.d}/x2`, !dayCfg(a.d).x2); break;
-    case 'fmt': op(`days/${a.d}/format`, a.v); break;
+    case 'fmt': op(`days/${a.d}/format`, a.v); op(`days/${a.d}/allowancePct`, null); break;
     case 'seat': {
       const d = a.d, ck = a.ck, sIdx = +a.s;
       const dc = dayCfg(d);
