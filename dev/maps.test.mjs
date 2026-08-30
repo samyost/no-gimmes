@@ -116,6 +116,26 @@ try {
     return r === 'lay back off the tee, creek crosses';
   }));
 
+  // --- index.html carries exactly what the map pipeline builds ---
+  const built = k => JSON.parse(readFileSync(join(here, 'osm', k + '.maps.json'), 'utf8'));
+  for (const k of ['vail','willis','river','ranch','breck']){
+    const want = {};
+    for (const h of built(k)){
+      if (h.nine) (want[h.nine] = want[h.nine] || {})[h.hole] = { vb: h.vb, g: h.g };
+      else want[h.hole] = { vb: h.vb, g: h.g };
+    }
+    const line = html.match(new RegExp(`^HOLEMAPS\\.${k} = (.*);$`, 'm'));
+    ok(`${k} embed is current with dev/osm/${k}.maps.json`,
+      !!line && line[1] === JSON.stringify(want));
+  }
+
+  // --- overlapping Overpass boxes: each Keystone course kept its own lines ---
+  const wayOf = (k, hole) => (built(k).find(h => h.hole === hole) || {}).way;
+  ok('river 1 and 2 are the River Course\'s, not Ranch 1 and 2',
+    wayOf('river', 1) === 759907392 && wayOf('river', 2) === 759907393);
+  ok('ranch 16 and 17 are the Ranch\'s, not River 16 and 17',
+    wayOf('ranch', 16) === 1162334830 && wayOf('ranch', 17) === 1162480606);
+
   // --- every embedded course carries a full round of maps ---
   ok('maps embedded for all five courses', await p.evaluate(()=>{
     const flat = k => { const m = HOLEMAPS[k]; return m && Array.from({length:18},(_,i)=>i+1).every(n=>m[n] && m[n].g.length); };
@@ -137,8 +157,6 @@ try {
     const c = document.querySelector('.hmap .mc');
     return !!c && c.getAttribute('d') === HOLEMAPS.ranch[1].g.find(x=>x[0]==='c')[1];
   })));
-  ok('ranch 16 is a ranch hole, not the river hole sharing its bbox', await p.evaluate(()=>
-    HOLEMAPS.ranch[16].g.find(x=>x[0]==='c')[1] !== HOLEMAPS.river[16].g.find(x=>x[0]==='c')[1]));
 
   // --- Breckenridge picks the map by nine, not by hole number ---
   await p.evaluate(()=>{ location.hash = '#/match/m3'; });   // Bear -> Elk

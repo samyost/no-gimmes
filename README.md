@@ -64,25 +64,31 @@ Bear→Elk rotation has no printed card anywhere we could find, so its stroke
 allocation is derived from the other two cards (the app says so in the UI).
 A minimal custom-course card covers everywhere else.
 
-Lo-fi **hole maps** — fairway, green, tees, bunkers, water, and the playing
-line — are traced from OpenStreetMap for Vail, Willis Case, Breckenridge (all
-27 holes), The River Course, and Keystone Ranch. They render above the scoring
-buttons and double as the tap surface for ball marks.
+Lo-fi **hole maps** — fairway, rough, green, tees, bunkers, water, and the
+playing line — are traced from OpenStreetMap for Vail, Willis Case,
+Breckenridge (all 27 holes), The River Course, and Keystone Ranch. They render
+above the scoring buttons and double as the tap surface for ball marks.
 
 Two wrinkles worth knowing about. Keystone's two courses sit close enough that
 one Overpass bounding box catches a few of the neighbour's holes under a hole
-number it already owns; the builder keeps whichever line sits with the rest of
-the course. And OSM has centerlines for only two of Breckenridge's three nines
-(they turn out to be Beaver and Bear — their lengths match the printed card).
-Someone later traced Elk's greens, tees, fairways and bunkers but never drew
-the hole lines, so `dev/osm/derive-elk.mjs` reconstructs them: the orphaned
-features are exactly Elk's, a routing search fits them to the printed Elk card,
-and each line is threaded through its fairway so doglegs bend the right way.
-The winning route beats the runner-up better than 2:1, and the reconstructed
-lines land closer to the card (worst hole 31 yards out) than OSM's own traced
-Beaver and Bear lines do (worst hole 97 yards out, traced from a forward tee).
-`dev/osm/breck.elk.json` is the committed result, and rerunning the script
-reprints the card-versus-built table so drift is obvious.
+number it already owns — River's file carries Ranch 1 and 2, Ranch's carries
+River 16 and 17 — so the builder keeps whichever line sits with the rest of the
+course and records the OSM way it kept.
+
+The other is Breckenridge. OSM has centerlines for only two of its three nines;
+measured against the printed cards those two are Beaver (holes 1-9) and Bear
+(10-18). Someone later traced Elk's greens, tees, fairways and bunkers but
+never drew its hole lines, so `dev/osm/derive-elk.mjs` reconstructs them: the
+features left over once Beaver, Bear and the practice ground are accounted for
+are Elk's — and they come to exactly nine greens — then a search assigns each
+green and tee complex to a hole number by fitting the printed Elk card and the
+walk between holes, and threads each line through its fairway so doglegs bend
+the right way. The result averages 13.8 yards off the card and is never worse
+than 31 on any hole; the runner-up routing averages 25.9 and needs a 311-yard
+walk between two holes. For comparison, OSM's own Beaver and Bear lines are up
+to 97 yards off the Gold column, because a few were traced from a forward tee.
+`dev/osm/breck.elk.json` is the committed result; rerunning the script reprints
+the card-versus-built table and warns if either margin erodes.
 
 ## Development
 

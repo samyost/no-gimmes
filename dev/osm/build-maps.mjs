@@ -2,7 +2,9 @@
 // path data ready to embed in index.html.
 //   node dev/osm/build-maps.mjs <key> [holes]
 // Emits dev/osm/<key>.maps.json:
-//   [ {hole, nine?, vb:[w,h], yds, g:[[kind, "M…Z"], …]} × 18 ]
+//   [ {hole, nine?, way?, vb:[w,h], yds, g:[[kind, "M…Z"], …]} × 18 ]
+// `way` is the OSM way the centerline came from — the record of which line
+// ownHoles() kept where a bounding box caught two courses.
 // kinds: f fairway · g green · t tee · b bunker · w water · r rough · c centerline
 // `nine` is set only for Breckenridge, whose 27 holes are keyed by nine
 // (beaver/bear/elk) because a round there plays two of the three.
@@ -117,13 +119,14 @@ if (!holes.length){ console.error('no golf=hole centerlines in ' + key + '.json'
 // for two of them; dev/osm/derive-elk.mjs reconstructs the third from its
 // greens, tees and fairways. Elsewhere a course is a flat 18.
 function nineList(){
-  const flat = holes.map(h => ({ nine: null, ref: +h.tags.ref, geometry: h.geometry }));
+  const flat = holes.map(h => ({ nine: null, ref: +h.tags.ref, way: h.id, geometry: h.geometry }));
   if (key !== 'breck') return flat;
   if (flat.length !== 18) throw new Error(`breck: expected 18 Beaver/Bear centerlines, got ${flat.length}`);
   const elk = JSON.parse(readFileSync(join(here, 'breck.elk.json'), 'utf8')).holes;
   return [
-    ...flat.map(h => ({ nine: h.ref <= 9 ? 'beaver' : 'bear', ref: (h.ref - 1) % 9 + 1, geometry: h.geometry })),
-    ...elk.map(h => ({ nine: 'elk', ref: h.ref, geometry: h.geometry })),
+    ...flat.map(h => ({ ...h, nine: h.ref <= 9 ? 'beaver' : 'bear', ref: (h.ref - 1) % 9 + 1 })),
+    // the Elk lines are reconstructed, not traced, so they have no OSM way
+    ...elk.map(h => ({ nine: 'elk', ref: h.ref, way: null, geometry: h.geometry })),
   ];
 }
 const NINES = ['beaver', 'bear', 'elk'];
@@ -182,8 +185,10 @@ for (const h of routes){
   for (const c of clip) shapes.push([c.kind, path(c.pts, true)]);
   shapes.push(['c', path(cl, false)]);
   const yds = Math.round(Math.hypot(b[0]-a[0], b[1]-a[1]) / 0.9144);
-  out.push(h.nine ? { hole: ref, nine: h.nine, vb: [W, Hgt], yds, g: shapes }
-                  : { hole: ref, vb: [W, Hgt], yds, g: shapes });
+  const rec = { hole: ref };
+  if (h.nine) rec.nine = h.nine;
+  if (h.way) rec.way = h.way;
+  out.push(Object.assign(rec, { vb: [W, Hgt], yds, g: shapes }));
 }
 writeFileSync(join(here, key + '.maps.json'), JSON.stringify(out));
 const bytes = JSON.stringify(out).length;
