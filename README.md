@@ -64,13 +64,45 @@ Bear→Elk rotation has no printed card anywhere we could find, so its stroke
 allocation is derived from the other two cards (the app says so in the UI).
 A minimal custom-course card covers everywhere else.
 
+Lo-fi **hole maps** — fairway, green, tees, bunkers, water, and the playing
+line — are traced from OpenStreetMap for Vail, Willis Case, Breckenridge (all
+27 holes), The River Course, and Keystone Ranch. They render above the scoring
+buttons and double as the tap surface for ball marks.
+
+Two wrinkles worth knowing about. Keystone's two courses sit close enough that
+one Overpass bounding box catches a few of the neighbour's holes under a hole
+number it already owns; the builder keeps whichever line sits with the rest of
+the course. And OSM has centerlines for only two of Breckenridge's three nines
+(they turn out to be Beaver and Bear — their lengths match the printed card).
+Someone later traced Elk's greens, tees, fairways and bunkers but never drew
+the hole lines, so `dev/osm/derive-elk.mjs` reconstructs them: the orphaned
+features are exactly Elk's, a routing search fits them to the printed Elk card,
+and each line is threaded through its fairway so doglegs bend the right way.
+The winning route beats the runner-up better than 2:1, and the reconstructed
+lines land closer to the card (worst hole 31 yards out) than OSM's own traced
+Beaver and Bear lines do (worst hole 97 yards out, traced from a forward tee).
+`dev/osm/breck.elk.json` is the committed result, and rerunning the script
+reprints the card-versus-built table so drift is obvious.
+
 ## Development
 
 ```
 node dev/engine.test.mjs   # unit tests for the scoring engine
 node dev/features.test.mjs # mixer / mix library / side-bet browser tests (needs: cd dev && npm i)
 node dev/sync.test.mjs     # two-browser integration tests (needs: cd dev && npm i)
+node dev/maps.test.mjs     # hole maps / ball marks / hole notes (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
+```
+
+Hole maps are built offline and embedded, so the app fetches nothing at play
+time. Overpass is only reachable from the `osm-fetch` GitHub Action; the rest
+runs anywhere:
+
+```
+node dev/osm/fetch.mjs          # refresh dev/osm/<key>.json from Overpass (CI only)
+node dev/osm/derive-elk.mjs     # rebuild Breckenridge's missing Elk centerlines
+node dev/osm/build-maps.mjs <k> # <key>.json -> <key>.maps.json (SVG path data)
+node dev/osm/embed.mjs <k>      # splice that into index.html as HOLEMAPS.<key>
 ```
 
 The scoring engine ships inline in `index.html` between `ENGINE` markers;

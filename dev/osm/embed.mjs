@@ -10,8 +10,13 @@ const here = dirname(fileURLToPath(import.meta.url));
 const key = process.argv[2];
 if (!key){ console.error('usage: node embed.mjs <course-key>'); process.exit(1); }
 const maps = JSON.parse(readFileSync(join(here, key + '.maps.json'), 'utf8'));
+// flat 18 -> {hole: map}; Breckenridge's 27 -> {nine: {hole: map}}, because a
+// round there plays two of the three nines and the app looks maps up that way
 const byHole = {};
-for (const m of maps) byHole[m.hole] = { vb: m.vb, g: m.g };
+for (const m of maps){
+  if (m.nine) (byHole[m.nine] = byHole[m.nine] || {})[m.hole] = { vb: m.vb, g: m.g };
+  else byHole[m.hole] = { vb: m.vb, g: m.g };
+}
 const line = `HOLEMAPS.${key} = ${JSON.stringify(byHole)};`;
 
 const idx = join(here, '..', '..', 'index.html');
