@@ -34,6 +34,11 @@ watch it appear on the other. That's the whole stack verified.
   **STROKES** drawer and enter gross scores; the app applies net strokes and
   lights up the derived winner for you to confirm. Mix both freely. Tap any
   hole in the rail to fix it; nothing ever locks.
+- **Shot by shot**: pick a golfer (you, by default), then tap the hole map
+  where each shot finished — or **+1** for one you can't place — and **IN THE
+  HOLE** when it drops. The count becomes that golfer's gross score unless
+  somebody types a number over it; the trace stays either way. Lost track?
+  Tap **IN THE HOLE** first and replay the hole backwards to the tee.
 - **The board**: pinned cup score with the tug-of-war bar and the magic number,
   day tabs (opens to today), live match chips (`2UP · THRU 12`, `DORMIE`,
   `4&3 ✓`), tee times and carts.
