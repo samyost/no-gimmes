@@ -153,6 +153,15 @@ try {
   ok('tee shot closes it: holed in 3', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t))));
   ok('numbered from the tee', await p.locator('.hmap .bmark.sel text').first().textContent().then(t=>t==='1'));
 
+  // --- an ace: in the hole, then tee shot, with nothing between ---
+  await p.locator('.gchips .gchip').nth(2).click(); // Tank
+  await p.locator('[data-act="holed"]').click();
+  await p.locator('[data-act="teeshot"]').click();
+  ok('hole-in-one is a legitimate 1', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 1/.test(t))));
+  await p.locator('[data-act="traceclear"]').click();
+  await p.locator('.gchips .gchip').nth(1).click(); // back to Sly
+  await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t)));
+
   // --- clear, with undo ---
   await p.locator('[data-act="traceclear"]').click();
   ok('clear empties the trace', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/NO STROKES YET/.test(t))));

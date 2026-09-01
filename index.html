@@ -3123,6 +3123,9 @@ document.addEventListener('click', (ev)=>{
       break; }
     case 'teeshot': { const m = theMatch(a.id); if (!m) break;
       const list = traceFor(m, +a.n, a.k), ti = traceInfo(list);
+      // marks the front stroke as the tee shot. When that stroke is the
+      // holing marker itself the trace is [{h,r,t}] — a hole-in-one, and a
+      // legitimate gross of 1 — so no minimum length here.
       if (ti.rev && !ti.complete){ list[0].t = 1; setTrace(m, +a.n, a.k, list); }
       break; }
     case 'traceundo': { const m = theMatch(a.id); if (!m) break;
