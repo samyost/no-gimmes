@@ -267,9 +267,10 @@ a{color:var(--brass)}
 .dbanner.r{background:var(--red-wash);color:var(--red)} .dbanner.b{background:var(--blue-wash);color:var(--blue)}
 .dbanner.h{background:var(--bone);border:1px solid var(--sagebrush);color:var(--sagebrush)}
 .dbanner.w{background:var(--bone);border:1px dashed var(--pencil);color:var(--sage)}
-.srow{display:flex;align-items:center;gap:5px;padding:5px 0}
+.srow{display:flex;align-items:center;gap:5px;padding:5px 0;border-radius:10px;margin:0 -4px;padding-left:4px;padding-right:4px}
+.srow.sel{background:var(--card);box-shadow:inset 3px 0 0 var(--brass)}
 .srow.picked .qnums{opacity:.35}
-.srow .who{flex:0 0 72px;font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden}
+.srow .who{flex:0 0 72px;font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-align:left;padding:6px 0}
 .srow .who.r{color:var(--red)} .srow .who.b{color:var(--blue)}
 .srowsub{display:flex;justify-content:flex-end;gap:10px;align-items:center;margin:-3px 0 2px;padding-right:2px}
 .qnums{display:flex;gap:4px;flex:1;justify-content:flex-end}
@@ -281,6 +282,7 @@ a{color:var(--brass)}
 .qn.step{font-size:16px;width:30px}
 .netlab{font-size:12px;color:var(--brass);font-weight:700;white-space:nowrap}
 .pickup{font-size:12px;color:var(--sage);text-decoration:underline;text-underline-offset:2px}
+.usemap{font-size:12px;color:var(--brass);font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .padnote{font-size:12.5px;color:var(--sage);text-align:center;padding-top:6px}
 .resultcard{border-radius:14px;border:1px solid var(--pencil);background:var(--card);padding:14px;text-align:center}
 .resultcard .r1{font-family:'Saira Condensed';font-weight:800;font-size:24px}
@@ -462,10 +464,32 @@ a{color:var(--brass)}
 .hmap .bmark.r circle{fill:var(--red)}
 .hmap .bmark.b circle{fill:var(--blue)}
 .hmap .bmark text{font-size:9px;text-anchor:middle;dominant-baseline:central}
-.hmap .mhint{position:absolute;right:9px;bottom:5px;font-size:10.5px;color:var(--sage);letter-spacing:.04em;pointer-events:none}
-.hmapfoot{display:flex;align-items:center;margin:3px 14px 0;font-size:12px;color:var(--sage)}
-.hmapfoot .sp{flex:1}
-.hmapfoot button{color:var(--ob);font-size:12px;padding:2px 4px}
+.hmap .bmark.dim{opacity:.45}
+.hmap .bmark.sel circle{stroke:var(--brass);stroke-width:2}
+.hmap .bmark.sel text{fill:#FCF8EF;font-weight:700;font-family:'Saira Condensed';font-size:11px}
+.hmap .bmark.hole circle{fill:none;stroke:var(--brass);stroke-width:2}
+.hmap .tr{fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;opacity:.7}
+.hmap .tr.r{stroke:var(--red)} .hmap .tr.b{stroke:var(--blue)}
+.hmap .mhint{position:absolute;right:9px;bottom:5px;font-size:10.5px;color:var(--sage);letter-spacing:.04em;pointer-events:none;
+  background:var(--bone);padding:1px 5px;border-radius:6px;max-width:70%;text-align:right}
+.gchips{display:flex;gap:6px;padding:6px 14px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.gchips::-webkit-scrollbar{display:none}
+.gchip{flex:0 0 auto;font-size:13px;font-weight:700;border:1.5px solid var(--pencil);border-radius:99px;padding:5px 10px;color:var(--sage);background:var(--card);white-space:nowrap}
+.gchip.r{color:var(--red)} .gchip.b{color:var(--blue)}
+.gchip.sel.r{background:var(--red);border-color:var(--red);color:#FCF8EF}
+.gchip.sel.b{background:var(--blue);border-color:var(--blue);color:#FCF8EF}
+.gchip .ct{opacity:.85;font-weight:600;margin-left:4px}
+.tracebar{padding:5px 14px 0}
+.tracebar .rorow{display:flex;align-items:baseline;gap:10px;min-height:20px}
+.tracebar .ro{font-family:'Saira Condensed';font-weight:700;font-size:13.5px;letter-spacing:.05em;color:var(--ink);text-transform:uppercase}
+.tracebar .ro .mut{font-family:inherit;font-weight:600}
+.tracebar .tbtns{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+.tbtn{font-family:'Saira Condensed';font-weight:700;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
+  border:1.5px solid var(--ink);border-radius:9px;padding:0 10px;height:36px;color:var(--ink);background:var(--card);white-space:nowrap}
+.tbtn.go{background:var(--ink);color:var(--bone)}
+.tbtn.lite{border-color:var(--pencil);color:var(--sage)}
+.tbtn.undo{width:40px;padding:0;font-size:16px}
+.tracebar .clr{color:var(--ob);font-size:12px;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
 .hnote{margin:6px 14px 0;font-size:12.5px;color:var(--sage);display:flex;gap:7px;align-items:center;line-height:1.4}
 .hnote input{flex:1;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:7px 10px;font-size:13.5px}
 .hnotebtn{color:var(--brass);font-size:11.5px;border:1px dashed var(--pencil);border-radius:8px;padding:3px 8px;flex:0 0 auto}
@@ -769,6 +793,8 @@ let pend = LS.get('pend', []) || [];        // op queue: [{id, path, value}]
 const ui = {
   day: null, matchId: null, screen: 'board', // screen: board|match|setup|settings|hub? (hub is a sheet)
   hole: {},          // matchId -> currently targeted hole (device-local)
+  sel: {},           // matchId -> {n, key} golfer (or one-ball team) selected for stroke entry; resets per hole
+  traceUndo: {},     // 'mid/n/key' -> stack of previous trace lists (device-local one-step undo)
   pick: null,        // tap-tap selection {kind:'seat'|'chip'|'slot', ...}
   lock: false,       // pad lockout
   sheet: null,       // {type, ...}
@@ -1008,7 +1034,7 @@ function mStrokes(m, fmtOverride){
 // stroke-committed hole whose derivation later flipped (tee/hcp/rotation change)
 function drifted(m, holeNo){
   const h = (m.holes||{})[holeNo];
-  if (!h || !h.winner || h.via !== 'strokes' || !h.strokes) return false;
+  if (!h || !h.winner || h.via !== 'strokes') return false;
   const dw = derivedWinner(m, holeNo);
   return dw != null && dw !== h.winner;
 }
@@ -1021,35 +1047,107 @@ function holeDots(m, si, holeNo, d){
   return dots;
 }
 function isOneBall(fmt){ return (FORMATS[fmt]||{}).oneBall; }
-// derived winner from stored strokes on a hole (null if underivable)
+// ---- stroke traces ---------------------------------------------------------
+// m.holes[n].trace[key] is an ordered list of strokes for one key — a player
+// id, or 'A'/'B' in one-ball formats. Each stroke optionally carries {x,y}
+// (0..1 map coords, where the ball finished). Flags: h = holed out, r = the
+// list was built putt-back-to-tee (set on the holing stroke), t = tee shot
+// (only needed to close a reverse build), p = penalty, u = tallied with no
+// spot. A stroke object is never empty (Firebase drops empty objects).
+// The posted score lives separately in m.holes[n].strokes[key]; the trace
+// is the record of what happened and only stands in for the score when
+// nobody has posted one and the trace is complete end to end.
+function traceKeys(m, n){ return isOneBall(mFormat(m, n)) ? ['A','B'] : [...sideIds(m,'A'), ...sideIds(m,'B')]; }
+function traceFor(m, n, key){
+  const t = (((m.holes||{})[n]||{}).trace||{})[key];
+  if (t) return arr(t).filter(Boolean).map(x=>Object.assign({}, x));
+  // legacy single ball mark: days/<d>/balls/<n>/<pid> = {x,y}
+  const b = (((S.days||{})[m.day]||{}).balls||{})[n];
+  const bb = b && b[key];
+  return (bb && bb.x != null) ? [{ x:bb.x, y:bb.y }] : [];
+}
+function traceInfo(list){
+  const first = list[0], last = list[list.length-1];
+  const rev = !!(last && last.h && last.r);
+  const complete = !!(last && last.h && (!rev || first.t));
+  const unplaced = list.filter(s=>s.x==null && !s.h).length;
+  const pen = list.filter(s=>s.p).length;
+  return { n:list.length, rev, complete, started:list.length>0, unplaced, pen };
+}
+// effective gross per key: the posted score wins; a complete trace stands in
+// when nothing was posted. An in-progress trace contributes nothing — a hole
+// half-mapped must never derive a result.
+function effStrokes(m, n){
+  const hd = (m.holes||{})[n] || {};
+  const out = Object.assign({}, hd.strokes||{});
+  for (const k of traceKeys(m, n)){
+    if (out[k] != null) continue;
+    const ti = traceInfo(traceFor(m, n, k));
+    if (ti.complete) out[k] = ti.n;
+  }
+  return Object.keys(out).length ? out : null;
+}
+function tracePath(m, n, key){ return `matches/${m.id}/holes/${n}/trace/${key}`; }
+function setTrace(m, n, key, list, noUndo){
+  if (!noUndo){
+    const k = m.id+'/'+n+'/'+key;
+    (ui.traceUndo[k] = ui.traceUndo[k] || []).push(traceFor(m, n, key));
+    if (ui.traceUndo[k].length > 30) ui.traceUndo[k].shift();
+  }
+  op(tracePath(m, n, key), list.length ? list : null);
+  op(`matches/${m.id}/touched`, Date.now());
+}
+function addStroke(m, n, key, stroke){
+  const list = traceFor(m, n, key), ti = traceInfo(list);
+  if (ti.complete) return false;
+  if (ti.rev) list.unshift(stroke); else list.push(stroke);
+  setTrace(m, n, key, list);
+  return true;
+}
+// ---- golfer selection (who the map / tally buttons score for) --------------
+function defaultSel(m, n){
+  const me = LS.get('id', null);
+  if (!me || me === 'watch') return null;
+  const a = sideIds(m,'A').includes(me), b = sideIds(m,'B').includes(me);
+  if (!a && !b) return null;
+  return isOneBall(mFormat(m, n)) ? (a ? 'A' : 'B') : me;
+}
+function selKey(m, n){
+  const s = ui.sel[m.id];
+  const key = (s && s.n === n) ? s.key : defaultSel(m, n);
+  return key && traceKeys(m, n).includes(key) ? key : null;
+}
+function keyLabel(m, key){ return (key==='A'||key==='B') ? teamName(key) : pName(key); }
+function keySide(m, key){ return (key==='A'||key==='B') ? key : (sideIds(m,'A').includes(key) ? 'A' : 'B'); }
+// derived winner from effective strokes on a hole (null if underivable)
 function derivedWinner(m, holeNo){
-  const h = (m.holes||{})[holeNo]; if (!h || !h.strokes) return null;
+  const strokes = effStrokes(m, holeNo); if (!strokes) return null;
   const fmt = mFormat(m, holeNo);
   const si = mStrokes(m, fmt);
   const hs = holesFor(m.day)[holeNo-1];
   const sp = { A: sideIds(m,'A'), B: sideIds(m,'B') };
   let entry;
   if (isOneBall(fmt)){
-    if (h.strokes.A == null || h.strokes.B == null) return null;
-    entry = { sides: h.strokes };
+    if (strokes.A == null || strokes.B == null) return null;
+    entry = { sides: strokes };
   } else {
     // completeness gate: a side counts as "in" once it has a numeric score,
     // or as picked up once EVERY entered ball on it is a pickup — a side
     // nobody has entered anything for is not yet derivable, never a loss.
     for (const side of ['A','B']){
       const ids = sp[side];
-      const numeric = ids.some(pid => typeof h.strokes[pid] === 'number');
-      const allPick = ids.length > 0 && ids.every(pid => h.strokes[pid] === 'pickup');
+      const numeric = ids.some(pid => typeof strokes[pid] === 'number');
+      const allPick = ids.length > 0 && ids.every(pid => strokes[pid] === 'pickup');
       if (!numeric && !allPick) return null;
     }
     entry = { players:{} };
-    for (const [pid,v] of Object.entries(h.strokes)) if (v !== 'pickup' && v != null) entry.players[pid] = v;
+    for (const [pid,v] of Object.entries(strokes)) if (v !== 'pickup' && v != null) entry.players[pid] = v;
   }
   return ENG.holeWinnerFromStrokes(fmt, entry, sp, si, hs.si, 18);
 }
 function overridden(m, holeNo){
   const h = (m.holes||{})[holeNo];
-  if (!h || !h.winner || h.via !== 'tap' || !h.strokes) return false;
+  if (!h || !h.winner || h.via !== 'tap') return false;
   const dw = derivedWinner(m, holeNo);
   return dw != null && dw !== h.winner;
 }
@@ -1545,7 +1643,7 @@ function railHtml(m, d){
     if (si.kind==='side'){ dh = teamDot('A',dots.A)+teamDot('B',dots.B); }
     else { for (const [pid,n] of Object.entries(dots.players)){ const t = sideIds(m,'A').includes(pid)?'A':'B'; dh += teamDot(t,n); } }
     let fill = '', sg = '';
-    if (hd && hd.strokes) sg = `<span class="sg">⛳</span>`;
+    if (hd && effStrokes(m, h.no)) sg = `<span class="sg">⛳</span>`;
     let fcls = '';
     if (hd && hd.winner){ fcls = hd.winner + (hd.exhibition?' x':'') + (overridden(m,h.no)?' ov':'') + (drifted(m,h.no)?' drift':''); }
     out += `<button class="cell ${h.no===cur?'cur':''}" data-act="hole" data-id="${m.id}" data-n="${h.no}" id="cell${h.no}">
@@ -1581,34 +1679,94 @@ function bigStatusHtml(m, dr){
   const d = st.dormie ? ` <span class="st d">· DORMIE</span>` : '';
   return `<div class="bigstat"><div class="st sc ${cls}">${txt}${d}</div><span class="sp"></span><div class="thru">${st.thru?('THRU '+st.thru):''}</div></div>`;
 }
-// ---- lo-fi hole map + ball marks -------------------------------------------
+// ---- lo-fi hole map + stroke traces ----------------------------------------
+function keyShort(m, key){ return (key==='A'||key==='B') ? teamName(key) : esc((player(key).name||'??').split(' ')[0]); }
 function holeMapHtml(m, d, n){
   const dc = dayCfg(d);
   const hm = (HOLEMAPS[dc.course]||{})[n];
-  if (!hm) return '';
+  const keys = traceKeys(m, n);
+  const sel = selKey(m, n);
+  // golfer chips — who the map taps and tally buttons score for. Defaults to
+  // the phone's owner when they're in this match; resets every hole.
+  const chipFor = (key) => {
+    const cls = keySide(m, key)==='A' ? 'r' : 'b';
+    const label = (key==='A'||key==='B') ? sideIds(m,key).map(pid=>player(pid).emoji).join('')+' '+teamName(key) : pName(key);
+    const ti = traceInfo(traceFor(m, n, key));
+    const ct = ti.started ? `<span class="ct">${ti.complete ? ti.n : ti.n+'…'}</span>` : '';
+    return `<button class="gchip ${cls} ${sel===key?'sel':''}" data-act="sel" data-id="${m.id}" data-n="${n}" data-k="${esc(key)}">${label}${ct}</button>`;
+  };
+  const chips = keys.length ? `<div class="gchips">${keys.map(chipFor).join('')}</div>` : '';
+  // tally bar — counts strokes for the selected golfer with or without a map
+  let bar = '';
+  if (sel){
+    const ti = traceInfo(traceFor(m, n, sel));
+    const B = (act, label, cls='') => `<button class="tbtn ${cls}" data-act="${act}" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}">${label}</button>`;
+    let ro = !ti.started ? 'NO STROKES YET' : ti.complete ? `HOLED IN ${ti.n}` : `${ti.n} SO FAR`;
+    const extra = [];
+    if (ti.unplaced - ti.pen) extra.push(`${ti.unplaced - ti.pen} unplaced`);
+    if (ti.pen) extra.push(`${ti.pen} penalty`);
+    if (ti.rev && !ti.complete) extra.push('putt back to tee');
+    if (extra.length) ro += ` <span class="mut">· ${extra.join(' · ')}</span>`;
+    const btns = [];
+    if (!ti.complete){
+      btns.push(B('tally', '+1'));
+      btns.push(B('pen', 'PENALTY', 'lite'));
+      btns.push(ti.rev ? B('teeshot', 'TEE SHOT', 'go') : B('holed', 'IN THE HOLE', 'go'));
+    }
+    if (ti.started) btns.push(B('traceundo', '↶', 'undo'));
+    const clr = ti.started ? `<button class="clr" data-act="traceclear" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}">clear</button>` : '';
+    bar = `<div class="tracebar"><div class="rorow"><span class="ro">${ro}</span>${clr}</div><div class="tbtns">${btns.join('')}</div></div>`;
+  }
+  if (!hm) return chips + bar;
   const [w, hh] = hm.vb;
   const shapes = hm.g.map(([k,p])=>`<path class="m${k}" d="${p}"/>`).join('');
   // pin flag at the end of the centerline
-  let flag = '';
+  let flag = '', fx = null, fy = null;
   const cd = (hm.g.find(([k])=>k==='c')||[])[1] || '';
   const last = cd.split('L').pop();
   if (last){
-    const [fx, fy] = last.replace('M','').split(' ').map(Number);
-    if (isFinite(fx) && isFinite(fy))
+    const [px, py] = last.replace('M','').split(' ').map(Number);
+    if (isFinite(px) && isFinite(py)){
+      fx = px; fy = py;
       flag = `<g transform="translate(${fx} ${fy})"><line y2="-10" stroke="var(--ink)" stroke-width="1.3"/><path d="M0 -10l6.5 2.4-6.5 2.4z" fill="var(--red)"/><circle r="1.7" fill="var(--ink)"/></g>`;
+    }
   }
-  const balls = (dc.balls||{})[n] || {};
-  const me = LS.get('id', null);
-  const canTap = me && me !== 'watch';
-  const dots = Object.entries(balls).map(([pid,b])=>{
-    if (!b || b.x==null || !isPresent(d,pid)) return '';
-    const t = effTeam(d,pid)==='red' ? 'r' : 'b';
-    return `<g class="bmark ${t}" transform="translate(${(b.x*w).toFixed(1)} ${(b.y*hh).toFixed(1)})"><circle r="7"/><text>${player(pid).emoji}</text></g>`;
-  }).join('');
-  const mine = canTap && balls[me] && balls[me].x!=null;
-  return `<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${canTap?`data-maptap="1" data-d="${d}" data-n="${n}"`:''}>${shapes}${flag}${dots}</svg>
-    ${canTap && !mine ? `<div class="mhint">tap where your ball is</div>` : ''}</div>` +
-    (mine ? `<div class="hmapfoot"><span>your ball is marked — tap again to move it</span><span class="sp"></span><button data-act="ballclear" data-d="${d}" data-n="${n}">clear</button></div>` : '');
+  // the selected golfer's whole trace (numbered, joined); everyone else's
+  // latest position only, so four players never bury the map in dots
+  let dots = '';
+  for (const key of keys){
+    if (key!=='A' && key!=='B' && !isPresent(d, key)) continue;
+    const cls = keySide(m, key)==='A' ? 'r' : 'b';
+    const em = (key==='A'||key==='B') ? teamName(key).slice(0,1) : player(key).emoji;
+    const pts = [];
+    traceFor(m, n, key).forEach((st, i)=>{
+      if (st.h && fx != null) pts.push({ st, i, px:fx, py:fy });
+      else if (st.x != null && st.y != null) pts.push({ st, i, px:st.x*w, py:st.y*hh });
+    });
+    if (!pts.length) continue;
+    const at = q => `transform="translate(${q.px.toFixed(1)} ${q.py.toFixed(1)})"`;
+    if (key === sel){
+      if (pts.length > 1) dots += `<polyline class="tr ${cls}" points="${pts.map(q=>q.px.toFixed(1)+','+q.py.toFixed(1)).join(' ')}"/>`;
+      for (const q of pts)
+        dots += q.st.h ? `<g class="bmark hole" ${at(q)}><circle r="6"/></g>`
+                       : `<g class="bmark sel ${cls}" ${at(q)}><circle r="8"/><text>${q.i+1}</text></g>`;
+    } else {
+      const q = pts[pts.length-1];
+      dots += `<g class="bmark ${cls} ${sel?'dim':''}" ${at(q)}><circle r="7"/><text>${em}</text></g>`;
+    }
+  }
+  let hint = '', tappable = false;
+  if (!sel) hint = keys.length ? 'pick a golfer to mark shots' : '';
+  else {
+    const ti = traceInfo(traceFor(m, n, sel));
+    tappable = !ti.complete;
+    if (ti.complete) hint = 'holed out';
+    else if (ti.rev) hint = 'tap where each earlier shot finished';
+    else if (!ti.started) hint = `tap where ${keyShort(m, sel)}’s ball is`;
+    else hint = 'tap where the next shot finished';
+  }
+  return `${chips}<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${tappable?`data-maptap="1" data-id="${m.id}" data-n="${n}"`:''}>${shapes}${flag}${dots}</svg>
+    ${hint ? `<div class="mhint">${hint}</div>` : ''}</div>${bar}`;
 }
 // ---- historical hole notes (shared, keyed to the physical hole) ------------
 function noteKey(d, n){
@@ -1714,22 +1872,21 @@ function padHtml(m, d){
     ${winRow}
   </div>`;
 }
-function litSide(m, n){
-  const hd = (m.holes||{})[n];
-  if (!hd || !hd.strokes) return null;
-  const dw = derivedWinner(m, n);
-  return dw;
-}
+function litSide(m, n){ return derivedWinner(m, n); }
 function strokesDrawerHtml(m, d, n){
   const dc = dayCfg(m.day);
   const hFmt = mFormat(m, n);
   const hd = (m.holes||{})[n] || {};
-  const stored = hd.strokes || {};
+  const stored = hd.strokes || {};           // posted by hand
+  const eff = effStrokes(m, n) || {};         // posted ?? completed trace
+  const sel = selKey(m, n);
   const si = mStrokes(m, hFmt);
   const h = holesFor(d)[n-1];
   const oneBall = isOneBall(hFmt);
   let rows = '';
-  const qrow = (key, label, cls, cur, dotN) => {
+  const qrow = (key, label, cls, dotN) => {
+    const cur = eff[key], hand = stored[key];
+    const ti = traceInfo(traceFor(m, n, key));
     const par = h.par;
     const nums = [];
     const curNum = typeof cur === 'number' ? cur : null;
@@ -1746,26 +1903,31 @@ function strokesDrawerHtml(m, d, n){
     const bits = [];
     if (dotN && curNum!=null) bits.push(`<span class="netlab">${curNum} → net ${curNum-dotN}</span>`);
     if (cur==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up</span>`);
+    if (ti.started){
+      if (!ti.complete) bits.push(`<span class="mut" style="font-size:12px">${ti.n} on the map so far</span>`);
+      else if (hand == null) bits.push(`<span class="mut" style="font-size:12px">⛳ mapped</span>`);
+      else if (ti.n !== hand) bits.push(`<span class="netlab">mapped ${ti.n}</span> <button class="usemap" data-act="usemap" data-id="${m.id}" data-n="${n}" data-k="${esc(key)}">use ${ti.n}</button>`);
+    }
     if (!oneBall && hFmt!=='singles')
       bits.push(`<button class="pickup" data-act="pickup" data-id="${m.id}" data-n="${n}" data-k="${esc(key)}">${cur==='pickup'?'back in':'pickup'}</button>`);
     if (bits.length) sub = `<div class="srowsub">${bits.join(' · ')}</div>`;
-    return `<div class="srow ${cur==='pickup'?'picked':''}"><span class="who ${cls}">${label}${dot}</span><div class="qnums">${minus}${nums.join('')}${plus}</div>${outlier}</div>${sub}`;
+    return `<div class="srow ${cur==='pickup'?'picked':''} ${sel===key?'sel':''}"><button class="who ${cls}" data-act="sel" data-id="${m.id}" data-n="${n}" data-k="${esc(key)}">${label}${dot}</button><div class="qnums">${minus}${nums.join('')}${plus}</div>${outlier}</div>${sub}`;
   };
   const dots = holeDots(m, si, n, d);
   if (oneBall){
     const emA = sideIds(m,'A').map(pid=>player(pid).emoji).join('');
     const emB = sideIds(m,'B').map(pid=>player(pid).emoji).join('');
-    rows += qrow('A', emA+' '+(teamName('A')), 'r', stored.A, dots.A);
-    rows += qrow('B', emB+' '+(teamName('B')), 'b', stored.B, dots.B);
+    rows += qrow('A', emA+' '+(teamName('A')), 'r', dots.A);
+    rows += qrow('B', emB+' '+(teamName('B')), 'b', dots.B);
   } else {
     for (const side of ['A','B'])
       for (const pid of sideIds(m, side))
-        rows += qrow(pid, pName(pid), side==='A'?'r':'b', stored[pid], (dots.players||{})[pid]||0);
+        rows += qrow(pid, pName(pid), side==='A'?'r':'b', (dots.players||{})[pid]||0);
   }
   // derivation banner
   const dw = derivedWinner(m, n);
   let ban;
-  const hasAny = Object.keys(stored).length > 0;
+  const hasAny = Object.keys(eff).length > 0;
   if (dw === 'A' || dw === 'B'){
     const nets = ''; // detail omitted; margin below
     ban = `<div class="dbanner ${dw==='A'?'r':'b'}">Derived: ${sideLabel(m, dw)} win${m.side?'s':''}${si.net?' (net)':''} — tap the lit button to post it</div>`;
@@ -1773,10 +1935,10 @@ function strokesDrawerHtml(m, d, n){
   else if (dw === 'H') ban = `<div class="dbanner h">HOLE HALVED${si.net?' — net tie':''} — tap HALVE to post it</div>`;
   else if (hasAny){
     const missing = [];
-    if (oneBall){ if (stored.A==null) missing.push(teamName('A')); if (stored.B==null) missing.push(teamName('B')); }
+    if (oneBall){ if (eff.A==null) missing.push(teamName('A')); if (eff.B==null) missing.push(teamName('B')); }
     else for (const side of ['A','B']){
       const ids = sideIds(m, side);
-      if (!ids.some(pid=>stored[pid]!=null && stored[pid]!=='pickup') && !ids.every(pid=>stored[pid]==='pickup')) missing.push(teamName(side));
+      if (!ids.some(pid=>eff[pid]!=null && eff[pid]!=='pickup') && !ids.every(pid=>eff[pid]==='pickup')) missing.push(teamName(side));
     }
     ban = `<div class="dbanner w">Waiting on ${missing.map(esc).join(' and ')||'more scores'}…</div>`;
   }
@@ -1789,7 +1951,8 @@ function ledgerHtml(m, d){
   let rows = '';
   for (const h of hs){
     const hd = (m.holes||{})[h.no];
-    if (!hd || (!hd.winner && !hd.strokes)) continue;
+    const strokes = effStrokes(m, h.no);
+    if (!hd || (!hd.winner && !strokes)) continue;
     const w = hd.winner;
     let res = w==='A'?teamName('A'):w==='B'?teamName('B'):w==='H'?'HALVED':'—';
     let notes = [];
@@ -1798,11 +1961,17 @@ function ledgerHtml(m, d){
     if (hd.exhibition) notes.push('for fun');
     if (m.concededAt === h.no) notes.push(`Conceded by ${teamName(m.concededBy)} on ${h.no}`);
     let sk = '';
-    if (hd.strokes){
-      sk = Object.entries(hd.strokes).map(([k,v])=>{
+    if (strokes){
+      sk = Object.entries(strokes).map(([k,v])=>{
         const label = (k==='A'||k==='B') ? teamName(k) : player(k).emoji;
         return `${label} ${v==='pickup'?'—':v}`;
       }).join(' · ');
+      // a posted score never overwrites the trace — where they disagree, say so
+      for (const k of traceKeys(m, h.no)){
+        const hand = (hd.strokes||{})[k], ti = traceInfo(traceFor(m, h.no, k));
+        if (hand != null && ti.complete && ti.n !== hand)
+          notes.push(`${(k==='A'||k==='B') ? teamName(k) : player(k).emoji} posted ${hand==='pickup'?'—':hand}, mapped ${ti.n}`);
+      }
     }
     const jd = Object.entries(S.junk||{}).filter(([,j])=>j && j.day===m.day && j.hole===h.no && [...sideIds(m,'A'),...sideIds(m,'B')].includes(j.pid))
       .map(([,j])=>`${player(j.pid).emoji} ${JUNKTYPES[j.type]||j.type}`).join(' · ');
@@ -2295,11 +2464,11 @@ function skinsSummary(){
       const entries = [];
       const seenPid = new Set();
       for (const m of ms){
-        const hd = (m.holes||{})[n];
-        if (!hd || !hd.strokes) continue;
+        const strokes = effStrokes(m, n);
+        if (!strokes) continue;
         const si = mStrokes(m, mFormat(m, n));
         const hcell = holesFor(d)[n-1];
-        for (const [k,v] of Object.entries(hd.strokes)){
+        for (const [k,v] of Object.entries(strokes)){
           if (v==='pickup'||v==null||k==='A'||k==='B') continue;
           if (seenPid.has(k)) continue; seenPid.add(k);
           const dots = conf.skinsNet ? ENG.dotsOnHole(si.players[k]||0, hcell.si, 18) : 0;
@@ -2782,7 +2951,10 @@ function clearHole(mid, n){
   const m = theMatch(mid); if (!m) return;
   const before = mDer(m);
   const prev = (m.holes||{})[n] ? JSON.parse(JSON.stringify(m.holes[n])) : null;
-  op(`matches/${mid}/holes/${n}`, prev && prev.strokes ? { strokes: prev.strokes } : null);
+  const keep = {};
+  if (prev && prev.strokes) keep.strokes = prev.strokes;
+  if (prev && prev.trace) keep.trace = prev.trace;
+  op(`matches/${mid}/holes/${n}`, Object.keys(keep).length ? keep : null);
   op(`matches/${mid}/touched`, Date.now());
   const after = mDer(theMatch(mid));
   if (before.st.done && !after.st.done){
@@ -2902,12 +3074,13 @@ function mixItUp(d){
 document.addEventListener('click', (ev)=>{
   const mt = ev.target.closest('[data-maptap]');
   if (mt){
-    const me = LS.get('id', null);
-    if (me && me !== 'watch'){
+    const m = theMatch(mt.dataset.id), n = +mt.dataset.n;
+    const key = m && selKey(m, n);
+    if (key){
       const r = mt.getBoundingClientRect();
       const x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
       const y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
-      op(`days/${mt.dataset.d}/balls/${mt.dataset.n}/${me}`, { x:+x.toFixed(3), y:+y.toFixed(3) });
+      addStroke(m, n, key, { x:+x.toFixed(3), y:+y.toFixed(3) });
     }
     return;
   }
@@ -2936,8 +3109,41 @@ document.addEventListener('click', (ev)=>{
     case 'takeover-close': $takeover.className=''; $takeover.innerHTML=''; break;
     case 'snackbtn': { const f = ui.undoFn; ui.undoFn=null; $snack.innerHTML=''; if (f) f(); break; }
     case 'who': closeSheet(true); ui.screen='who'; requestRender(); break;
-    case 'ballclear': { const me = LS.get('id', null);
-      if (me && me !== 'watch') op(`days/${a.d}/balls/${a.n}/${me}`, null); break; }
+    // stroke traces — who's selected, tally, end markers, undo
+    case 'sel': { const m = theMatch(a.id); if (!m) break;
+      const n = +a.n; ui.sel[a.id] = { n, key: selKey(m, n)===a.k ? null : a.k }; requestRender(); break; }
+    case 'tally': { const m = theMatch(a.id); if (m) addStroke(m, +a.n, a.k, { u:1 }); break; }
+    case 'pen': { const m = theMatch(a.id); if (m) addStroke(m, +a.n, a.k, { p:1, u:1 }); break; }
+    case 'holed': { const m = theMatch(a.id); if (!m) break;
+      const list = traceFor(m, +a.n, a.k), ti = traceInfo(list);
+      if (ti.complete) break;
+      // from nothing: start a putt-back-to-tee build; forward: close it out
+      if (!ti.started) setTrace(m, +a.n, a.k, [{ h:1, r:1 }]);
+      else if (!ti.rev){ list.push({ h:1 }); setTrace(m, +a.n, a.k, list); }
+      break; }
+    case 'teeshot': { const m = theMatch(a.id); if (!m) break;
+      const list = traceFor(m, +a.n, a.k), ti = traceInfo(list);
+      // marks the front stroke as the tee shot. When that stroke is the
+      // holing marker itself the trace is [{h,r,t}] — a hole-in-one, and a
+      // legitimate gross of 1 — so no minimum length here.
+      if (ti.rev && !ti.complete){ list[0].t = 1; setTrace(m, +a.n, a.k, list); }
+      break; }
+    case 'traceundo': { const m = theMatch(a.id); if (!m) break;
+      const st = ui.traceUndo[a.id+'/'+a.n+'/'+a.k];
+      let list;
+      if (st && st.length) list = st.pop();
+      else { // no local history (reloaded phone): peel the most recent end
+        list = traceFor(m, +a.n, a.k); const ti = traceInfo(list);
+        if (ti.rev && ti.complete) delete list[0].t; else if (ti.rev) list.shift(); else list.pop();
+      }
+      setTrace(m, +a.n, a.k, list, true); break; }
+    case 'traceclear': { const m = theMatch(a.id); if (!m) break;
+      const prev = traceFor(m, +a.n, a.k);
+      ui.traceUndo[a.id+'/'+a.n+'/'+a.k] = [];
+      setTrace(m, +a.n, a.k, [], true);
+      snack(`${keyShort(m, a.k)}’s strokes cleared on ${a.n}`, 'UNDO', ()=>{ const mm = theMatch(a.id); if (mm) setTrace(mm, +a.n, a.k, prev, true); });
+      break; }
+    case 'usemap': op(`matches/${a.id}/holes/${a.n}/strokes/${a.k}`, null); break;
     case 'noteedit': ui.noteEdit = a.c + '/' + a.hn; requestRender(); break;
     case 'iam': {
       LS.set('id', a.p); ui.screen='board';

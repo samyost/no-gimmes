@@ -7,6 +7,68 @@ here is a commitment; it's here so it doesn't get lost between trips.
 
 ## Select a golfer, then score for them — three ways to count a hole
 
+**Built** (Sept 2026). What shipped, and where it departs from the design
+below. The original write-up is kept underneath because it records the
+reasoning; the decisions here win where they disagree.
+
+### Decisions taken
+
+- **Selection is a chip row above the map**, one chip per golfer (per team in
+  one-ball formats), defaulting to the phone's owner when they're in the match
+  and to nobody otherwise. Tapping the selected chip deselects. Tapping a
+  player's name in the strokes drawer selects them too. Selection lives in
+  `ui.sel[matchId] = {n, key}` and falls back to the default whenever the hole
+  changes — device-local, not persisted; a reload mid-hole just re-defaults.
+- **The drawer keeps every row live.** The design floated collapsing it to one
+  active row plus a picker. That makes the common case — one phone entering all
+  four scores at the green — four taps slower and hides the other numbers.
+  Rejected; the rows *are* the picker.
+- **An in-progress trace is never a score.** `score ?? shots.length` as written
+  would derive a hole result from three taps mid-hole. The effective gross is
+  the posted score, else the trace length *only once the trace is complete*.
+  Until then the drawer shows "3 on the map so far" and lights nothing.
+- **Forward needs no "tee shot" tap.** A list built forward from empty starts at
+  the tee by construction; requiring the marker would add a tap to every hole.
+  Only the reverse build needs it: tapping IN THE HOLE on an empty trace starts
+  a putt-back-to-tee build (flagged `r` on the holing stroke so the trace reads
+  honestly), earlier shots prepend, and TEE SHOT closes it. That is the
+  asymmetry the design called load-bearing, expressed without a mode switch.
+- **Storage:** `matches/<id>/holes/<n>/trace/<key>` — a sibling of
+  `strokes/<key>`, so a hole's posted score and its trace sit together and
+  `clearHole` / commit-undo preserve both. Key is a player id, or `A`/`B` in
+  one-ball formats. A trace is a list of `{x,y}` strokes with optional flags
+  `h` (holed), `r` (built in reverse), `t` (tee shot, reverse only), `p`
+  (penalty), `u` (tallied without a spot — Firebase drops empty objects, so a
+  positionless stroke always carries a flag). The old single ball mark at
+  `days/<d>/balls/<n>/<pid>` still renders as a one-stroke trace; nothing
+  writes there any more.
+- **One-ball formats select a team.** The scramble/foursomes ball is the team's;
+  who swung is a different fact. If we ever want per-swing attribution it's a
+  flag on the stroke, not a different selection model.
+- **Anyone may score for anyone**, spectators included — they just get no
+  default. Consistent with RED/HALVE/BLUE, which never checked identity either.
+- **Posted beats mapped, visibly.** A hand-entered number lights the quick row;
+  the sub-line says `mapped 12 · use 12`, and "use" clears the posted number
+  rather than copying — the hole goes back to being map-derived. The ledger
+  footnotes `posted 8, mapped 12`, the same way `overridden` / `drifted` annotate
+  without overwriting.
+- **Undo** is a device-local stack per trace (↶ in the tally bar); after a
+  reload it falls back to peeling the most recent end. CLEAR wipes the trace
+  with the usual snack UNDO.
+- **Unplaceable putts** get `+1` (a positionless stroke); PENALTY is the same
+  with a flag. Map zoom stays parked below.
+
+### Still parked
+
+- **Map enlarge / zoom.** `.hmap` is a plain `width:100%` SVG; a real pinch or
+  tap-to-enlarge is new interaction work. `+1` covers the putts-you-can't-place
+  case, so this is a nicety rather than a gap.
+- **Edit history.** Still separable, still not needed for the flag question.
+
+---
+
+### The original design note
+
 ### The idea
 
 When you open the scoring interface for a hole, there should be a notion of
