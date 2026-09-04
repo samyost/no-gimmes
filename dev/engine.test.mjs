@@ -163,6 +163,13 @@ const O9 = Array.from({ length: 9 }, (_, i) => i + 1);
   eq('solo side in foursomes plays own ch', [r.sides.A, r.sides.B], [0, 1]); // B 50%(20)=10, A solo=9 → B gets 1
 
   eq('100pct override singles', ENG.playingStrokes([P('a', 6, 'A'), P('b', 10, 'B')], 'fourball', { net: true, pctOverride: 100 }).players.b, 4);
+
+  // Fig Jam (alternate shot with mulligans) builds its side handicap like foursomes
+  r = ENG.playingStrokes([P('a1', 5, 'A'), P('a2', 10, 'A'), P('b1', 8, 'B'), P('b2', 20, 'B')], 'figjam', { net: true });
+  eq('figjam 50 combined', [r.sides.A, r.sides.B, r.kind], [0, 7, 'side']);
+  // best 2 balls is own-ball, 90% off the low man like four-ball
+  r = ENG.playingStrokes([P('a1', 4, 'A'), P('a2', 10, 'A'), P('b1', 8, 'B'), P('b2', 18, 'B')], 'best2', { net: true });
+  eq('best2 90 off low', [r.players.a1, r.players.a2, r.players.b1, r.players.b2, r.kind], [0, 5, 4, 13, 'individual']);
 }
 
 // ---- dots -----------------------------------------------------------------
@@ -195,6 +202,38 @@ const O9 = Array.from({ length: 9 }, (_, i) => i + 1);
   eq('foursomes net dot wins', w, 'B'); // B 5-1=4
   w = ENG.holeWinnerFromStrokes('foursomes', { sides: { A: 4 } }, sidesPlayers, sideStrokes, 5, H);
   eq('foursomes needs both', w, null);
+  // Fig Jam scores one ball a side, exactly like foursomes (B's 7 strokes give a dot on SI 5)
+  eq('figjam net halve', ENG.holeWinnerFromStrokes('figjam', { sides: { A: 5, B: 6 } }, sidesPlayers, sideStrokes, 5, H), 'H');
+  eq('figjam side dot wins', ENG.holeWinnerFromStrokes('figjam', { sides: { A: 5, B: 5 } }, sidesPlayers, sideStrokes, 5, H), 'B');
+
+  // best 2 balls: the two best nets add up (a2 and b2 each get a dot on SI 5)
+  w = ENG.holeWinnerFromStrokes('best2', { players: { a1: 5, a2: 5, b1: 4, b2: 7 } }, sidesPlayers, strokes, si, H);
+  eq('best2 aggregate', w, 'A'); // A 5+4=9, B 4+6=10
+  w = ENG.holeWinnerFromStrokes('best2', { players: { a1: 4, a2: 5, b1: 4, b2: 5 } }, sidesPlayers, strokes, si, H);
+  eq('best2 aggregate halve', w, 'H'); // A 4+4=8, B 4+4=8
+  eq('best2 dot swings the sum', ENG.holeWinnerFromStrokes('best2', { players: { a1: 4, a2: 5, b1: 4, b2: 4 } }, sidesPlayers, strokes, si, H), 'B'); // A 8, B 4+3=7
+  w = ENG.holeWinnerFromStrokes('best2', { players: { a1: 4, b1: 4, b2: 4 } }, sidesPlayers, strokes, si, H);
+  eq('best2 side with one ball has picked up', w, 'B');
+  w = ENG.holeWinnerFromStrokes('best2', { players: { a1: 4, b1: 4 } }, sidesPlayers, strokes, si, H);
+  eq('best2 both short → nothing', w, null);
+  // three-man side: only its two best count
+  w = ENG.holeWinnerFromStrokes('best2', { players: { a1: 4, a2: 9, b1: 4, b2: 5, b3: 3 } },
+    { A: ['a1', 'a2'], B: ['b1', 'b2', 'b3'] }, { kind: 'individual', players: { a1: 0, a2: 5, b1: 4, b2: 13, b3: 0 }, sides: { A: 0, B: 0 } }, si, H);
+  eq('best2 three-man side uses its two best', w, 'B'); // A 4+8=12, B 3+4=7
+  w = ENG.holeWinnerFromStrokes('best2', { players: { a1: 3, a2: 4, b1: 6 } }, { A: ['a1', 'a2'], B: ['b1'] }, strokes, si, H);
+  eq('best2 solo side counts its one ball', w, 'H'); // A 3+3=6 v B 6
+
+  // Shambleford: Stableford points per ball, both count, higher total wins (par 4)
+  eq('stableford points', [2, 3, 4, 5, 6, 7, 1].map(n => ENG.stablefordPoints(n, 4)), [4, 3, 2, 1, 0, 0, 5]);
+  w = ENG.holeWinnerFromStrokes('shambleford', { players: { a1: 2, a2: 7, b1: 4, b2: 5 } }, sidesPlayers, strokes, si, H, 4);
+  eq('shambleford: eagle + blowup ties two pars', w, 'H'); // A 4+0, B 2+2 (b2 dot: 5→4)
+  w = ENG.holeWinnerFromStrokes('shambleford', { players: { a1: 4, a2: 5, b1: 4, b2: 5 } }, sidesPlayers, strokes, si, H, 4);
+  eq('shambleford dots count', w, 'H'); // A 2+2 (a2 dot), B 2+2 (b2 dot)
+  w = ENG.holeWinnerFromStrokes('shambleford', { players: { a1: 4, b1: 4, b2: 9 } }, sidesPlayers, strokes, si, H, 4);
+  eq('shambleford pickup is 0, not a loss', w, 'H'); // A 2+0, B 2+0
+  w = ENG.holeWinnerFromStrokes('shambleford', { players: { a1: 4, a2: 6, b1: 4, b2: 9 } }, sidesPlayers, strokes, si, H, 4);
+  eq('shambleford bogey beats a pickup', w, 'A'); // A 2+1, B 2+0
+  eq('shambleford nothing entered', ENG.holeWinnerFromStrokes('shambleford', { players: {} }, sidesPlayers, strokes, si, H, 4), null);
 }
 
 // ---- cup targets ----------------------------------------------------------

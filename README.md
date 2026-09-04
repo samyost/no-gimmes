@@ -46,11 +46,31 @@ watch it appear on the other. That's the whole stack verified.
   It opens to today; the day pill under the cup score switches days.
 - **Setup** (the ⚙ top-right, on every screen): per-day attendance (4–8 players), per-day team draws (Red
   and Blue are permanent; membership can change daily), carts → two tee times,
-  cart-vs-cart match maker, formats (four-ball, foursomes, greensomes, Chapman,
-  scramble, shamble, singles, mixer — a different game every few holes, with
-  the rotations built as named mixes in a shared library, not tied to any day,
-  and each mixer day picking one), gross/net with editable WHS allowances, points
-  per match, double singles, gimme policy, tie rule, junk dots, skins.
+  cart-vs-cart match maker, formats (best ball, best 2 balls, foursomes, Fig
+  Jam, greensomes, Chapman, scramble, shamble, Shambleford, singles, mixer — a
+  different game every few holes, with the rotations built as named mixes in a
+  shared library, not tied to any day, and each mixer day picking one),
+  gross/net with editable WHS allowances, points per match, double singles,
+  gimme policy, tie rule, junk dots, skins.
+
+## Formats
+
+| Format | Balls | How a hole is decided |
+|---|---|---|
+| **Best ball** (four-ball) | own | best net score on each side |
+| **Best 2 balls** | own | the two best nets on each side, added |
+| **Shamble** | own from the best drive | best net on each side |
+| **Shambleford** | own from the best drive | Stableford points per ball, both added; a pickup is 0 |
+| **Scramble** | one a side | side's score |
+| **Greensomes / Chapman** | one a side | side's score |
+| **Foursomes** | one a side, alternate | side's score |
+| **Fig Jam** | one a side, alternate | side's score — the player hitting gets up to two mulligans a swing and must play a mulligan once taken; the trace has a MULLIGAN button that keeps the shot on the map without counting it |
+| **Singles** | own | net score |
+| **Mixer** | rotates | the day plays a *mix*: 3-, 6- or 9-hole turns through a list of formats, with the back nine reversed, the same, or in its own order |
+
+The hybrid round from Scotty's birthday weekend — three 3-hole turns a nine of
+best ball, scramble and Fig Jam, order switched on the back — ships as the
+**Birthday Weekend** recipe under *Mix library* (one tap saves an editable copy).
 - **Offline**: scores save on the phone instantly and sync when signal returns
   (the pill in the corner tells the truth: `LIVE` / `3 QUEUED`).
 

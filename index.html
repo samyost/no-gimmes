@@ -475,6 +475,8 @@ a{color:var(--brass)}
 .hmap .bmark.sel circle{stroke:var(--brass);stroke-width:2}
 .hmap .bmark.sel text{fill:#FCF8EF;font-weight:700;font-family:'Saira Condensed';font-size:11px}
 .hmap .bmark.hole circle{fill:none;stroke:var(--brass);stroke-width:2}
+.hmap .bmark.mul{opacity:.4}
+.hmap .bmark.mul circle{stroke-dasharray:2 2}
 .hmap .pinring{fill:var(--brass);fill-opacity:.12;stroke:var(--brass);stroke-width:1;stroke-dasharray:2 2;opacity:.8}
 .hmap .tr{fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;opacity:.7}
 .hmap .tr.r{stroke:var(--red)} .hmap .tr.b{stroke:var(--blue)}
@@ -534,17 +536,25 @@ const DAYMETA = {
 const EMOJIS = ['🦅','🐻','🫎','🐺','🦊','🐐','🦈','🦫','🦬','🦉','🐍','🐊','🏔️','🌲','🔥','⚡','🎯','🎲','🪓','🍺','🥃','⛳','🎣','💀'];
 
 const FORMATS = {
-  fourball:  { name:'FOUR-BALL',  desc:'own ball, best score counts',                oneBall:false },
+  fourball:  { name:'BEST BALL',  desc:'four-ball: own ball, best score counts',      oneBall:false },
+  best2:     { name:'BEST 2 BALLS', desc:'own ball, the two best scores add up',     oneBall:false },
   scramble:  { name:'SCRAMBLE',   desc:'both hit, play the best one',                oneBall:true  },
   shamble:   { name:'SHAMBLE',    desc:'scramble the drive, own ball in',            oneBall:false },
+  shambleford:{ name:'SHAMBLEFORD', desc:'shamble scored in Stableford points — both balls count, a pickup is 0', oneBall:false, points:true },
   greensomes:{ name:'GREENSOMES', desc:'both drive, pick one, alternate in',         oneBall:true  },
   chapman:   { name:'CHAPMAN',    desc:'both drive, swap, pick, alternate',          oneBall:true  },
   foursomes: { name:'FOURSOMES',  desc:'one ball, alternate everything (the purist’s format)', oneBall:true },
+  figjam:    { name:'FIG JAM',    desc:'alternate shot, two mulligans a swing — take one, you play it', oneBall:true, mulligans:2 },
   singles:   { name:'SINGLES',    desc:'1 v 1',                                      oneBall:false },
   mixer:     { name:'MIXER',      desc:'a different game every few holes',           oneBall:false },
 };
 const MIXER_DEFAULT = { seg:3, formats:['scramble','greensomes','fourball'], flip:true };
-const WHS_DEFAULTS = { singles:100, fourball:90, shamble:85, foursomes:50, greensomes:60, chapman:60, scramble:35 };
+// ready-made rotations offered as a starting point in the mix library
+const MIX_PRESETS = [
+  { name:'Birthday Weekend', seg:3, formats:['fourball','scramble','figjam'], flip:true,
+    blurb:'the Scotty’s-birthday round: three 3-hole turns a nine — best ball, scramble, Fig Jam — order switched on the back' },
+];
+const WHS_DEFAULTS = { singles:100, fourball:90, best2:90, shamble:85, shambleford:85, foursomes:50, figjam:50, greensomes:60, chapman:60, scramble:35 };
 // note: side formats' % are labels for the WHS combination (50 combined, 60/40, 35/15);
 // the engine implements the real combination math; pctOverride scales it.
 
@@ -684,11 +694,17 @@ const ENG = (() => {
   //   greensomes/chapman: side = 60% low + 40% high
   //   scramble2: side = 35% low + 15% high
   //   shamble: commonly played like fourball (own ball from the drive): 90% off low
+  //   best2 (two best balls add up): own ball, played like fourball: 90% off low
+  //   shambleford (shamble scored in Stableford points): 85% like shamble
+  //   figjam (alternate shot with mulligans): same construction as foursomes
   const ALLOWANCES = {
     singles:   { kind: 'individual', pct: 100 },
     fourball:  { kind: 'individual', pct: 90 },
+    best2:     { kind: 'individual', pct: 90 },
     shamble:   { kind: 'individual', pct: 85 },
+    shambleford:{ kind: 'individual', pct: 85 },
     foursomes: { kind: 'side', calc: (lo, hi) => 0.5 * (lo + hi) },
+    figjam:    { kind: 'side', calc: (lo, hi) => 0.5 * (lo + hi) },
     greensomes:{ kind: 'side', calc: (lo, hi) => 0.6 * lo + 0.4 * hi },
     chapman:   { kind: 'side', calc: (lo, hi) => 0.6 * lo + 0.4 * hi },
     scramble2: { kind: 'side', calc: (lo, hi) => 0.35 * lo + 0.15 * hi },
@@ -743,32 +759,60 @@ const ENG = (() => {
     return dots;
   }
 
+  // Stableford points for a net score: net double bogey or worse 0, bogey 1,
+  // par 2, birdie 3, eagle 4, albatross 5.
+  function stablefordPoints(net, par) {
+    if (net == null || par == null) return 0;
+    return Math.max(0, 2 + par - net);
+  }
+
   // ---- deriving a hole result from strokes ------------------------------
   // grossBySide for team-ball formats: {A: n|null, B: n|null}
   // grossByPlayer for own-ball formats: {playerId: n|null} (missing = picked up)
   // strokesInfo = output of playingStrokes; si = hole stroke index.
   // Returns 'A'|'B'|'H'|null (null = not derivable yet).
-  function holeWinnerFromStrokes(fmt, entry, sidesPlayers, strokesInfo, si, holesInRound) {
+  // best2: a side's score is the sum of its two best nets (both, on a
+  // two-man side); a side with fewer counting balls than that has picked up.
+  // shambleford: every ball scores Stableford points (needs `par`); a ball
+  // not entered is a pickup worth 0, and the side with MORE points wins.
+  function holeWinnerFromStrokes(fmt, entry, sidesPlayers, strokesInfo, si, holesInRound, par) {
     const sideNet = { A: null, B: null };
-    if (strokesInfo.kind === 'side' || fmt === 'foursomes' || fmt === 'greensomes' || fmt === 'chapman' || fmt === 'scramble' || fmt === 'scramble2') {
+    if (fmt === 'shambleford') {
+      const pts = { A: 0, B: 0 };
+      let any = false;
+      for (const s of ['A', 'B']) {
+        for (const id of sidesPlayers[s]) {
+          const g = entry.players && entry.players[id];
+          if (g == null) continue;
+          any = true;
+          pts[s] += stablefordPoints(g - dotsOnHole(strokesInfo.players[id], si, holesInRound), par);
+        }
+      }
+      if (!any) return null;
+      return pts.A > pts.B ? 'A' : pts.B > pts.A ? 'B' : 'H';
+    }
+    if (strokesInfo.kind === 'side' || fmt === 'foursomes' || fmt === 'figjam' || fmt === 'greensomes' || fmt === 'chapman' || fmt === 'scramble' || fmt === 'scramble2') {
       for (const s of ['A', 'B']) {
         const g = entry.sides && entry.sides[s];
         if (g == null) return null;
         sideNet[s] = g - dotsOnHole(strokesInfo.sides[s], si, holesInRound);
       }
     } else {
-      // own-ball: best net among entered balls per side; a side with no ball
-      // entered has picked up ONLY if the other side has at least one ball.
+      // own-ball: best net among entered balls per side (best two, added, for
+      // best2); a side with no counting ball has picked up ONLY if the other
+      // side has at least one.
+      const count = fmt === 'best2' ? 2 : 1;
       for (const s of ['A', 'B']) {
         const ids = sidesPlayers[s];
-        let best = null;
+        const nets = [];
         for (const id of ids) {
           const g = entry.players && entry.players[id];
           if (g == null) continue;
-          const net = g - dotsOnHole(strokesInfo.players[id], si, holesInRound);
-          if (best === null || net < best) best = net;
+          nets.push(g - dotsOnHole(strokesInfo.players[id], si, holesInRound));
         }
-        sideNet[s] = best;
+        nets.sort((a, b) => a - b);
+        const need = Math.min(count, ids.length);
+        sideNet[s] = nets.length >= need && need > 0 ? nets.slice(0, need).reduce((a, b) => a + b, 0) : null;
       }
       if (sideNet.A === null && sideNet.B === null) return null;
       if (sideNet.A === null) return 'B';
@@ -796,7 +840,7 @@ const ENG = (() => {
   }
 
   return { matchState, matchPoints, projectedPoints, playingStrokes, dotsOnHole,
-           holeWinnerFromStrokes, cupTargets, courseHandicap, ALLOWANCES };
+           stablefordPoints, holeWinnerFromStrokes, cupTargets, courseHandicap, ALLOWANCES };
 })();
 /* ===END ENGINE=== */
 /* ===CORE STATE=== */
@@ -884,9 +928,13 @@ function dayNet(d){ const dc = dayCfg(d); return dc.net == null ? cfg().net : dc
 function sanitizeMix(m){
   m = m || {};
   const fmts = arr(m.formats).filter(f=>FORMATS[f] && f!=='mixer');
+  // back: an explicit back-nine rotation (any order, not just the reverse);
+  // null = derive it from flip
+  const back = arr(m.back).filter(f=>FORMATS[f] && f!=='mixer');
   return { seg: [3,6,9].includes(m.seg) ? m.seg : 3,
            formats: fmts.length ? fmts : MIXER_DEFAULT.formats.slice(),
-           flip: m.flip !== false };
+           flip: m.flip !== false,
+           back: back.length ? back : null };
 }
 function mixerCfg(dc){
   // a mixer day points at a shared library mix (mixId); older data may still
@@ -902,12 +950,22 @@ function daysUsingMix(id){ return DAYS.filter(d=>(((S.days||{})[d]||{}).mixId)==
 // the format played on hole n under a mix rotation
 function mixFormatAt(mx, n){
   const L = mx.formats.length;
-  if (mx.flip && mx.seg !== 6 && n > 9){ // seg 6 straddles the turn — no flip
-    const rev = mx.formats.slice().reverse();
-    return rev[Math.floor((n-10)/mx.seg) % L];
+  if (mx.seg !== 6 && n > 9){ // seg 6 straddles the turn — the back is never its own
+    if (mx.back) return mx.back[Math.floor((n-10)/mx.seg) % mx.back.length];
+    if (mx.flip){ const rev = mx.formats.slice().reverse(); return rev[Math.floor((n-10)/mx.seg) % L]; }
   }
   return mx.formats[Math.floor((n-1)/mx.seg) % L];
 }
+// the back nine as actually played — the explicit list, else the reverse
+// (or the same order) of the front, laid out one segment at a time
+function mixBackList(mx){
+  if (mx.seg === 6) return null;
+  const out = [];
+  for (let n0 = 10; n0 <= 18; n0 += mx.seg) out.push(mixFormatAt(mx, n0));
+  return out;
+}
+// how the back nine relates to the front: 'flip' | 'same' | 'own'
+function mixBackMode(mx){ return mx.back ? 'own' : (mx.flip ? 'flip' : 'same'); }
 // the format actually being played on a given hole (mixer days rotate it)
 function holeFormat(d, n){
   const dc = dayCfg(d);
@@ -915,7 +973,13 @@ function holeFormat(d, n){
   return mixFormatAt(mixerCfg(dc), n);
 }
 function mixRotTxt(mx){
-  return `${mx.seg}-hole turns · ${mx.formats.map(f=>FORMATS[f].name).join(' → ')}${mx.flip && mx.seg!==6 ? ' · flips on the back' : ''}`;
+  const names = l => l.map(f=>FORMATS[f].name).join(' → ');
+  const back = mx.seg===6 ? '' : mx.back ? ` · back: ${names(mx.back)}` : mx.flip ? ' · flips on the back' : '';
+  return `${mx.seg}-hole turns · ${names(mx.formats)}${back}`;
+}
+// recipe buttons beside "+ New mix": each saves a fresh, editable copy
+function mixPresetBtns(d){
+  return MIX_PRESETS.map((pr,i)=>` <button class="ghostbtn" data-act="mixpreset" data-i="${i}"${d?` data-d="${d}"`:''} title="${esc(pr.blurb||mixRotTxt(sanitizeMix(pr)))}">+ ${esc(pr.name)}</button>`).join('');
 }
 function mixSegsTxt(mx){
   const segs = [];
@@ -1065,11 +1129,15 @@ function holeDots(m, si, holeNo, d){
   return dots;
 }
 function isOneBall(fmt){ return (FORMATS[fmt]||{}).oneBall; }
+// formats where every ball on a side goes into the hole score
+function allBallsCount(fmt){ return fmt === 'best2' || fmt === 'shambleford'; }
 // ---- stroke traces ---------------------------------------------------------
 // m.holes[n].trace[key] is an ordered list of strokes for one key — a player
 // id, or 'A'/'B' in one-ball formats. Each stroke optionally carries {x,y}
 // (0..1 map coords, where the ball finished). Flags: h = holed out, p =
-// penalty, u = tallied with no spot. Traces build forward, tee to pin. Two
+// penalty, u = tallied with no spot, m = mulligan (Fig Jam: the shot was
+// re-hit — it stays on the map but never counts). Traces build forward,
+// tee to pin. Two
 // legacy flags still read correctly: r = list was built putt-back-to-tee
 // (set on the holing stroke), t = tee shot (closed such a build). Nothing
 // writes them any more. A stroke object is never empty (Firebase drops
@@ -1090,9 +1158,24 @@ function traceInfo(list){
   const first = list[0], last = list[list.length-1];
   const rev = !!(last && last.h && last.r);
   const complete = !!(last && last.h && (!rev || first.t));
-  const unplaced = list.filter(s=>s.x==null && !s.h).length;
-  const pen = list.filter(s=>s.p).length;
-  return { n:list.length, rev, complete, started:list.length>0, unplaced, pen };
+  const unplaced = list.filter(s=>s.x==null && !s.h && !s.m).length;
+  const pen = list.filter(s=>s.p && !s.m).length;
+  const mul = list.filter(s=>s.m).length;
+  // mulligans in a row at the end of the trace: the swing being replayed
+  let redo = 0; for (let i = list.length-1; i >= 0 && list[i].m; i--) redo++;
+  return { n:list.length - mul, rev, complete, started:list.length>0, unplaced, pen, mul, redo };
+}
+// Fig Jam: flag the last stroke a mulligan — it stays on the map, stops
+// counting, and the next tap is the re-hit. The format caps how many in a
+// row one swing may take.
+function mulligan(m, n, key){
+  const list = traceFor(m, n, key), ti = traceInfo(list);
+  const cap = (FORMATS[mFormat(m, n)]||{}).mulligans || 0;
+  const last = list[list.length-1];
+  if (ti.complete || !last || last.m || last.h || ti.redo >= cap) return false;
+  last.m = 1;
+  setTrace(m, n, key, list);
+  return true;
 }
 // effective gross per key: the posted score wins; a complete trace stands in
 // when nothing was posted. An in-progress trace contributes nothing — a hole
@@ -1167,16 +1250,20 @@ function derivedWinner(m, holeNo){
     // completeness gate: a side counts as "in" once it has a numeric score,
     // or as picked up once EVERY entered ball on it is a pickup — a side
     // nobody has entered anything for is not yet derivable, never a loss.
+    // best2 and shambleford count every ball, so a side is only "in" once
+    // each ball on it has a score or a pickup — one number alone must never
+    // read as a pickup.
     for (const side of ['A','B']){
       const ids = sp[side];
       const numeric = ids.some(pid => typeof strokes[pid] === 'number');
       const allPick = ids.length > 0 && ids.every(pid => strokes[pid] === 'pickup');
-      if (!numeric && !allPick) return null;
+      const allIn = ids.length > 0 && ids.every(pid => strokes[pid] != null);
+      if (allBallsCount(fmt) ? !allIn : (!numeric && !allPick)) return null;
     }
     entry = { players:{} };
     for (const [pid,v] of Object.entries(strokes)) if (v !== 'pickup' && v != null) entry.players[pid] = v;
   }
-  return ENG.holeWinnerFromStrokes(fmt, entry, sp, si, hs.si, 18);
+  return ENG.holeWinnerFromStrokes(fmt, entry, sp, si, hs.si, 18, hs.par);
 }
 function overridden(m, holeNo){
   const h = (m.holes||{})[holeNo];
@@ -1775,11 +1862,19 @@ function holeMapHtml(m, d, n){
     const extra = [];
     if (ti.unplaced - ti.pen) extra.push(`${ti.unplaced - ti.pen} unplaced`);
     if (ti.pen) extra.push(`${ti.pen} penalty`);
+    if (ti.mul) extra.push(`${ti.mul} mulligan${ti.mul===1?'':'s'}`);
     if (extra.length) ro += ` <span class="mut">· ${extra.join(' · ')}</span>`;
     const btns = [];
+    const mulCap = (FORMATS[mFormat(m, n)]||{}).mulligans || 0;
     if (!ti.complete){
       btns.push(B('tally', '+1 SHOT'));
       btns.push(B('pen', 'PENALTY', 'lite'));
+      // Fig Jam: the last stroke can be re-hit — up to the format's cap per swing
+      if (mulCap){
+        const last = traceFor(m, n, sel).slice(-1)[0];
+        const can = last && !last.m && ti.redo < mulCap;
+        btns.push(`<button class="tbtn lite" data-act="mulligan" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}" ${can?'':'disabled'}>MULLIGAN${ti.redo?` ${ti.redo}/${mulCap}`:''}</button>`);
+      }
       if (!hm) btns.push(B('holed', '⛳ IN THE HOLE', 'go'));
     }
     if (ti.started) btns.push(B('traceundo', '↶', 'undo'));
@@ -1808,19 +1903,23 @@ function holeMapHtml(m, d, n){
     const cls = keySide(m, key)==='A' ? 'r' : 'b';
     const em = (key==='A'||key==='B') ? teamName(key).slice(0,1) : player(key).emoji;
     const pts = [];
-    traceFor(m, n, key).forEach((st, i)=>{
-      if (st.h && fx != null) pts.push({ st, i, px:fx, py:fy });
-      else if (st.x != null && st.y != null) pts.push({ st, i, px:st.x*w, py:st.y*hh });
+    let num = 0; // stroke number as counted — a mulligan keeps its spot but no number
+    traceFor(m, n, key).forEach((st)=>{
+      if (!st.m) num++;
+      if (st.h && fx != null) pts.push({ st, num, px:fx, py:fy });
+      else if (st.x != null && st.y != null) pts.push({ st, num, px:st.x*w, py:st.y*hh });
     });
     if (!pts.length) continue;
     const at = q => `transform="translate(${q.px.toFixed(1)} ${q.py.toFixed(1)})"`;
     if (key === sel){
-      if (pts.length > 1) dots += `<polyline class="tr ${cls}" points="${pts.map(q=>q.px.toFixed(1)+','+q.py.toFixed(1)).join(' ')}"/>`;
+      const line = pts.filter(q=>!q.st.m);
+      if (line.length > 1) dots += `<polyline class="tr ${cls}" points="${line.map(q=>q.px.toFixed(1)+','+q.py.toFixed(1)).join(' ')}"/>`;
       for (const q of pts)
         dots += q.st.h ? `<g class="bmark hole" ${at(q)}><circle r="6"/></g>`
-                       : `<g class="bmark sel ${cls}" ${at(q)}><circle r="8"/><text>${q.i+1}</text></g>`;
+              : q.st.m ? `<g class="bmark sel mul ${cls}" ${at(q)}><circle r="7"/><text>M</text></g>`
+                       : `<g class="bmark sel ${cls}" ${at(q)}><circle r="8"/><text>${q.num}</text></g>`;
     } else {
-      const q = pts[pts.length-1];
+      const q = pts.filter(q=>!q.st.m).pop() || pts[pts.length-1];
       dots += `<g class="bmark ${cls} ${sel?'dim':''}" ${at(q)}><circle r="7"/><text>${em}</text></g>`;
     }
   }
@@ -1974,7 +2073,8 @@ function strokesDrawerHtml(m, d, n){
     let sub = '';
     const bits = [];
     if (dotN && curNum!=null) bits.push(`<span class="netlab">${curNum} → net ${curNum-dotN}</span>`);
-    if (cur==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up</span>`);
+    if (hFmt==='shambleford' && curNum!=null){ const sp = ENG.stablefordPoints(curNum-dotN, par); bits.push(`<span class="netlab">${sp} pt${sp===1?'':'s'}</span>`); }
+    if (cur==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up${hFmt==='shambleford'?' · 0 pts':''}</span>`);
     if (ti.started){
       if (!ti.complete) bits.push(`<span class="mut" style="font-size:12px">${ti.n} on the map so far</span>`);
       else if (hand == null) bits.push(`<span class="mut" style="font-size:12px">⛳ mapped</span>`);
@@ -2010,7 +2110,9 @@ function strokesDrawerHtml(m, d, n){
     if (oneBall){ if (eff.A==null) missing.push(teamName('A')); if (eff.B==null) missing.push(teamName('B')); }
     else for (const side of ['A','B']){
       const ids = sideIds(m, side);
-      if (!ids.some(pid=>eff[pid]!=null && eff[pid]!=='pickup') && !ids.every(pid=>eff[pid]==='pickup')) missing.push(teamName(side));
+      const short = allBallsCount(hFmt) ? !ids.every(pid=>eff[pid]!=null)
+        : (!ids.some(pid=>eff[pid]!=null && eff[pid]!=='pickup') && !ids.every(pid=>eff[pid]==='pickup'));
+      if (short) missing.push(teamName(side));
     }
     ban = `<div class="dbanner w">Waiting on ${missing.map(esc).join(' and ')||'more scores'}…</div>`;
   }
@@ -2043,6 +2145,7 @@ function ledgerHtml(m, d){
         const hand = (hd.strokes||{})[k], ti = traceInfo(traceFor(m, h.no, k));
         if (hand != null && ti.complete && ti.n !== hand)
           notes.push(`${(k==='A'||k==='B') ? teamName(k) : player(k).emoji} posted ${hand==='pickup'?'—':hand}, mapped ${ti.n}`);
+        if (ti.mul) notes.push(`${(k==='A'||k==='B') ? teamName(k) : player(k).emoji} ${ti.mul} mulligan${ti.mul===1?'':'s'}`);
       }
     }
     const jd = Object.entries(S.junk||{}).filter(([,j])=>j && j.day===m.day && j.hole===h.no && [...sideIds(m,'A'),...sideIds(m,'B')].includes(j.pid))
@@ -2246,7 +2349,7 @@ function renderSetupDay(d){
     mixerPanel = `<div style="margin-top:12px;border-top:1px solid var(--pencil);padding-top:10px">
       <div class="mut" style="font-size:13px;margin-bottom:6px">Pick today’s mix. Rotations live in a shared library — anyone can build one, every phone sees it, and it isn’t tied to a day until you pick it here.</div>
       ${legacy}${cards}
-      <div style="margin-top:8px"><button class="ghostbtn" data-act="mixnew" data-d="${d}">+ New mix</button></div>
+      <div style="margin-top:8px"><button class="ghostbtn" data-act="mixnew" data-d="${d}">+ New mix</button>${mixPresetBtns(d)}</div>
       <div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.6">${mixSegsTxt(mx)}</div>
     </div>`;
   }
@@ -2337,7 +2440,7 @@ function renderSettings(){
   const cupInfo = cup();
   const allowRows = Object.entries(WHS_DEFAULTS).map(([k, dflt])=>{
     const v = (c.allowances||{})[k] != null ? c.allowances[k] : dflt;
-    const note = {singles:'100',fourball:'90 off low',foursomes:'50 combined',greensomes:'60/40',chapman:'60/40',scramble:'35/15',shamble:'85'}[k];
+    const note = {singles:'100',fourball:'90 off low',best2:'90 off low',foursomes:'50 combined',figjam:'50 combined',greensomes:'60/40',chapman:'60/40',scramble:'35/15',shamble:'85',shambleford:'85'}[k];
     return `<div class="field"><label>${FORMATS[k].name}</label>
       <input type="number" value="${v}" data-input="allow" data-k="${k}" style="width:74px"> <span class="mut" style="font-size:11.5px;width:80px">WHS: ${note}</span></div>`;
   }).join('');
@@ -2411,7 +2514,7 @@ function renderSettings(){
           <button class="mixedit" data-act="mixeditsheet" data-id="${m.id}" title="Edit this mix">✎</button>
         </div>`;
       }).join('') || `<div class="mut" style="font-size:12.5px;padding:4px 0">Nothing yet. Cook one up.</div>`}
-      <div style="margin-top:8px"><button class="ghostbtn" data-act="mixnew">+ New mix</button></div>
+      <div style="margin-top:8px"><button class="ghostbtn" data-act="mixnew">+ New mix</button>${mixPresetBtns()}</div>
     </div>
 
     <h2>Extras</h2>
@@ -2737,17 +2840,26 @@ function sheetHtml(sh){
     const segSel = [3,6,9].map(s=>`<button class="selopt ${mx.seg===s?'on':''}" data-act="mixseg" data-id="${sh.id}" data-v="${s}">${s}-hole turns</button>`).join('');
     const rotChips = mx.formats.map((f,i)=>
       `<button class="selopt on" data-act="mixdel" data-id="${sh.id}" data-i="${i}">${FORMATS[f].name} ✕</button>`).join('');
-    const palette = Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles').map(f=>
-      `<button class="selopt" data-act="mixadd" data-id="${sh.id}" data-v="${f}">+ ${FORMATS[f].name}</button>`).join('');
+    const palette = (act) => Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles').map(f=>
+      `<button class="selopt" data-act="${act}" data-id="${sh.id}" data-v="${f}">+ ${FORMATS[f].name}</button>`).join('');
+    // the back nine: the front reversed, the same again, or its own order
+    const bm = mixBackMode(mx);
+    const backSel = [['flip','Reversed'],['same','Same order'],['own','Its own order']].map(([k,l])=>
+      `<button class="selopt ${bm===k?'on':''}" data-act="mixback" data-id="${sh.id}" data-v="${k}">${l}</button>`).join('');
+    const backChips = (mx.back||[]).map((f,i)=>
+      `<button class="selopt on" data-act="mixbackdel" data-id="${sh.id}" data-i="${i}">${FORMATS[f].name} ✕</button>`).join('');
+    const backPanel = mx.seg===6 ? '' : `<div class="mut" style="font-size:13px;margin:10px 0 6px">The back nine:</div>
+      <div class="selrow">${backSel}</div>
+      ${bm==='own' ? `<div class="selrow" style="margin-top:8px">${backChips}</div>
+      <div class="selrow" style="margin-top:6px">${palette('mixbackadd')}</div>` : ''}`;
     const used = daysUsingMix(sh.id);
     return `<h3>Mix designer</h3>
       <div class="field"><label>Mix name</label><input type="text" maxlength="24" placeholder="e.g. The Gauntlet" value="${esc(raw.name||'')}" data-input="mixname" data-id="${sh.id}"></div>
-      <div class="mut" style="font-size:13px;margin:6px 0">The rotation — order matters:</div>
+      <div class="mut" style="font-size:13px;margin:6px 0">The rotation${mx.seg!==6?' on the front nine':''} — order matters:</div>
       <div class="selrow">${segSel}</div>
       <div class="selrow" style="margin-top:8px">${rotChips}</div>
-      <div class="selrow" style="margin-top:6px">${palette}</div>
-      ${mx.seg!==6 ? `<div class="togg"><span>Reverse the order on the back nine</span>
-        <button class="sw ${mx.flip?'on':''}" data-act="mixflip" data-id="${sh.id}" role="switch" aria-checked="${!!mx.flip}"></button></div>` : ''}
+      <div class="selrow" style="margin-top:6px">${palette('mixadd')}</div>
+      ${backPanel}
       <div class="mut" style="font-size:12.5px;margin-top:8px;line-height:1.6">${mixSegsTxt(mx)}</div>
       <div class="mut" style="font-size:12px;margin-top:8px">${used.length
         ? `In play: ${used.map(d=>DAYMETA[d].name).join(', ')} — edits land there live.`
@@ -3196,6 +3308,7 @@ document.addEventListener('click', (ev)=>{
       const n = +a.n; ui.sel[a.id] = { n, key: selKey(m, n)===a.k ? null : a.k }; requestRender(); break; }
     case 'tally': { const m = theMatch(a.id); if (m) addStroke(m, +a.n, a.k, { u:1 }); break; }
     case 'pen': { const m = theMatch(a.id); if (m) addStroke(m, +a.n, a.k, { p:1, u:1 }); break; }
+    case 'mulligan': { const m = theMatch(a.id); if (m) mulligan(m, +a.n, a.k); break; }
     case 'holed': { const m = theMatch(a.id); if (m) holeOut(m, +a.n, a.k); break; }
     case 'traceundo': { const m = theMatch(a.id); if (!m) break;
       const st = ui.traceUndo[a.id+'/'+a.n+'/'+a.k];
@@ -3390,6 +3503,20 @@ document.addEventListener('click', (ev)=>{
     }
     case 'mixseg': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); mx.seg = +a.v; op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
     case 'mixflip': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); mx.flip = !mx.flip; op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixback': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw);
+      // 'own' starts from whatever the back is playing right now, so nothing jumps
+      const own = a.v==='own' ? mixBackList(mx) : null;
+      mx.flip = a.v!=='same'; mx.back = own;
+      op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixbackadd': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); const b = mx.back || mixBackList(mx) || []; if (b.length < 6) b.push(a.v); mx.back = b; op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixbackdel': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); const b = mx.back || []; if (b.length > 1) b.splice(+a.i, 1); mx.back = b; op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
+    case 'mixpreset': { // a ready-made rotation, saved to the library as its own editable copy
+      const pr = MIX_PRESETS[+a.i]; if (!pr) break;
+      const id = 'mx'+uid();
+      op(`mixes/${id}`, Object.assign({ name: pr.name, ord: mixes().length }, sanitizeMix(pr)));
+      if (a.d) op(`days/${a.d}/mixId`, id);
+      openSheet('mixedit', { id }); break;
+    }
     case 'mixadd': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); if (mx.formats.length < 6) mx.formats.push(a.v); op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
     case 'mixdel': { const raw=(S.mixes||{})[a.id]; if (!raw) break; const mx = sanitizeMix(raw); if (mx.formats.length > 1) mx.formats.splice(+a.i, 1); op(`mixes/${a.id}`, Object.assign({}, raw, mx)); break; }
     case 'seat': {

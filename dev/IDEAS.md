@@ -5,6 +5,44 @@ here is a commitment; it's here so it doesn't get lost between trips.
 
 ---
 
+## The hybrid round (Sept 2026)
+
+**Built.** Colby's description of the Scotty's-birthday format: each nine is
+three 3-hole chunks of *Best Ball* (team keeps the best individual score —
+"we could make that top 2"), *Scramble*, and *Alternating shot Fig Jam*
+(alternate in a set rotation; the player hitting has up to 2 mulligans on
+their shot and must use the shot once they take a mulligan). Sam's memory:
+the order was switched up on the back nine.
+
+What that became in the app:
+
+- `figjam` — a one-ball alternate-shot format, handicapped like foursomes,
+  with a per-format mulligan cap (`FORMATS.figjam.mulligans = 2`). On the
+  trace a MULLIGAN button flags the last stroke `m`: it stays on the map,
+  drawn faded with an "M", and stops counting. Two in a row and the button
+  goes dead until the swing is played. The ledger footnotes mulligans.
+- `best2` — own ball, the two best nets added ("top 2"). A side is only *in*
+  once every ball has a score or a pickup, so one number alone never reads as
+  a pickup. Handicapped 90% off the low man like best ball.
+- Four-ball is labelled **BEST BALL** now, which is what everyone calls it.
+- A mix's back nine can be **Reversed** (the old flip), **Same order**, or
+  **Its own order** (`back: [...]` on the mix). "Its own" starts from whatever
+  the back was already playing so nothing jumps.
+- `MIX_PRESETS` — recipe buttons beside *+ New mix*. One so far, **Birthday
+  Weekend**, saved as an ordinary editable mix. Its back nine is set to
+  *reversed* because nobody remembers the real order.
+
+**Shambleford — a guess.** Sam remembered inventing a hybrid called
+"Shambleford" but nothing about it survives in any branch, commit, or session
+title. Built from the name: a shamble (best drive, own ball in) scored in
+Stableford points, both balls counting, a pickup worth 0, the side with more
+points winning the hole. `ENG.stablefordPoints(net, par)` is the standard
+table (net double bogey 0 … albatross 5). If the real rules differ — best
+single Stableford score, points as the cup currency instead of holes, a
+different cap — that's a small change in `holeWinnerFromStrokes`.
+
+---
+
 ## Select a golfer, then score for them — three ways to count a hole
 
 **Built** (Sept 2026). What shipped, and where it departs from the design
