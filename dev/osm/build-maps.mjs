@@ -2,7 +2,7 @@
 // path data ready to embed in index.html.
 //   node dev/osm/build-maps.mjs <key> [holes]
 // Emits dev/osm/<key>.maps.json:
-//   [ {hole, nine?, way?, vb:[w,h], yds, g:[[kind, "M…Z"], …]} × 18 ]
+//   [ {hole, nine?, way?, vb:[w,h], yds, g:[[kind, "M…Z"], …]} × 18 (27 for breck: three nines × 9, `nine` set) ]
 // `way` is the OSM way the centerline came from — the record of which line
 // ownHoles() kept where a bounding box caught two courses.
 // kinds: f fairway · g green · t tee · b bunker · w water · r rough · c centerline
