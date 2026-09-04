@@ -2,8 +2,12 @@
 // path data ready to embed in index.html.
 //   node dev/osm/build-maps.mjs <key> [holes]
 // Emits dev/osm/<key>.maps.json:
-//   [ {hole, vb:[w,h], yds, g:[[kind, "M…Z"], …]} × 18 ]
+//   [ {hole, nine?, way?, vb:[w,h], yds, g:[[kind, "M…Z"], …]} × 18 (27 for breck: three nines × 9, `nine` set) ]
+// `way` is the OSM way the centerline came from — the record of which line
+// ownHoles() kept where a bounding box caught two courses.
 // kinds: f fairway · g green · t tee · b bunker · w water · r rough · c centerline
+// `nine` is set only for Breckenridge, whose 27 holes are keyed by nine
+// (beaver/bear/elk) because a round there plays two of the three.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,7 +78,34 @@ function rings(members){
   return done;
 }
 
-const holes = raw.elements.filter(e => e.tags.golf === 'hole' && e.geometry && e.geometry.length > 1);
+// One Overpass bbox can straddle two courses — Keystone's River and Ranch
+// overlap, so each file carries a couple of the neighbour's holes under a ref
+// it already owns. Refs that appear exactly once anchor the real course; a
+// duplicated ref resolves to whichever line sits with that anchor cluster.
+function ownHoles(ways){
+  const byRef = new Map();
+  for (const w of ways){
+    const r = w.tags.ref;
+    if (!byRef.has(r)) byRef.set(r, []);
+    byRef.get(r).push(w);
+  }
+  const mid = w => w.geometry[Math.floor(w.geometry.length / 2)];
+  const solo = [...byRef.values()].filter(v => v.length === 1).map(v => mid(v[0]));
+  if (!solo.length) return ways;
+  const med = a => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+  const core = { lat: med(solo.map(p => p.lat)), lon: med(solo.map(p => p.lon)) };
+  const off = w => (mid(w).lat - core.lat) ** 2 + (mid(w).lon - core.lon) ** 2;
+  const kept = [];
+  for (const [ref, v] of byRef){
+    if (v.length === 1){ kept.push(v[0]); continue; }
+    const win = v.reduce((a, b) => off(b) < off(a) ? b : a);
+    console.log(`  ref ${ref}: ${v.length} candidates, kept way/${win.id} (dropped a neighbouring course's hole)`);
+    kept.push(win);
+  }
+  return kept;
+}
+
+const holes = ownHoles(raw.elements.filter(e => e.tags.golf === 'hole' && e.geometry && e.geometry.length > 1));
 const feats = [];
 for (const e of raw.elements){
   const kind = KINDS[e.tags.golf] || (e.tags.natural === 'water' ? 'w' : null);
@@ -84,13 +115,30 @@ for (const e of raw.elements){
 }
 if (!holes.length){ console.error('no golf=hole centerlines in ' + key + '.json'); process.exit(2); }
 
+// Breckenridge plays 27 holes as three nines, and OSM only drew centerlines
+// for two of them; dev/osm/derive-elk.mjs reconstructs the third from its
+// greens, tees and fairways. Elsewhere a course is a flat 18.
+function nineList(){
+  const flat = holes.map(h => ({ nine: null, ref: +h.tags.ref, way: h.id, geometry: h.geometry }));
+  if (key !== 'breck') return flat;
+  if (flat.length !== 18) throw new Error(`breck: expected 18 Beaver/Bear centerlines, got ${flat.length}`);
+  const elk = JSON.parse(readFileSync(join(here, 'breck.elk.json'), 'utf8')).holes;
+  return [
+    ...flat.map(h => ({ ...h, nine: h.ref <= 9 ? 'beaver' : 'bear', ref: (h.ref - 1) % 9 + 1 })),
+    // the Elk lines are reconstructed, not traced, so they have no OSM way
+    ...elk.map(h => ({ nine: 'elk', ref: h.ref, way: null, geometry: h.geometry })),
+  ];
+}
+const NINES = ['beaver', 'bear', 'elk'];
+const routes = nineList().sort((a, b) => (NINES.indexOf(a.nine) - NINES.indexOf(b.nine)) || (a.ref - b.ref));
+
 const lat0 = holes[0].geometry[0].lat, proj = projector(lat0);
 const projFeats = feats.map(f => ({ kind: f.kind, pts: f.pts.map(proj) }));
 
 const only = process.argv[3] ? process.argv[3].split(',').map(Number) : null;
 const out = [];
-for (const h of holes.sort((a,b) => (+a.tags.ref||0) - (+b.tags.ref||0))){
-  const ref = +h.tags.ref;
+for (const h of routes){
+  const ref = h.ref;
   if (only && !only.includes(ref)) continue;
   const line = h.geometry.map(proj);
   // rotate so play runs left (tee) to right (green): x along the hole, y across
@@ -137,9 +185,12 @@ for (const h of holes.sort((a,b) => (+a.tags.ref||0) - (+b.tags.ref||0))){
   for (const c of clip) shapes.push([c.kind, path(c.pts, true)]);
   shapes.push(['c', path(cl, false)]);
   const yds = Math.round(Math.hypot(b[0]-a[0], b[1]-a[1]) / 0.9144);
-  out.push({ hole: ref, vb: [W, Hgt], yds, g: shapes });
+  const rec = { hole: ref };
+  if (h.nine) rec.nine = h.nine;
+  if (h.way) rec.way = h.way;
+  out.push(Object.assign(rec, { vb: [W, Hgt], yds, g: shapes }));
 }
 writeFileSync(join(here, key + '.maps.json'), JSON.stringify(out));
 const bytes = JSON.stringify(out).length;
 console.log(key, out.length + ' holes,', (bytes/1024).toFixed(1) + ' KB total,',
-  out.map(o => o.hole + ':' + o.g.length + 'shp').join(' '));
+  out.map(o => (o.nine ? o.nine[0].toUpperCase() : '') + o.hole + ':' + o.g.length + 'shp').join(' '));
