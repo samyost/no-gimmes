@@ -484,7 +484,8 @@ a{color:var(--brass)}
 .hmap .inbtn{cursor:pointer}
 .hmap .inbtn rect{fill:var(--ink);stroke:var(--bone);stroke-width:1.5}
 .hmap .inbtn text{fill:var(--bone);font-family:'Saira Condensed';font-weight:800;font-size:11px;letter-spacing:.06em;text-anchor:middle;dominant-baseline:central}
-.hmap .inbtn:active rect{fill:var(--brass)}
+.hmap .inbtn:active rect,.hmap .inbtn:focus-visible rect{fill:var(--brass)}
+.hmap .inbtn:focus{outline:none}
 .gchips{display:flex;gap:6px;padding:6px 14px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .gchips::-webkit-scrollbar{display:none}
 .gchip{flex:0 0 auto;font-size:13px;font-weight:700;border:1.5px solid var(--pencil);border-radius:99px;padding:5px 10px;color:var(--sage);background:var(--card);white-space:nowrap}
@@ -1760,7 +1761,8 @@ function holeMapHtml(m, d, n){
     return `<button class="gchip ${cls} ${sel===key?'sel':''}" data-act="sel" data-id="${m.id}" data-n="${n}" data-k="${esc(key)}">${label}${ct}</button>`;
   };
   const chips = keys.length ? `<div class="gchips">${keys.map(chipFor).join('')}</div>` : '';
-  // "pick a golfer" sits between the chips and the map, where the choice is
+  // "pick a golfer" sits between the chips and the map, right under the
+  // chips that make the choice
   const lead = (!sel && keys.length) ? `<div class="mlead">Pick a golfer to mark shots</div>` : '';
   // tally bar — counts strokes for the selected golfer with or without a map.
   // With a map, IN THE HOLE lives on the map beside the flag; without one it
@@ -1840,7 +1842,7 @@ function holeMapHtml(m, d, n){
     const below = fy < hh/2;
     const bx = Math.min(w - bw - 3, Math.max(3, fx - bw/2));
     const by = below ? Math.min(hh - bh - 3, fy + PIN_R + gap) : Math.max(3, fy - PIN_R - gap - bh);
-    inbtn = `<g class="inbtn" data-act="holed" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}" role="button" aria-label="In the hole">
+    inbtn = `<g class="inbtn" data-act="holed" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}" role="button" tabindex="0" aria-label="In the hole">
       <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6"/><text x="${bx+bw/2}" y="${by+bh/2+0.5}">⛳ IN</text></g>`;
   }
   const tapAttrs = tappable ? `data-maptap="1" data-id="${m.id}" data-n="${n}" data-w="${w}" data-h="${hh}" data-fx="${fx!=null?fx:''}" data-fy="${fy!=null?fy:''}"` : '';
@@ -3140,6 +3142,12 @@ function mixItUp(d){
 }
 
 // ---- delegated events ------------------------------------------------------
+// SVG controls carry role=button + tabindex; Enter/Space activates them like a real button
+document.addEventListener('keydown', (ev)=>{
+  if (ev.key !== 'Enter' && ev.key !== ' ') return;
+  const el = ev.target.closest && ev.target.closest('svg [data-act][tabindex]');
+  if (el){ ev.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles:true })); }
+});
 document.addEventListener('click', (ev)=>{
   const mt = ev.target.closest('[data-maptap]');
   if (mt && !ev.target.closest('[data-act]')){
