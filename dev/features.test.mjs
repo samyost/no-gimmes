@@ -104,7 +104,7 @@ try {
   ok('side-bet meta says no cup points', await until(()=>p.locator('.mmeta').textContent().then(t=>/SIDE BET/.test(t) && /NO CUP POINTS/.test(t))));
   // score a hole for Duck; the cup must not move
   await p.locator('.wbtn.R').first().click();
-  await until(()=>p.locator('.bigstat').textContent().then(t=>/1UP/.test(t)));
+  await until(()=>p.locator('.mmeta .mst').textContent().then(t=>/1UP/.test(t)));
   const c = await p.evaluate(()=>{ const c = cup(); return { pts: c.red + c.blue, proj: c.pRed + c.pBlue, sched: c.scheduled }; });
   ok('side-bet hole moves nothing on the cup', c.pts === 0 && c.proj === 0);
   ok('side bet not in the scheduled pool', c.sched === 1);

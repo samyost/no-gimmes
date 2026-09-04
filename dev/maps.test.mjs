@@ -87,8 +87,10 @@ try {
   // --- golfer selection: the phone's owner is selected by default ---
   ok('golfer chips render for all four', await p.locator('.gchips .gchip').count().then(n=>n===4));
   ok('I am selected by default', await p.locator('.gchip.sel').textContent().then(t=>/Duck/.test(t)));
-  ok('tally bar offers +1 / penalty / in the hole', await p.evaluate(()=>
-    ['tally','pen','holed'].every(a=>document.querySelector(`.tracebar [data-act="${a}"]`))));
+  ok('tally bar offers +1 / penalty', await p.evaluate(()=>
+    ['tally','pen'].every(a=>document.querySelector(`.tracebar [data-act="${a}"]`))));
+  ok('IN lives on the map beside the flag, not in the tally bar', await p.evaluate(()=>
+    !!document.querySelector('.hmap svg .inbtn[data-act="holed"]') && !document.querySelector('.tracebar [data-act="holed"]')));
 
   // --- forward: each map tap is a stroke where the ball finished ---
   await p.locator('.hmap svg').click({ position:{ x:120, y:30 } });
@@ -149,22 +151,31 @@ try {
   ok('hint names them', await p.locator('.mhint').textContent().then(t=>/Sly/.test(t)));
   ok('my finished trace fades to a last dot', await p.locator('.hmap .bmark.dim').count().then(n=>n===1));
 
-  // --- the flag is a target: tap the map for each shot, tap the pin to hole out ---
+  // --- the flag is a putting target: a tap on it is a putt that stayed out
+  //     (snapped to the pin); the IN button beside it is the holing stroke ---
   ok('no reverse-build mode anywhere', await p.evaluate(()=>!document.querySelector('[data-act="teeshot"]')));
   ok('pin ring drawn while the map takes taps', await p.locator('.hmap .pinring').count().then(n=>n===1));
   await p.locator('.hmap svg').click({ position:{ x:150, y:40 } });
   await p.locator('.hmap svg').click({ position:{ x:300, y:44 } });
   const pin = await p.evaluate(()=>{ const s = document.querySelector('.hmap svg[data-maptap]'); const r = s.getBoundingClientRect();
-    return { x: (+s.dataset.fx) / (+s.dataset.w) * r.width, y: (+s.dataset.fy) / (+s.dataset.h) * r.height }; });
+    return { x: (+s.dataset.fx) / (+s.dataset.w) * r.width, y: (+s.dataset.fy) / (+s.dataset.h) * r.height, fx:+s.dataset.fx, fy:+s.dataset.fy, w:+s.dataset.w, h:+s.dataset.h }; });
   await p.locator('.hmap svg').click({ position:{ x: pin.x + 3, y: pin.y - 3 } });
-  ok('tapping the flag holes out: holed in 3', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t))));
+  ok('tapping the flag is a putt, not a hole-out: 3 so far', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/3 SO FAR/.test(t))));
+  ok('the putt snaps to the pin', await until(async()=>{
+    const r = await fetch(`${DB}/t/no-gimmes-2026/matches/m1/holes/1/trace/p3.json`).then(x=>x.json());
+    return Array.isArray(r) && r.length===3 && Math.abs(r[2].x*pin.w - pin.fx) < 0.5 && Math.abs(r[2].y*pin.h - pin.fy) < 0.5;
+  }));
+  ok('hint switches to missed-or-made', await p.locator('.mhint').textContent().then(t=>/Missed/.test(t) && /IN/.test(t)));
+  await p.locator('.hmap .inbtn').click();
+  ok('IN beside the flag holes out: holed in 4', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 4/.test(t))));
   ok('holing stroke sits at the flag, numbered from the tee', await p.evaluate(()=>{
     const marks = document.querySelectorAll('.hmap .bmark.sel text');
     return document.querySelectorAll('.hmap .bmark.hole').length===1 && marks[0].textContent==='1';
   }));
+  ok('IN button gone once holed', await p.locator('.hmap .inbtn').count().then(n=>n===0));
   ok('trace stored tee to pin', await until(async()=>{
     const r = await fetch(`${DB}/t/no-gimmes-2026/matches/m1/holes/1/trace/p3.json`).then(x=>x.json());
-    return Array.isArray(r) && r.length===3 && r[2].h && r[0].x < r[1].x && !r.some(s=>s.r||s.t);
+    return Array.isArray(r) && r.length===4 && r[3].h && r[0].x < r[1].x && !r.some(s=>s.r||s.t);
   }));
 
   // --- an ace: IN THE HOLE with nothing before it, with a second look ---
@@ -175,13 +186,13 @@ try {
   await p.locator('[data-act="snackbtn"]').click();
   ok('undo takes the ace back', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/NO STROKES YET/.test(t))));
   await p.locator('.gchips .gchip').nth(1).click(); // back to Sly
-  await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t)));
+  await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 4/.test(t)));
 
   // --- clear, with undo ---
   await p.locator('[data-act="traceclear"]').click();
   ok('clear empties the trace', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/NO STROKES YET/.test(t))));
   await p.locator('[data-act="snackbtn"]').click();
-  ok('undo brings it back', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t))));
+  ok('undo brings it back', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 4/.test(t))));
 
   // --- selection resets each hole ---
   await p.locator('#cell2').click();

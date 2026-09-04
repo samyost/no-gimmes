@@ -36,8 +36,9 @@ watch it appear on the other. That's the whole stack verified.
   strokes and lights up the derived winner for you to confirm. Mix both
   freely. Tap any hole in the rail to fix it; nothing ever locks.
 - **Shot by shot**: pick a golfer (you, by default), then tap the hole map
-  where each shot finished, tee to pin — **+1 SHOT** for one you can't place
-  — and tap the flag (or **IN THE HOLE**) when it drops. The count becomes
+  where each shot stopped, tee to pin — **+1 SHOT** for one you can't place.
+  A tap on the flag is a putt that stayed out; the **⛳ IN** button right
+  beside the flag is the one that dropped. The count becomes
   that golfer's gross score unless somebody types a number over it under
   **SCORES**; the trace stays either way. Lost track? Just type the number.
 - **The board**: pinned cup score with the tug-of-war bar and the magic number,
