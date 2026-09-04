@@ -165,7 +165,7 @@ try {
     const r = await fetch(`${DB}/t/no-gimmes-2026/matches/m1/holes/1/trace/p3.json`).then(x=>x.json());
     return Array.isArray(r) && r.length===3 && Math.abs(r[2].x*pin.w - pin.fx) < 0.5 && Math.abs(r[2].y*pin.h - pin.fy) < 0.5;
   }));
-  ok('hint switches to missed-or-made', await p.locator('.mhint').textContent().then(t=>/Missed/.test(t) && /IN/.test(t)));
+  ok('hint stays one short line', await p.locator('.mhint').textContent().then(t=>/IN when it drops/.test(t)));
   await p.locator('.hmap .inbtn').click();
   ok('IN beside the flag holes out: holed in 4', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 4/.test(t))));
   ok('holing stroke sits at the flag, numbered from the tee', await p.evaluate(()=>{

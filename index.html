@@ -1728,7 +1728,7 @@ function matchStatusHtml(m, dr){
   const st = dr.st;
   if (st.done) return '';
   let txt, cls='';
-  if (st.leader===null) txt='A/S';
+  if (st.leader===null) txt='EVEN';
   else { cls = st.leader==='A'?'R':'B'; txt = `${sideLabel(m, st.leader)} ${Math.abs(st.up)}UP`; }
   if (st.thru) txt += ` · THRU ${st.thru}`;
   if (st.dormie) txt += ` <span class="d">· DORMIE</span>`;
@@ -1826,12 +1826,9 @@ function holeMapHtml(m, d, n){
   if (sel){
     const list = traceFor(m, n, sel), ti = traceInfo(list);
     tappable = !ti.complete;
-    const lastSt = list[list.length-1];
-    const atPin = !!(lastSt && fx != null && lastSt.x != null && Math.hypot(lastSt.x*w - fx, lastSt.y*hh - fy) <= PIN_R);
     if (ti.complete) hint = `${keyShort(m, sel)} holed out in ${ti.n}`;
     else if (!ti.started) hint = `Tap where ${keyShort(m, sel)}’s tee shot stopped`;
-    else if (atPin) hint = 'Missed the putt? Tap the flag again.<br>Made it? Tap IN.';
-    else hint = 'Tap where the ball stopped.<br>On the green: tap the flag for a putt, IN when it drops.';
+    else hint = 'Tap where it stopped · IN when it drops';
   }
   // the flag is a target for putts: a tap on or beside it is a stroke that
   // finished at the hole (it snaps to the pin). The IN button right next to

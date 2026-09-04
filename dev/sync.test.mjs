@@ -84,7 +84,7 @@ try {
   await p1.locator('.whocard').first().click(); // Duck (p1), in m1
   // Duck is in a live match today (tee 06:00 < 15:00) → personalized landing on the match
   ok('personalized landing on own match', await until(()=>p1.evaluate(()=>location.hash.includes('#/match/m1'))));
-  ok('status A/S in the meta line, not a billboard', await until(()=>p1.locator('.mmeta .mst').textContent().then(t=>t.includes('A/S'))));
+  ok('status EVEN in the meta line, not a billboard', await until(()=>p1.locator('.mmeta .mst').textContent().then(t=>t.includes('EVEN'))));
   ok('no big status block', await p1.locator('.bigstat').count().then(n=>n===0));
   // ---- match screen chrome: setup gear top-right, one compact winner row, scores tucked away ----
   ok('setup gear on the match screen', await p1.locator('.cupstrip .gear[data-act="hub"]').count().then(n=>n===1));
