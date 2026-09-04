@@ -32,8 +32,18 @@ function seed(){
     config: { tripName:'T', teamNames:{red:'RED',blue:'BLUE'}, holder:null, tieRule:'chip', gimme:'conc',
       net:false, allowances:{fourball:90}, flat100:false, strokeCap:0, junk:false, junkTypes:{}, skins:false, skinsNet:true, skinsCarry:true },
     players, usualTeams,
-    days: { sat: { course:'vail', tee:'Black', format:'fourball', points:1, times:{a:'06:00'}, teamOf:{} } },
-    matches: { m1: { day:'sat', group:'a', ord:0, red:['p1','p3'], blue:['p2','p4'], holes:{} } },
+    days: {
+      fri: { course:'willis', tee:'Bronze', format:'fourball', points:1, times:{a:'06:00'}, teamOf:{} },
+      sat: { course:'vail',   tee:'Black',  format:'fourball', points:1, times:{a:'06:00'}, teamOf:{} },
+      sun: { course:'breck',  rot:'be',     format:'fourball', points:1, times:{a:'06:00'}, teamOf:{} },
+      mon: { course:'ranch',  tee:'Gold',   format:'fourball', points:1, times:{a:'06:00'}, teamOf:{} },
+    },
+    matches: {
+      m1: { day:'sat', group:'a', ord:0, red:['p1','p3'], blue:['p2','p4'], holes:{} },
+      m2: { day:'fri', group:'a', ord:0, red:['p1','p3'], blue:['p2','p4'], holes:{} },
+      m3: { day:'sun', group:'a', ord:0, red:['p1','p3'], blue:['p2','p4'], holes:{} },
+      m4: { day:'mon', group:'a', ord:0, red:['p1','p3'], blue:['p2','p4'], holes:{} },
+    },
     junk: {},
   };
 }
@@ -196,6 +206,61 @@ try {
     return r === 'lay back off the tee, creek crosses';
   }));
 
+  // --- index.html carries exactly what the map pipeline builds ---
+  const built = k => JSON.parse(readFileSync(join(here, 'osm', k + '.maps.json'), 'utf8'));
+  for (const k of ['vail','willis','river','ranch','breck']){
+    const want = {};
+    for (const h of built(k)){
+      if (h.nine) (want[h.nine] = want[h.nine] || {})[h.hole] = { vb: h.vb, g: h.g };
+      else want[h.hole] = { vb: h.vb, g: h.g };
+    }
+    const line = html.match(new RegExp(`^HOLEMAPS\\.${k} = (.*);$`, 'm'));
+    ok(`${k} embed is current with dev/osm/${k}.maps.json`,
+      !!line && line[1] === JSON.stringify(want));
+  }
+
+  // --- overlapping Overpass boxes: each Keystone course kept its own lines ---
+  const wayOf = (k, hole) => (built(k).find(h => h.hole === hole) || {}).way;
+  ok('river 1 and 2 are the River Course\'s, not Ranch 1 and 2',
+    wayOf('river', 1) === 759907392 && wayOf('river', 2) === 759907393);
+  ok('ranch 16 and 17 are the Ranch\'s, not River 16 and 17',
+    wayOf('ranch', 16) === 1162334830 && wayOf('ranch', 17) === 1162480606);
+
+  // --- every embedded course carries a full round of maps ---
+  ok('maps embedded for all five courses', await p.evaluate(()=>{
+    const flat = k => { const m = HOLEMAPS[k]; return m && Array.from({length:18},(_,i)=>i+1).every(n=>m[n] && m[n].g.length); };
+    const breck = ['beaver','bear','elk'].every(n => HOLEMAPS.breck[n] &&
+      Array.from({length:9},(_,i)=>i+1).every(h => HOLEMAPS.breck[n][h] && HOLEMAPS.breck[n][h].g.length));
+    return ['vail','willis','river','ranch'].every(flat) && breck;
+  }));
+
+  // --- Willis (a flat 18) ---
+  await p.evaluate(()=>{ location.hash = '#/match/m2'; });
+  ok('willis renders its own map', await until(()=>p.evaluate(()=>{
+    const c = document.querySelector('.hmap .mc');
+    return !!c && c.getAttribute('d') === HOLEMAPS.willis[1].g.find(x=>x[0]==='c')[1];
+  })));
+
+  // --- Keystone Ranch, whose OSM bbox overlaps the River Course ---
+  await p.evaluate(()=>{ location.hash = '#/match/m4'; });
+  ok('ranch renders its own map', await until(()=>p.evaluate(()=>{
+    const c = document.querySelector('.hmap .mc');
+    return !!c && c.getAttribute('d') === HOLEMAPS.ranch[1].g.find(x=>x[0]==='c')[1];
+  })));
+
+  // --- Breckenridge picks the map by nine, not by hole number ---
+  await p.evaluate(()=>{ location.hash = '#/match/m3'; });   // Bear -> Elk
+  const cline = () => p.evaluate(()=>{ const c = document.querySelector('.hmap .mc'); return c && c.getAttribute('d'); });
+  const breckNine = (nine, h) => p.evaluate(([n,i])=>HOLEMAPS.breck[n][i].g.find(x=>x[0]==='c')[1], [nine,h]);
+  ok('breck front nine draws BEAR', await until(async()=> await cline() === await breckNine('bear',1)));
+  await p.locator('#cell10').click();
+  ok('breck back nine draws ELK', await until(async()=> await cline() === await breckNine('elk',1)));
+  await p.locator('#cell14').click();
+  ok('breck hole 14 draws ELK 5', await until(async()=> await cline() === await breckNine('elk',5)));
+
+  // --- spectator can't tap ---
+  await p.evaluate(()=>{ location.hash = '#/match/m1'; });
+  await until(()=>p.locator('#cell7').count().then(n=>n===1));
   // --- spectator: nobody selected by default, but may pick anyone ---
   await p.evaluate(()=>{ localStorage.setItem('ng_id', JSON.stringify('watch')); });
   await p.reload();
