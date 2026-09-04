@@ -74,7 +74,7 @@ a{color:var(--brass)}
 .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:19px;background:var(--card);border:2px solid var(--sagebrush)}
 .avatar.red{border-color:var(--red)} .avatar.blue{border-color:var(--blue)}
-.backbtn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-left:-10px}
+.backbtn{width:48px;height:44px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;margin-left:-12px;padding-bottom:4px}
 
 /* ---- sync pill ---- */
 .pill{font-family:'Saira Condensed';font-weight:700;font-size:11.5px;letter-spacing:.05em;
@@ -108,7 +108,7 @@ a{color:var(--brass)}
 .ticked{animation:tick .2s ease-out}
 @keyframes tick{50%{transform:scale(1.12)}}
 /* condensed cup strip */
-.cupstrip{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;height:38px;
+.cupstrip{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;height:44px;
   padding:0 10px;background:var(--bone);border-bottom:1px solid var(--pencil)}
 .cupstrip .mini{font-family:'Saira Condensed';font-weight:800;font-size:16px}
 .cupstrip .tug{flex:1;height:5px;margin:0;border-radius:3px}
@@ -127,7 +127,7 @@ a{color:var(--brass)}
 .dayctx .c1{font-weight:700;font-size:15.5px}
 .dayctx .c1 .tbd{color:var(--brass);text-decoration:underline;text-underline-offset:3px}
 .dayctx .c2{font-family:'Saira Condensed';font-weight:600;font-size:11.5px;letter-spacing:.05em;color:var(--sage);text-transform:uppercase;margin-top:1px}
-.gear{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-right:-6px}
+.gear{width:46px;height:44px;display:flex;align-items:center;justify-content:center;font-size:28px;line-height:1;margin-right:-8px}
 /* day picker sheet */
 .dayrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bone);
   border:1.5px solid var(--pencil);border-radius:12px;padding:10px 12px;margin-bottom:8px}
@@ -199,15 +199,13 @@ a{color:var(--brass)}
 .mhead .pn.R{color:var(--red)} .mhead .pn.B{color:var(--blue);text-align:right}
 .mhead .vs{color:var(--sage);font-size:13px}
 .mmeta{font-size:11px;color:var(--sage);letter-spacing:.05em;text-transform:uppercase;margin-top:3px;display:flex;align-items:center;gap:8px}
+.mmeta .meta{flex:1;min-width:0}
+.mmeta .mst{flex:0 0 auto;font-family:'Saira Condensed';font-weight:700;font-size:12px;color:var(--ink);white-space:nowrap}
+.mmeta .mst.R{color:var(--red)} .mmeta .mst.B{color:var(--blue)} .mmeta .mst .d{color:var(--brass)}
 .dots{display:flex;gap:4px}
 .dots i{width:5px;height:5px;border-radius:50%;background:var(--pencil)}
 .dots i.on{background:var(--ink)}
 .ovf{position:absolute;right:6px;top:6px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--sage)}
-.bigstat{display:flex;align-items:baseline;padding:2px 14px 8px;gap:10px}
-.bigstat .st{font-family:'Saira Condensed';font-weight:800;font-size:42px;line-height:1}
-.bigstat .st.R{color:var(--red)} .bigstat .st.B{color:var(--blue)} .bigstat .st.d{color:var(--brass)}
-.bigstat .sp{flex:1}
-.bigstat .thru{font-size:13px}
 .finpanel{margin:0 14px 8px;border-radius:12px;padding:12px;text-align:center;color:var(--cream);
   font-family:'Saira Condensed';font-weight:800;font-size:30px}
 .finpanel.R{background:var(--red)} .finpanel.B{background:var(--blue)} .finpanel.H{background:linear-gradient(90deg,var(--red) 50%,var(--blue) 50%)}
@@ -251,9 +249,9 @@ a{color:var(--brass)}
   padding:6px 12px calc(12px + env(safe-area-inset-bottom));margin-top:8px}
 .padbar{display:flex;align-items:center;gap:8px;min-height:30px;padding:0 0 5px}
 .padbar .sp{flex:1}
-.drawerh{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 9px;border-radius:8px;border:1px solid transparent;
-  font-family:'Saira Condensed';font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--sage);text-transform:uppercase}
-.drawerh.open{color:var(--ink);background:var(--card);border-color:var(--pencil)}
+.drawerh{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border-radius:8px;border:1.5px solid var(--pencil);
+  background:var(--card);font-family:'Saira Condensed';font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--sage);text-transform:uppercase}
+.drawerh.open{color:var(--ink);border-color:var(--ink)}
 .editrib{display:flex;align-items:center;gap:10px;font-family:'Saira Condensed';font-weight:700;
   font-size:12px;letter-spacing:.05em;color:var(--brass);text-transform:uppercase;min-width:0}
 .editrib span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -481,7 +479,13 @@ a{color:var(--brass)}
 .hmap .tr{fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;opacity:.7}
 .hmap .tr.r{stroke:var(--red)} .hmap .tr.b{stroke:var(--blue)}
 .hmap .mhint{position:absolute;right:9px;bottom:5px;font-size:10.5px;color:var(--sage);letter-spacing:.04em;pointer-events:none;
-  background:var(--bone);padding:1px 5px;border-radius:6px;max-width:70%;text-align:right}
+  background:var(--bone);padding:1px 5px;border-radius:6px;max-width:70%;text-align:right;line-height:1.35}
+.mlead{padding:6px 14px 0;font-size:12.5px;color:var(--sage);letter-spacing:.02em}
+.hmap .inbtn{cursor:pointer}
+.hmap .inbtn rect{fill:var(--ink);stroke:var(--bone);stroke-width:1.5}
+.hmap .inbtn text{fill:var(--bone);font-family:'Saira Condensed';font-weight:800;font-size:11px;letter-spacing:.06em;text-anchor:middle;dominant-baseline:central}
+.hmap .inbtn:active rect,.hmap .inbtn:focus-visible rect{fill:var(--brass)}
+.hmap .inbtn:focus{outline:none}
 .gchips{display:flex;gap:6px;padding:6px 14px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .gchips::-webkit-scrollbar{display:none}
 .gchip{flex:0 0 auto;font-size:13px;font-weight:700;border:1.5px solid var(--pencil);border-radius:99px;padding:5px 10px;color:var(--sage);background:var(--card);white-space:nowrap}
@@ -1717,11 +1721,19 @@ function bigStatusHtml(m, dr){
     const txt = r.conceded ? `${who} WIN${m.side?'S':''} ${r.text} · CONCEDED` : `${who} WIN${m.side?'S':''} ${r.text}`;
     return `<div class="finpanel ${r.winner==='A'?'R':'B'} sc">${txt} ✓</div>`;
   }
+  return '';
+}
+// the running status lives small in the match meta line — the rail and the
+// cup strip tell the story; this is just the number
+function matchStatusHtml(m, dr){
+  const st = dr.st;
+  if (st.done) return '';
   let txt, cls='';
-  if (st.leader===null) txt='ALL SQUARE';
+  if (st.leader===null) txt='EVEN';
   else { cls = st.leader==='A'?'R':'B'; txt = `${sideLabel(m, st.leader)} ${Math.abs(st.up)}UP`; }
-  const d = st.dormie ? ` <span class="st d">· DORMIE</span>` : '';
-  return `<div class="bigstat"><div class="st sc ${cls}">${txt}${d}</div><span class="sp"></span><div class="thru">${st.thru?('THRU '+st.thru):''}</div></div>`;
+  if (st.thru) txt += ` · THRU ${st.thru}`;
+  if (st.dormie) txt += ` <span class="d">· DORMIE</span>`;
+  return `<span class="mst ${cls}">${txt}</span>`;
 }
 // ---- lo-fi hole map + stroke traces ----------------------------------------
 // Breckenridge's 27 holes are keyed by nine, because a round there plays two
@@ -1749,7 +1761,12 @@ function holeMapHtml(m, d, n){
     return `<button class="gchip ${cls} ${sel===key?'sel':''}" data-act="sel" data-id="${m.id}" data-n="${n}" data-k="${esc(key)}">${label}${ct}</button>`;
   };
   const chips = keys.length ? `<div class="gchips">${keys.map(chipFor).join('')}</div>` : '';
-  // tally bar — counts strokes for the selected golfer with or without a map
+  // "pick a golfer" sits between the chips and the map, right under the
+  // chips that make the choice
+  const lead = (!sel && keys.length) ? `<div class="mlead">Pick a golfer to mark shots</div>` : '';
+  // tally bar — counts strokes for the selected golfer with or without a map.
+  // With a map, IN THE HOLE lives on the map beside the flag; without one it
+  // lives here.
   let bar = '';
   if (sel){
     const ti = traceInfo(traceFor(m, n, sel));
@@ -1763,13 +1780,13 @@ function holeMapHtml(m, d, n){
     if (!ti.complete){
       btns.push(B('tally', '+1 SHOT'));
       btns.push(B('pen', 'PENALTY', 'lite'));
-      btns.push(B('holed', '⛳ IN THE HOLE', 'go'));
+      if (!hm) btns.push(B('holed', '⛳ IN THE HOLE', 'go'));
     }
     if (ti.started) btns.push(B('traceundo', '↶', 'undo'));
     const clr = ti.started ? `<button class="clr" data-act="traceclear" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}">clear</button>` : '';
     bar = `<div class="tracebar"><div class="rorow"><span class="ro">${ro}</span>${clr}</div><div class="tbtns">${btns.join('')}</div></div>`;
   }
-  if (!hm) return chips + bar;
+  if (!hm) return chips + lead + bar;
   const [w, hh] = hm.vb;
   const shapes = hm.g.map(([k,p])=>`<path class="m${k}" d="${p}"/>`).join('');
   // pin flag at the end of the centerline
@@ -1808,18 +1825,28 @@ function holeMapHtml(m, d, n){
     }
   }
   let hint = '', tappable = false;
-  if (!sel) hint = keys.length ? 'pick a golfer to mark shots' : '';
-  else {
-    const ti = traceInfo(traceFor(m, n, sel));
+  if (sel){
+    const list = traceFor(m, n, sel), ti = traceInfo(list);
     tappable = !ti.complete;
-    if (ti.complete) hint = 'holed out';
-    else if (!ti.started) hint = `tap where ${keyShort(m, sel)}’s tee shot finished`;
-    else hint = 'tap where the next shot finished · the flag when it drops';
+    if (ti.complete) hint = `${keyShort(m, sel)} holed out in ${ti.n}`;
+    else if (!ti.started) hint = `Tap where ${keyShort(m, sel)}’s tee shot stopped`;
+    else hint = 'Tap where it stopped · IN when it drops';
   }
-  // the pin is a target: a tap on or beside the flag is the holing stroke
+  // the flag is a target for putts: a tap on or beside it is a stroke that
+  // finished at the hole (it snaps to the pin). The IN button right next to
+  // it is the holing stroke — the two intents live side by side.
   const pin = (tappable && fx != null) ? `<circle class="pinring" cx="${fx}" cy="${fy}" r="${PIN_R}"/>` : '';
+  let inbtn = '';
+  if (tappable && fx != null){
+    const bw = 44, bh = 20, gap = 5;
+    const below = fy < hh/2;
+    const bx = Math.min(w - bw - 3, Math.max(3, fx - bw/2));
+    const by = below ? Math.min(hh - bh - 3, fy + PIN_R + gap) : Math.max(3, fy - PIN_R - gap - bh);
+    inbtn = `<g class="inbtn" data-act="holed" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}" role="button" tabindex="0" aria-label="In the hole">
+      <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6"/><text x="${bx+bw/2}" y="${by+bh/2+0.5}">⛳ IN</text></g>`;
+  }
   const tapAttrs = tappable ? `data-maptap="1" data-id="${m.id}" data-n="${n}" data-w="${w}" data-h="${hh}" data-fx="${fx!=null?fx:''}" data-fy="${fy!=null?fy:''}"` : '';
-  return `${chips}<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${tapAttrs}>${shapes}${pin}${flag}${dots}</svg>
+  return `${chips}${lead}<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${tapAttrs}>${shapes}${pin}${dots}${flag}${inbtn}</svg>
     ${hint ? `<div class="mhint">${hint}</div>` : ''}</div>${bar}`;
 }
 // ---- historical hole notes (shared, keyed to the physical hole) ------------
@@ -1987,7 +2014,7 @@ function strokesDrawerHtml(m, d, n){
     }
     ban = `<div class="dbanner w">Waiting on ${missing.map(esc).join(' and ')||'more scores'}…</div>`;
   }
-  else ban = `<div class="dbanner w">Enter gross scores — the app does the net math</div>`;
+  else ban = '';
   return `<div class="drawer">${ban}${rows}</div>`;
 }
 function ledgerHtml(m, d){
@@ -2049,8 +2076,8 @@ function renderMatch(id){
       <span class="vs">vs</span>
       <div class="pn B">${sideIds(m,'B').map(pName).join(' + ')||'—'}</div>
     </div>
-    <div class="mmeta"><span>${m.side ? 'SIDE BET · SINGLES · '+(net?'NET':'GROSS')+' · NO CUP POINTS' : `MATCH ${idx+1} · ${FORMATS[dc.format].name} · ${net?'NET':'GROSS'} · ${halfTxt(dr.worth)} PT`} · ${DAYMETA[d].label}${courseLabel(d)?' · '+esc(courseLabel(d).split('·')[0]):''}</span>
-      <span class="dots">${dots}</span></div>
+    <div class="mmeta"><span class="meta">${m.side ? 'SIDE BET · SINGLES · '+(net?'NET':'GROSS')+' · NO CUP POINTS' : `MATCH ${idx+1} · ${FORMATS[dc.format].name} · ${net?'NET':'GROSS'} · ${halfTxt(dr.worth)} PT`} · ${DAYMETA[d].label}${courseLabel(d)?' · '+esc(courseLabel(d).split('·')[0]):''}</span>
+      ${matchStatusHtml(m, dr)}<span class="dots">${dots}</span></div>
     ${msi.missingHcp && msi.missingHcp.length ? `<div class="warnchip" style="margin-top:4px">No index: ${msi.missingHcp.map(pid=>esc((player(pid).name||'').split(' ')[0])).join(', ')} — playing off scratch</div>` : ''}
   </div>
   ${bigStatusHtml(m, dr)}
@@ -3115,19 +3142,26 @@ function mixItUp(d){
 }
 
 // ---- delegated events ------------------------------------------------------
+// SVG controls carry role=button + tabindex; Enter/Space activates them like a real button
+document.addEventListener('keydown', (ev)=>{
+  if (ev.key !== 'Enter' && ev.key !== ' ') return;
+  const el = ev.target.closest && ev.target.closest('svg [data-act][tabindex]');
+  if (el){ ev.preventDefault(); el.dispatchEvent(new MouseEvent('click', { bubbles:true })); }
+});
 document.addEventListener('click', (ev)=>{
   const mt = ev.target.closest('[data-maptap]');
-  if (mt){
+  if (mt && !ev.target.closest('[data-act]')){
     const m = theMatch(mt.dataset.id), n = +mt.dataset.n;
     const key = m && selKey(m, n);
     if (key){
       const r = mt.getBoundingClientRect();
-      const x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
-      const y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
-      // on the flag = in the hole; anywhere else = where that shot finished
-      const fx = mt.dataset.fx, fy = mt.dataset.fy;
-      if (fx !== '' && fx != null && Math.hypot(x*(+mt.dataset.w) - fx, y*(+mt.dataset.h) - fy) <= PIN_R) holeOut(m, n, key);
-      else addStroke(m, n, key, { x:+x.toFixed(3), y:+y.toFixed(3) });
+      let x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+      let y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
+      // every tap is where that shot finished. On or beside the flag it snaps
+      // to the pin — a putt that stayed out. Holing is the IN button by the flag.
+      const fx = mt.dataset.fx, fy = mt.dataset.fy, w = +mt.dataset.w, h = +mt.dataset.h;
+      if (fx !== '' && fx != null && Math.hypot(x*w - fx, y*h - fy) <= PIN_R){ x = fx/w; y = fy/h; }
+      addStroke(m, n, key, { x:+x.toFixed(3), y:+y.toFixed(3) });
     }
     return;
   }

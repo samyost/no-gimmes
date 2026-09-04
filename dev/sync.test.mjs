@@ -84,7 +84,8 @@ try {
   await p1.locator('.whocard').first().click(); // Duck (p1), in m1
   // Duck is in a live match today (tee 06:00 < 15:00) → personalized landing on the match
   ok('personalized landing on own match', await until(()=>p1.evaluate(()=>location.hash.includes('#/match/m1'))));
-  ok('big status ALL SQUARE', await until(()=>p1.locator('.bigstat').textContent().then(t=>t.includes('ALL SQUARE'))));
+  ok('status EVEN in the meta line, not a billboard', await until(()=>p1.locator('.mmeta .mst').textContent().then(t=>t.includes('EVEN'))));
+  ok('no big status block', await p1.locator('.bigstat').count().then(n=>n===0));
   // ---- match screen chrome: setup gear top-right, one compact winner row, scores tucked away ----
   ok('setup gear on the match screen', await p1.locator('.cupstrip .gear[data-act="hub"]').count().then(n=>n===1));
   ok('one compact RED · HALVE · BLUE row', await p1.locator('.winrow .wbtn').count().then(n=>n===3));
@@ -124,7 +125,7 @@ try {
   // ---- tap scoring + SSE to the other client ----
   await p1.locator('.wbtn.R').click();          // hole 1: RED
   ok('optimistic rail fill', await until(()=>p1.locator('.cell .fill.A').count().then(n=>n>=1)));
-  ok('status 1UP on scorer', await until(()=>p1.locator('.bigstat').textContent().then(t=>t.includes('RED 1UP'))));
+  ok('status 1UP on scorer', await until(()=>p1.locator('.mmeta .mst').textContent().then(t=>t.includes('RED 1UP'))));
   ok('undo snackbar', await until(()=>p1.locator('#snack').textContent().then(t=>t.includes('UNDO'))));
   ok('p2 sees 1UP chip via SSE', await until(()=>p2.locator('.mrow .chip').first().textContent().then(t=>t.trim()==='1UP')));
   await sleep(1500); // let the SSE echo of p1's own write come back
@@ -155,7 +156,7 @@ try {
   const lit = p1.locator('.wbtn.R.lit');
   ok('red mini pill lit', await until(()=>lit.count().then(n=>n===1)));
   await lit.click();
-  ok('hole 2 committed via strokes', await until(()=>p1.locator('.bigstat').textContent().then(t=>t.includes('RED 2UP'))));
+  ok('hole 2 committed via strokes', await until(()=>p1.locator('.mmeta .mst').textContent().then(t=>t.includes('RED 2UP'))));
 
   // ---- offline queue + concurrent merge ----
   await p1.context().setOffline(true);
