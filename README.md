@@ -30,19 +30,20 @@ watch it appear on the other. That's the whole stack verified.
 
 - **First open**: "Who are you?" — tap your name. That phone remembers you and
   opens straight to your own match on game days.
-- **Scoring**: tap **RED / HALVE / BLUE** for each hole — or open the
-  **STROKES** drawer and enter gross scores; the app applies net strokes and
-  lights up the derived winner for you to confirm. Mix both freely. Tap any
-  hole in the rail to fix it; nothing ever locks.
+- **Scoring**: one row at the bottom of every hole — tap **RED / HALVE /
+  BLUE** and the app moves to the next hole. Gross scores live behind the
+  small **SCORES** toggle above that row; enter them and the app applies net
+  strokes and lights up the derived winner for you to confirm. Mix both
+  freely. Tap any hole in the rail to fix it; nothing ever locks.
 - **Shot by shot**: pick a golfer (you, by default), then tap the hole map
-  where each shot finished — or **+1** for one you can't place — and **IN THE
-  HOLE** when it drops. The count becomes that golfer's gross score unless
-  somebody types a number over it; the trace stays either way. Lost track?
-  Tap **IN THE HOLE** first and replay the hole backwards to the tee.
+  where each shot finished, tee to pin — **+1 SHOT** for one you can't place
+  — and tap the flag (or **IN THE HOLE**) when it drops. The count becomes
+  that golfer's gross score unless somebody types a number over it under
+  **SCORES**; the trace stays either way. Lost track? Just type the number.
 - **The board**: pinned cup score with the tug-of-war bar and the magic number,
-  day tabs (opens to today), live match chips (`2UP · THRU 12`, `DORMIE`,
-  `4&3 ✓`), tee times and carts.
-- **Setup** (gear): per-day attendance (4–8 players), per-day team draws (Red
+  live match chips (`2UP · THRU 12`, `DORMIE`, `4&3 ✓`), tee times and carts.
+  It opens to today; the day pill under the cup score switches days.
+- **Setup** (the ⚙ top-right, on every screen): per-day attendance (4–8 players), per-day team draws (Red
   and Blue are permanent; membership can change daily), carts → two tee times,
   cart-vs-cart match maker, formats (four-ball, foursomes, greensomes, Chapman,
   scramble, shamble, singles, mixer — a different game every few holes, with

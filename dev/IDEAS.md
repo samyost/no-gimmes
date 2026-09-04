@@ -27,12 +27,14 @@ reasoning; the decisions here win where they disagree.
   would derive a hole result from three taps mid-hole. The effective gross is
   the posted score, else the trace length *only once the trace is complete*.
   Until then the drawer shows "3 on the map so far" and lights nothing.
-- **Forward needs no "tee shot" tap.** A list built forward from empty starts at
-  the tee by construction; requiring the marker would add a tap to every hole.
-  Only the reverse build needs it: tapping IN THE HOLE on an empty trace starts
-  a putt-back-to-tee build (flagged `r` on the holing stroke so the trace reads
-  honestly), earlier shots prepend, and TEE SHOT closes it. That is the
-  asymmetry the design called load-bearing, expressed without a mode switch.
+- **Forward only** (revised Sept 2026). A list built forward from empty starts
+  at the tee by construction, so there is no "tee shot" tap. The reverse
+  putt-back-to-tee build shipped first and was retired the same week: IN THE
+  HOLE silently flipping into a mode where the button reads TEE SHOT was the
+  least intuitive thing on the screen. Now IN THE HOLE — or a tap on the flag
+  itself — is always the holing stroke; on an empty trace that is an ace and
+  comes with an UNDO snack. "Lost track" is handled by typing the number under
+  SCORES. Old reverse traces (`r`/`t` flags) still render and still count.
 - **Storage:** `matches/<id>/holes/<n>/trace/<key>` — a sibling of
   `strokes/<key>`, so a hole's posted score and its trace sit together and
   `clearHole` / commit-undo preserve both. Key is a player id, or `A`/`B` in

@@ -103,7 +103,7 @@ try {
   await p.evaluate(()=>location.hash='#/match/sb1');
   ok('side-bet meta says no cup points', await until(()=>p.locator('.mmeta').textContent().then(t=>/SIDE BET/.test(t) && /NO CUP POINTS/.test(t))));
   // score a hole for Duck; the cup must not move
-  await p.locator('.wbtn.R, .mini3 .mR').first().click();
+  await p.locator('.wbtn.R').first().click();
   await until(()=>p.locator('.bigstat').textContent().then(t=>/1UP/.test(t)));
   const c = await p.evaluate(()=>{ const c = cup(); return { pts: c.red + c.blue, proj: c.pRed + c.pBlue, sched: c.scheduled }; });
   ok('side-bet hole moves nothing on the cup', c.pts === 0 && c.proj === 0);
