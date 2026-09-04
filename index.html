@@ -113,27 +113,35 @@ a{color:var(--brass)}
 .cupstrip .mini{font-family:'Saira Condensed';font-weight:800;font-size:16px}
 .cupstrip .tug{flex:1;height:5px;margin:0;border-radius:3px}
 
-/* ---- day tabs ---- */
-.daytabs{position:sticky;top:calc(46px + var(--cuph,97px));z-index:28;display:flex;background:var(--bone);border-bottom:1px solid var(--pencil)}
-.dt{flex:1;padding:6px 0 5px;text-align:center;border-bottom:3px solid transparent}
-.dt .d1{font-family:'Saira Condensed';font-weight:700;font-size:15px;letter-spacing:.05em}
-.dt .d2{font-size:10px;color:var(--sage);display:flex;align-items:center;justify-content:center;gap:4px}
-.dt.on{border-bottom-color:var(--brass)}
-.dt .ring{display:inline-block;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--brass)}
-.dt .win{display:inline-block;width:7px;height:7px;border-radius:50%}
-.dt .win.red{background:var(--red)} .dt .win.blue{background:var(--blue)}
-.dt .win.split{background:linear-gradient(90deg,var(--red) 50%,var(--blue) 50%)}
-
-/* ---- day context ---- */
-.ctx{padding:10px 14px 8px;display:flex;align-items:flex-start;gap:8px}
-.ctx .c1{font-weight:700;font-size:16px}
-.ctx .c1 .tbd{color:var(--brass);text-decoration:underline;text-underline-offset:3px}
-.ctx .chips{margin-top:3px;display:flex;flex-wrap:wrap;gap:5px}
-.rchip{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.05em;
-  padding:2px 7px;border:1px solid var(--pencil);border-radius:99px;color:var(--sage);text-transform:uppercase}
-.ctx .sp{flex:1}
-.daysub{font-family:'Saira Condensed';font-weight:700;font-size:13px;white-space:nowrap}
-.gear{width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin:-8px -8px 0 0}
+/* ---- day bar: one picker pill + today's context ---- */
+.daybar{display:flex;align-items:center;gap:10px;padding:10px 14px 0}
+.daypick{display:inline-flex;align-items:baseline;gap:7px;border:1.5px solid var(--ink);border-radius:10px;
+  padding:5px 10px 5px 12px;background:var(--card);min-height:40px}
+.daypick .d1{font-family:'Saira Condensed';font-weight:800;font-size:19px;letter-spacing:.05em}
+.daypick .d2{font-family:'Saira Condensed';font-weight:600;font-size:12px;letter-spacing:.06em;color:var(--sage)}
+.daypick .d2.today{color:var(--brass)}
+.daypick .caret{font-size:12px;color:var(--sage);align-self:center;margin-left:2px}
+.daybar .sp{flex:1}
+.daysub{font-family:'Saira Condensed';font-weight:700;font-size:16px;white-space:nowrap}
+.dayctx{display:block;width:100%;text-align:left;padding:5px 14px 8px}
+.dayctx .c1{font-weight:700;font-size:15.5px}
+.dayctx .c1 .tbd{color:var(--brass);text-decoration:underline;text-underline-offset:3px}
+.dayctx .c2{font-family:'Saira Condensed';font-weight:600;font-size:11.5px;letter-spacing:.05em;color:var(--sage);text-transform:uppercase;margin-top:1px}
+.gear{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-right:-6px}
+/* day picker sheet */
+.dayrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bone);
+  border:1.5px solid var(--pencil);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.dayrow.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--card)}
+.dayrow .dl{font-family:'Saira Condensed';font-weight:800;font-size:20px;letter-spacing:.04em;width:50px;line-height:1;flex:0 0 50px}
+.dayrow .dl small{display:block;font-size:11px;font-weight:600;color:var(--sage);letter-spacing:.06em;margin-top:2px}
+.dayrow .dn{font-weight:700;font-size:14.5px}
+.dayrow .dv{font-size:12px;color:var(--sage)}
+.dayrow .mk{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.dayrow .ring{display:inline-block;width:9px;height:9px;border-radius:50%;border:2px solid var(--brass)}
+.dayrow .win{display:inline-block;width:9px;height:9px;border-radius:50%}
+.dayrow .win.red{background:var(--red)} .dayrow .win.blue{background:var(--blue)}
+.dayrow .win.split{background:linear-gradient(90deg,var(--red) 50%,var(--blue) 50%)}
+.dayrow .today{font-family:'Saira Condensed';font-weight:700;font-size:10px;letter-spacing:.1em;color:var(--brass)}
 
 /* ---- tee groups & match rows ---- */
 .tgh{padding:12px 14px 4px;font-family:'Saira Condensed';font-weight:600;font-size:12.5px;
@@ -231,38 +239,39 @@ a{color:var(--brass)}
 /* ---- hole context + pad ---- */
 .hctx{padding:8px 14px 4px}
 .hctx .h1{font-family:'Saira Condensed';font-weight:700;font-size:15.5px;letter-spacing:.04em}
-.spill{margin-top:4px;border-radius:8px;padding:5px 10px;font-size:13.5px;font-weight:700;display:inline-block}
+.spills{margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.spills .spl{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.08em;color:var(--sage);margin-right:2px}
+.spill{border-radius:8px;padding:3px 8px;font-size:13px;font-weight:700;display:inline-block}
 .spill.r{background:var(--red-wash);color:var(--red)}
 .spill.b{background:var(--blue-wash);color:var(--blue)}
 .junkchips{display:flex;gap:6px;padding:6px 14px 0;flex-wrap:wrap}
 .jchip{font-family:'Saira Condensed';font-weight:600;font-size:11.5px;letter-spacing:.06em;
   border:1px dashed var(--sage);color:var(--sage);border-radius:99px;padding:4px 10px;text-transform:uppercase}
 .pad{position:sticky;bottom:0;background:var(--bone);border-top:1px solid var(--pencil);
-  padding:8px 12px calc(14px + env(safe-area-inset-bottom));margin-top:8px}
-.editrib{display:flex;align-items:center;gap:8px;font-family:'Saira Condensed';font-weight:700;
-  font-size:12.5px;letter-spacing:.05em;color:var(--brass);padding:0 2px 6px;text-transform:uppercase}
-.editrib .sp{flex:1}
-.drawerh{width:100%;height:34px;display:flex;align-items:center;justify-content:center;gap:6px;
-  font-family:'Saira Condensed';font-weight:600;font-size:12.5px;letter-spacing:.08em;color:var(--sage);text-transform:uppercase}
-.winrow{display:flex;gap:8px;margin:2px 0 8px}
-.wbtn{flex:1;height:104px;border-radius:16px;color:#FCF8EF;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:2px}
-.wbtn .wl{font-family:'Saira Condensed';font-weight:800;font-size:24px;letter-spacing:.06em}
-.wbtn .wn{font-family:'Saira Condensed';font-weight:600;font-size:11.5px;letter-spacing:.08em;opacity:.92}
+  padding:6px 12px calc(12px + env(safe-area-inset-bottom));margin-top:8px}
+.padbar{display:flex;align-items:center;gap:8px;min-height:30px;padding:0 0 5px}
+.padbar .sp{flex:1}
+.drawerh{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 9px;border-radius:8px;border:1px solid transparent;
+  font-family:'Saira Condensed';font-weight:600;font-size:12px;letter-spacing:.08em;color:var(--sage);text-transform:uppercase}
+.drawerh.open{color:var(--ink);background:var(--card);border-color:var(--pencil)}
+.editrib{display:flex;align-items:center;gap:10px;font-family:'Saira Condensed';font-weight:700;
+  font-size:12px;letter-spacing:.05em;color:var(--brass);text-transform:uppercase;min-width:0}
+.editrib span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* one row: RED · HALVE · BLUE — thumb-sized, not billboard-sized */
+.winrow{display:flex;gap:6px}
+.wbtn{flex:1;min-width:0;height:60px;border-radius:12px;color:#FCF8EF;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;padding:0 4px}
+.wbtn .wl{font-family:'Saira Condensed';font-weight:800;font-size:19px;letter-spacing:.07em;line-height:1.1}
+.wbtn .wn{font-family:'Saira Condensed';font-weight:600;font-size:10px;letter-spacing:.07em;opacity:.9;
+  max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wbtn.R{background:var(--red)} .wbtn.R:active{background:var(--red-press)}
 .wbtn.B{background:var(--blue)} .wbtn.B:active{background:var(--blue-press)}
+.wbtn.H{background:var(--card);border:2px solid var(--ink);color:var(--ink)}
 .wbtn.lit{box-shadow:0 0 0 3px var(--brass);animation:lit 1.2s infinite}
 @keyframes lit{50%{box-shadow:0 0 0 5px var(--brass)}}
-.halvebar{width:100%;height:72px;border-radius:14px;border:2px solid var(--ink);background:var(--card);
-  font-family:'Saira Condensed';font-weight:700;font-size:20px;letter-spacing:.14em;color:var(--ink)}
-.gutter{width:8px;flex:0 0 8px}
-.locked .wbtn,.locked .halvebar,.mini3.locked button{opacity:.6;pointer-events:none}
+.winrow.locked .wbtn{opacity:.6;pointer-events:none}
 /* drawer */
-.mini3{display:flex;gap:6px;margin:2px 0 8px}
-.mini3 button{flex:1;height:52px;border-radius:10px;font-family:'Saira Condensed';font-weight:700;font-size:15px;letter-spacing:.08em;color:#FCF8EF}
-.mini3 .mR{background:var(--red)} .mini3 .mB{background:var(--blue)}
-.mini3 .mH{background:var(--card);border:2px solid var(--ink);color:var(--ink)}
-.mini3 button.lit{box-shadow:0 0 0 3px var(--brass);animation:lit 1.2s infinite}
+.drawer{padding-bottom:4px}
 .dbanner{border-radius:8px;padding:6px 10px;font-size:13.5px;font-weight:700;margin-bottom:8px;text-align:center}
 .dbanner.r{background:var(--red-wash);color:var(--red)} .dbanner.b{background:var(--blue-wash);color:var(--blue)}
 .dbanner.h{background:var(--bone);border:1px solid var(--sagebrush);color:var(--sagebrush)}
@@ -468,6 +477,7 @@ a{color:var(--brass)}
 .hmap .bmark.sel circle{stroke:var(--brass);stroke-width:2}
 .hmap .bmark.sel text{fill:#FCF8EF;font-weight:700;font-family:'Saira Condensed';font-size:11px}
 .hmap .bmark.hole circle{fill:none;stroke:var(--brass);stroke-width:2}
+.hmap .pinring{fill:var(--brass);fill-opacity:.12;stroke:var(--brass);stroke-width:1;stroke-dasharray:2 2;opacity:.8}
 .hmap .tr{fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;opacity:.7}
 .hmap .tr.r{stroke:var(--red)} .hmap .tr.b{stroke:var(--blue)}
 .hmap .mhint{position:absolute;right:9px;bottom:5px;font-size:10.5px;color:var(--sage);letter-spacing:.04em;pointer-events:none;
@@ -1050,10 +1060,12 @@ function isOneBall(fmt){ return (FORMATS[fmt]||{}).oneBall; }
 // ---- stroke traces ---------------------------------------------------------
 // m.holes[n].trace[key] is an ordered list of strokes for one key — a player
 // id, or 'A'/'B' in one-ball formats. Each stroke optionally carries {x,y}
-// (0..1 map coords, where the ball finished). Flags: h = holed out, r = the
-// list was built putt-back-to-tee (set on the holing stroke), t = tee shot
-// (only needed to close a reverse build), p = penalty, u = tallied with no
-// spot. A stroke object is never empty (Firebase drops empty objects).
+// (0..1 map coords, where the ball finished). Flags: h = holed out, p =
+// penalty, u = tallied with no spot. Traces build forward, tee to pin. Two
+// legacy flags still read correctly: r = list was built putt-back-to-tee
+// (set on the holing stroke), t = tee shot (closed such a build). Nothing
+// writes them any more. A stroke object is never empty (Firebase drops
+// empty objects).
 // The posted score lives separately in m.holes[n].strokes[key]; the trace
 // is the record of what happened and only stands in for the score when
 // nobody has posted one and the trace is complete end to end.
@@ -1103,6 +1115,19 @@ function addStroke(m, n, key, stroke){
   if (ti.rev) list.unshift(stroke); else list.push(stroke);
   setTrace(m, n, key, list);
   return true;
+}
+// map taps within this many viewBox units of the flag count as holing out
+const PIN_R = 16;
+// the holing stroke closes the trace. Traces only build forward now (tee to
+// pin); a legacy putt-back-to-tee build still closes here. From an empty
+// trace this is an ace — real, but worth a second look, so it carries UNDO.
+function holeOut(m, n, key){
+  const list = traceFor(m, n, key), ti = traceInfo(list);
+  if (ti.complete) return;
+  if (ti.rev){ list[0].t = 1; setTrace(m, n, key, list); return; }
+  list.push({ h:1 });
+  setTrace(m, n, key, list);
+  if (!ti.started) snack(`Hole-in-one for ${keyShort(m, key)}?!`, 'UNDO', ()=>{ const mm = theMatch(m.id); if (mm) setTrace(mm, n, key, [], true); });
 }
 // ---- golfer selection (who the map / tally buttons score for) --------------
 function defaultSel(m, n){
@@ -1447,6 +1472,7 @@ function cupStripHtml(backAct){
     <div style="flex:1" data-act="cupsheet">${tugHtml(c, true)}</div>
     <span class="mini tBlue sc">${half(c.blue)}</span>
     ${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button>
   </div>`;
 }
 
@@ -1479,31 +1505,48 @@ function fmtTime(t){
 }
 
 // ---- board -----------------------------------------------------------------
-function dayTabsHtml(d){
-  const t = todayISO();
-  return `<div class="daytabs">` + DAYS.map(k=>{
-    const dm = DAYMETA[k];
-    const dp = dayPts(k);
-    let mark = '';
-    if (dp.done) mark = `<span class="win ${dp.red>dp.blue?'red':dp.blue>dp.red?'blue':'split'}"></span>`;
-    else if (dm.date === t) mark = `<span class="ring"></span>`;
-    return `<button class="dt ${k===d?'on':''}" data-act="day" data-d="${k}">
-      <div class="d1 sc">${dm.label}</div><div class="d2">${dm.dshort} ${mark}</div></button>`;
-  }).join('') + `</div>`;
+// the day switcher: one pill on the board that opens the day sheet
+function dayPickHtml(d){
+  const dm = DAYMETA[d];
+  const today = isToday(d);
+  return `<button class="daypick" data-act="days" aria-label="Switch day" aria-haspopup="dialog">
+    <span class="d1 sc">${dm.label}</span><span class="d2 sc ${today?'today':''}">${today?'TODAY':dm.dshort}</span><span class="caret">▾</span></button>`;
 }
-function rulesChipsHtml(d){
+function dayMarkHtml(d){
+  const dp = dayPts(d);
+  if (dp.done) return `<span class="win ${dp.red>dp.blue?'red':dp.blue>dp.red?'blue':'split'}"></span>`;
+  if (isToday(d)) return `<span class="ring"></span>`;
+  return '';
+}
+function daysSheetHtml(){
+  const cur = ui.day || resolveDay();
+  const rows = DAYS.map(d=>{
+    const dm = DAYMETA[d], dc = dayCfg(d), dp = dayPts(d), ms = cupMatchesFor(d);
+    const cl = courseLabel(d);
+    const bits = [cl ? esc(cl.split('·')[0].trim()) : 'course TBD'];
+    bits.push(ms.length ? `${FORMATS[dc.format].name.toLowerCase()} · ${ms.length} match${ms.length>1?'es':''}` : 'not set up');
+    const score = dp.any ? `<span class="daysub sc"><span class="tRed">${half(dp.red)}</span>–<span class="tBlue">${half(dp.blue)}</span></span>` : '';
+    return `<button class="dayrow ${d===cur?'on':''}" data-act="day" data-d="${d}">
+      <span class="dl sc">${dm.label}<small>${dm.dshort}</small></span>
+      <span><div class="dn">${dm.name}${isToday(d)?' <span class="today sc">TODAY</span>':''}</div><div class="dv">${bits.join(' · ')}</div></span>
+      <span class="mk">${score}${dayMarkHtml(d)}</span></button>`;
+  }).join('');
+  return `<h3>Which day?</h3>${rows}`;
+}
+// one muted line under the course: format · net · points · gimmes
+function dayRulesTxt(d){
   const dc = dayCfg(d), c = cfg();
-  const chips = [];
+  const bits = [];
   const mixTag = dc.format==='mixer' ? (dayMixId(dc) ? ' · '+esc(mixName(S.mixes[dc.mixId]).toUpperCase()) : ' '+mixerCfg(dc).seg+'s') : '';
-  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${FORMATS[dc.format].name}${mixTag}</button>`);
+  bits.push(FORMATS[dc.format].name + mixTag);
   const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
   const net = dayNet(d) && anyH && dc.course !== 'tbd';
   const pct = dayAllowancePct(d);
-  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${net? (dc.format==='mixer' ? 'NET · WHS PER SEGMENT' : 'NET '+pct+'%') : (dayNet(d) ? 'GROSS (no hcps yet)' : 'GROSS')}</button>`);
+  bits.push(net ? (dc.format==='mixer' ? 'NET · WHS PER SEGMENT' : 'NET '+pct+'%') : (dayNet(d) ? 'GROSS (no hcps yet)' : 'GROSS'));
   const worth = (dc.points||1) * ((dc.x2 && dc.format==='singles')?2:1);
-  chips.push(`<button class="rchip" data-act="setup" data-d="${d}">${halfTxt(worth)} PT${worth===1?'':'S'}</button>`);
-  chips.push(`<button class="rchip" data-act="settings">${{conc:'CONCESSIONS ONLY',leather:'INSIDE THE LEATHER',two:'GIMMES 2FT',three:'GIMMES 3FT',none:'NO GIMMES'}[c.gimme]}</button>`);
-  return chips.join('');
+  bits.push(`${halfTxt(worth)} PT${worth===1?'':'S'}`);
+  bits.push({conc:'CONCESSIONS ONLY',leather:'INSIDE THE LEATHER',two:'GIMMES 2FT',three:'GIMMES 3FT',none:'NO GIMMES'}[c.gimme]);
+  return bits.join(' · ');
 }
 function holeStripHtml(m){
   let cells = '';
@@ -1567,7 +1610,7 @@ function renderBoard(d){
   const cl = courseLabel(d);
   const tee = dayTee(d);
   let ctx1;
-  if (!cl) ctx1 = `<button class="tbd" data-act="setup" data-d="${d}">Course TBD — tap to set</button>`;
+  if (!cl) ctx1 = `<span class="tbd">Course TBD — tap to set</span>`;
   else ctx1 = `${esc(cl)}${tee ? ' · '+esc(tee)+' tees' : ''}`;
   let subChip = '';
   if (dp.red+dp.blue > 0){
@@ -1612,14 +1655,11 @@ function renderBoard(d){
   const rm = !dbConfigured() ? `<div class="banner">Range mode — nothing’s saving to the group. Add the trip link in Settings to go live.</div>` : '';
   const est = (dc.course==='breck' && dc.rot==='be') ? `<div class="banner">Bear→Elk has no printed card — net strokes use a derived allocation.</div>` : '';
   return `
-  <div class="appbar"><span class="wordmark sc">NO GIMMES</span><span class="sp"></span>${pillHtml()}${avatarHtml()}</div>
+  <div class="appbar"><span class="wordmark sc">NO GIMMES</span><span class="sp"></span>${pillHtml()}${avatarHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
   ${cupHeaderHtml()}
-  ${dayTabsHtml(d)}
-  <div class="ctx">
-    <div><div class="c1">${ctx1}</div><div class="chips">${rulesChipsHtml(d)}</div></div>
-    <span class="sp"></span>${subChip}
-    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button>
-  </div>
+  <div class="daybar">${dayPickHtml(d)}<span class="sp"></span>${subChip}</div>
+  <button class="dayctx" data-act="setup" data-d="${d}"><div class="c1">${ctx1}</div><div class="c2">${dayRulesTxt(d)}</div></button>
   ${rm}${est}
   ${body}
   ${foot}`;
@@ -1705,13 +1745,12 @@ function holeMapHtml(m, d, n){
     const extra = [];
     if (ti.unplaced - ti.pen) extra.push(`${ti.unplaced - ti.pen} unplaced`);
     if (ti.pen) extra.push(`${ti.pen} penalty`);
-    if (ti.rev && !ti.complete) extra.push('putt back to tee');
     if (extra.length) ro += ` <span class="mut">· ${extra.join(' · ')}</span>`;
     const btns = [];
     if (!ti.complete){
-      btns.push(B('tally', '+1'));
+      btns.push(B('tally', '+1 SHOT'));
       btns.push(B('pen', 'PENALTY', 'lite'));
-      btns.push(ti.rev ? B('teeshot', 'TEE SHOT', 'go') : B('holed', 'IN THE HOLE', 'go'));
+      btns.push(B('holed', '⛳ IN THE HOLE', 'go'));
     }
     if (ti.started) btns.push(B('traceundo', '↶', 'undo'));
     const clr = ti.started ? `<button class="clr" data-act="traceclear" data-id="${m.id}" data-n="${n}" data-k="${esc(sel)}">clear</button>` : '';
@@ -1761,11 +1800,13 @@ function holeMapHtml(m, d, n){
     const ti = traceInfo(traceFor(m, n, sel));
     tappable = !ti.complete;
     if (ti.complete) hint = 'holed out';
-    else if (ti.rev) hint = 'tap where each earlier shot finished';
-    else if (!ti.started) hint = `tap where ${keyShort(m, sel)}’s ball is`;
-    else hint = 'tap where the next shot finished';
+    else if (!ti.started) hint = `tap where ${keyShort(m, sel)}’s tee shot finished`;
+    else hint = 'tap where the next shot finished · the flag when it drops';
   }
-  return `${chips}<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${tappable?`data-maptap="1" data-id="${m.id}" data-n="${n}"`:''}>${shapes}${flag}${dots}</svg>
+  // the pin is a target: a tap on or beside the flag is the holing stroke
+  const pin = (tappable && fx != null) ? `<circle class="pinring" cx="${fx}" cy="${fy}" r="${PIN_R}"/>` : '';
+  const tapAttrs = tappable ? `data-maptap="1" data-id="${m.id}" data-n="${n}" data-w="${w}" data-h="${hh}" data-fx="${fx!=null?fx:''}" data-fy="${fy!=null?fy:''}"` : '';
+  return `${chips}<div class="hmap"><svg viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid meet" ${tapAttrs}>${shapes}${pin}${flag}${dots}</svg>
     ${hint ? `<div class="mhint">${hint}</div>` : ''}</div>${bar}`;
 }
 // ---- historical hole notes (shared, keyed to the physical hole) ------------
@@ -1801,17 +1842,18 @@ function holeCtxHtml(m, d){
   const hFmt = mFormat(m, n);
   const si = mStrokes(m, hFmt);
   const dots = holeDots(m, si, n, d);
+  // who gets a stroke on this hole — one wrapped row, not a stack
   let pills = '';
   if (si.net){
+    const sp = [];
+    const pill = (cls, who, dn) => `<span class="spill ${cls}">${who}${dn>1?' ×'+dn:''}</span>`;
     if (si.kind==='side'){
-      if (dots.A) pills += `<div class="spill r">● ${teamName('A')} get ${dots.A>1?dots.A+' strokes':'a stroke'} here</div>`;
-      if (dots.B) pills += `<div class="spill b">● ${teamName('B')} get ${dots.B>1?dots.B+' strokes':'a stroke'} here</div>`;
+      if (dots.A) sp.push(pill('r', teamName('A'), dots.A));
+      if (dots.B) sp.push(pill('b', teamName('B'), dots.B));
     } else {
-      for (const [pid,dn] of Object.entries(dots.players)){
-        const side = sideIds(m,'A').includes(pid)?'r':'b';
-        pills += `<div class="spill ${side}">● ${pName(pid)} gets ${dn>1?dn+' strokes':'a stroke'} here</div>`;
-      }
+      for (const [pid,dn] of Object.entries(dots.players)) if (dn) sp.push(pill(sideIds(m,'A').includes(pid)?'r':'b', pName(pid), dn));
     }
+    if (sp.length) pills = `<div class="spills"><span class="spl">${sp.length===1?'GETS A STROKE':'GET A STROKE'}</span>${sp.join('')}</div>`;
   }
   const pl = playsLike(h.yds, dayCfg(d).course);
   const yds = h.yds ? ` · ${h.yds} YDS${pl?` <span style="color:var(--sage);text-transform:none">(plays ~${pl})</span>`:''}` : '';
@@ -1844,31 +1886,21 @@ function padHtml(m, d){
       <button data-act="fixhole" data-id="${m.id}">Fix a hole</button></div>
     </div></div>`;
   }
-  const editRib = editing ? `<div class="editrib"><span>EDITING HOLE ${n} — currently ${hd.winner==='A'?sideLabel(m,'A'):hd.winner==='B'?sideLabel(m,'B'):'HALVED'}</span><span class="sp"></span>
-      <button data-act="clearhole" data-id="${m.id}" data-n="${n}" style="color:var(--ob)">Clear hole</button></div>` : '';
+  const editRib = editing ? `<div class="editrib"><span>EDITING ${n} — ${hd.winner==='A'?sideLabel(m,'A'):hd.winner==='B'?sideLabel(m,'B'):'HALVED'}</span>
+      <button data-act="clearhole" data-id="${m.id}" data-n="${n}" style="color:var(--ob)">Clear</button></div>` : '';
   const funBan = (done && keepOn) ? `<div class="funban">For fun — ${dr.st.result.winner ? sideLabel(m, dr.st.result.winner)+' already won '+dr.st.result.text : 'match halved'}.</div>` : '';
-  let drawerHtml2 = '';
-  let winRow;
   const lblA = sideLabel(m, 'A'), lblB = sideLabel(m, 'B');
-  if (drawer){
-    drawerHtml2 = strokesDrawerHtml(m, d, n);
-    winRow = `<div class="mini3 ${ui.lock?'locked':''}">
-      <button class="mR sc ${litSide(m,n)==='A'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A">${lblA}</button>
-      <button class="mH sc ${litSide(m,n)==='H'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="H">HALVE</button>
-      <button class="mB sc ${litSide(m,n)==='B'?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B">${lblB}</button>
+  // one compact row: RED · HALVE · BLUE. Once gross scores (typed or mapped)
+  // derive a winner, that button lights up; tapping it posts the hole.
+  const lit = litSide(m, n);
+  const wb = (w, cls, lbl, sub) => `<button class="wbtn ${cls} ${lit===w?'lit':''}" data-act="win" data-id="${m.id}" data-n="${n}" data-w="${w}"><span class="wl sc">${lbl}</span>${sub?`<span class="wn sc">${sub}</span>`:''}</button>`;
+  const winRow = `<div class="winrow ${ui.lock?'locked':''}">
+      ${wb('A','R',lblA, m.side?'':rn)}${wb('H','H','HALVE','')}${wb('B','B',lblB, m.side?'':bn)}
     </div>`;
-  } else {
-    winRow = `<div class="winrow ${ui.lock?'locked':''}">
-      <button class="wbtn R" data-act="win" data-id="${m.id}" data-n="${n}" data-w="A"><span class="wl">${lblA}</span><span class="wn">${m.side?'':rn}</span></button>
-      <div class="gutter"></div>
-      <button class="wbtn B" data-act="win" data-id="${m.id}" data-n="${n}" data-w="B"><span class="wl">${lblB}</span><span class="wn">${m.side?'':bn}</span></button>
-    </div>
-    <div class="${ui.lock?'locked':''}"><button class="halvebar sc" data-act="win" data-id="${m.id}" data-n="${n}" data-w="H">HALVE</button></div>`;
-  }
   return `<div class="pad">
-    ${editRib}${funBan}
-    <button class="drawerh" data-act="drawer" data-id="${m.id}">${drawer?'⌄':'⌃'} STROKES</button>
-    ${drawerHtml2}
+    ${funBan}
+    <div class="padbar"><button class="drawerh ${drawer?'open':''}" data-act="drawer" data-id="${m.id}" aria-expanded="${!!drawer}">${drawer?'⌄':'⌃'} SCORES</button><span class="sp"></span>${editRib}</div>
+    ${drawer ? strokesDrawerHtml(m, d, n) : ''}
     ${winRow}
   </div>`;
 }
@@ -2392,7 +2424,7 @@ function hubSheetHtml(){
     bits.push(FORMATS[dc.format].name.toLowerCase());
     bits.push(ms.length ? ms.length+' match'+(ms.length>1?'es':'') : 'not set up');
     return `<button class="hubrow" data-act="setup" data-d="${d}">
-      <div><div class="hl">${DAYMETA[d].name} ${DAYMETA[d].dshort}</div><div class="hv">${bits.join(' · ')}</div></div>
+      <div><div class="hl">${DAYMETA[d].name} <span class="mut" style="font-weight:400;font-size:13px">${DAYMETA[d].dshort}</span>${isToday(d)?' <span class="badge" style="color:var(--brass);border-color:var(--brass)">TODAY</span>':''}</div><div class="hv">${bits.join(' · ')}</div></div>
       <span class="chev">›</span></button>`;
   };
   return `<h3>Setup</h3>
@@ -2578,8 +2610,6 @@ function renderScreen(){
   return renderBoard(ui.day || resolveDay());
 }
 function postRender(){
-  const ch = document.querySelector('.cuphead');
-  if (ch) document.documentElement.style.setProperty('--cuph', ch.offsetHeight + 'px');
   if (ui.flashCup){
     ui.flashCup = false;
     document.querySelectorAll('.tug .aR,.tug .aB').forEach(el=>el.classList.add('flash'));
@@ -2642,6 +2672,7 @@ window.addEventListener('popstate', ()=>{
 function sheetHtml(sh){
   const t = sh.type;
   if (t==='hub') return hubSheetHtml();
+  if (t==='days') return daysSheetHtml();
   if (t==='cup') return cupSheetHtml();
   if (t==='gloss') return `<h3>Match play, translated</h3>
     <div style="font-size:14.5px;line-height:1.6">
@@ -3080,7 +3111,10 @@ document.addEventListener('click', (ev)=>{
       const r = mt.getBoundingClientRect();
       const x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
       const y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
-      addStroke(m, n, key, { x:+x.toFixed(3), y:+y.toFixed(3) });
+      // on the flag = in the hole; anywhere else = where that shot finished
+      const fx = mt.dataset.fx, fy = mt.dataset.fy;
+      if (fx !== '' && fx != null && Math.hypot(x*(+mt.dataset.w) - fx, y*(+mt.dataset.h) - fy) <= PIN_R) holeOut(m, n, key);
+      else addStroke(m, n, key, { x:+x.toFixed(3), y:+y.toFixed(3) });
     }
     return;
   }
@@ -3101,6 +3135,7 @@ document.addEventListener('click', (ev)=>{
     case 'setup': closeSheet(true); navigate('#/day/'+(a.d||ui.day||resolveDay())+'/setup'); break;
     case 'settings': closeSheet(true); navigate('#/settings'); break;
     case 'hub': openSheet('hub'); break;
+    case 'days': openSheet('days'); break;
     case 'cupsheet': openSheet('cup'); break;
     case 'gloss': openSheet('gloss'); break;
     case 'pill': openSheet('pill'); break;
@@ -3114,20 +3149,7 @@ document.addEventListener('click', (ev)=>{
       const n = +a.n; ui.sel[a.id] = { n, key: selKey(m, n)===a.k ? null : a.k }; requestRender(); break; }
     case 'tally': { const m = theMatch(a.id); if (m) addStroke(m, +a.n, a.k, { u:1 }); break; }
     case 'pen': { const m = theMatch(a.id); if (m) addStroke(m, +a.n, a.k, { p:1, u:1 }); break; }
-    case 'holed': { const m = theMatch(a.id); if (!m) break;
-      const list = traceFor(m, +a.n, a.k), ti = traceInfo(list);
-      if (ti.complete) break;
-      // from nothing: start a putt-back-to-tee build; forward: close it out
-      if (!ti.started) setTrace(m, +a.n, a.k, [{ h:1, r:1 }]);
-      else if (!ti.rev){ list.push({ h:1 }); setTrace(m, +a.n, a.k, list); }
-      break; }
-    case 'teeshot': { const m = theMatch(a.id); if (!m) break;
-      const list = traceFor(m, +a.n, a.k), ti = traceInfo(list);
-      // marks the front stroke as the tee shot. When that stroke is the
-      // holing marker itself the trace is [{h,r,t}] — a hole-in-one, and a
-      // legitimate gross of 1 — so no minimum length here.
-      if (ti.rev && !ti.complete){ list[0].t = 1; setTrace(m, +a.n, a.k, list); }
-      break; }
+    case 'holed': { const m = theMatch(a.id); if (m) holeOut(m, +a.n, a.k); break; }
     case 'traceundo': { const m = theMatch(a.id); if (!m) break;
       const st = ui.traceUndo[a.id+'/'+a.n+'/'+a.k];
       let list;

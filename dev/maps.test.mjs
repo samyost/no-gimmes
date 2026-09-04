@@ -1,5 +1,5 @@
 // Feature tests: lo-fi hole maps (traced from OSM), golfer selection and
-// stroke traces (tap-per-stroke, tally, reverse build, posted-vs-mapped),
+// stroke traces (tap-per-stroke, tally, tap-the-flag, posted-vs-mapped),
 // historical hole notes, and plays-like yardage.
 //   node dev/maps.test.mjs
 import { createServer } from 'node:http';
@@ -139,26 +139,31 @@ try {
   ok('hint names them', await p.locator('.mhint').textContent().then(t=>/Sly/.test(t)));
   ok('my finished trace fades to a last dot', await p.locator('.hmap .bmark.dim').count().then(n=>n===1));
 
-  // --- reverse: in the hole first, replay back to the tee ---
-  await p.locator('[data-act="holed"]').click();
-  ok('starts a putt-back-to-tee build', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/1 SO FAR/.test(t) && /putt back to tee/.test(t))));
-  ok('TEE SHOT replaces IN THE HOLE', await p.evaluate(()=>!!document.querySelector('[data-act="teeshot"]') && !document.querySelector('[data-act="holed"]')));
-  await p.locator('.hmap svg').click({ position:{ x:300, y:44 } });
+  // --- the flag is a target: tap the map for each shot, tap the pin to hole out ---
+  ok('no reverse-build mode anywhere', await p.evaluate(()=>!document.querySelector('[data-act="teeshot"]')));
+  ok('pin ring drawn while the map takes taps', await p.locator('.hmap .pinring').count().then(n=>n===1));
   await p.locator('.hmap svg').click({ position:{ x:150, y:40 } });
-  ok('earlier shots prepend', await until(async()=>{
-    const r = await fetch(`${DB}/t/no-gimmes-2026/matches/m1/holes/1/trace/p3.json`).then(x=>x.json());
-    return Array.isArray(r) && r.length===3 && r[2].h && r[0].x < r[1].x;
+  await p.locator('.hmap svg').click({ position:{ x:300, y:44 } });
+  const pin = await p.evaluate(()=>{ const s = document.querySelector('.hmap svg[data-maptap]'); const r = s.getBoundingClientRect();
+    return { x: (+s.dataset.fx) / (+s.dataset.w) * r.width, y: (+s.dataset.fy) / (+s.dataset.h) * r.height }; });
+  await p.locator('.hmap svg').click({ position:{ x: pin.x + 3, y: pin.y - 3 } });
+  ok('tapping the flag holes out: holed in 3', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t))));
+  ok('holing stroke sits at the flag, numbered from the tee', await p.evaluate(()=>{
+    const marks = document.querySelectorAll('.hmap .bmark.sel text');
+    return document.querySelectorAll('.hmap .bmark.hole').length===1 && marks[0].textContent==='1';
   }));
-  await p.locator('[data-act="teeshot"]').click();
-  ok('tee shot closes it: holed in 3', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t))));
-  ok('numbered from the tee', await p.locator('.hmap .bmark.sel text').first().textContent().then(t=>t==='1'));
+  ok('trace stored tee to pin', await until(async()=>{
+    const r = await fetch(`${DB}/t/no-gimmes-2026/matches/m1/holes/1/trace/p3.json`).then(x=>x.json());
+    return Array.isArray(r) && r.length===3 && r[2].h && r[0].x < r[1].x && !r.some(s=>s.r||s.t);
+  }));
 
-  // --- an ace: in the hole, then tee shot, with nothing between ---
+  // --- an ace: IN THE HOLE with nothing before it, with a second look ---
   await p.locator('.gchips .gchip').nth(2).click(); // Tank
   await p.locator('[data-act="holed"]').click();
-  await p.locator('[data-act="teeshot"]').click();
   ok('hole-in-one is a legitimate 1', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 1/.test(t))));
-  await p.locator('[data-act="traceclear"]').click();
+  ok('…and asks for a second look', await until(()=>p.locator('#snack').textContent().then(t=>/Hole-in-one/.test(t) && /UNDO/.test(t))));
+  await p.locator('[data-act="snackbtn"]').click();
+  ok('undo takes the ace back', await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/NO STROKES YET/.test(t))));
   await p.locator('.gchips .gchip').nth(1).click(); // back to Sly
   await until(()=>p.locator('.tracebar .ro').textContent().then(t=>/HOLED IN 3/.test(t)));
 
@@ -197,7 +202,7 @@ try {
   await until(()=>p.locator('#cell7').count().then(n=>n===1));
   await p.locator('#cell7').click();
   await until(()=>p.locator('.hmap svg').count().then(n=>n===1));
-  ok('legacy ball mark shows as a dot', await p.locator('.hmap .bmark.b').count().then(n=>n===1));
+  ok('legacy ball mark shows as a dot', await until(()=>p.locator('.hmap .bmark.b').count().then(n=>n===1))); // lands with the sync snapshot after reload
   ok('spectator has no golfer selected', await p.locator('.gchip.sel').count().then(n=>n===0));
   ok('spectator gets no tally bar', await p.locator('.tracebar').count().then(n=>n===0));
   await p.locator('.hmap svg').click({ position:{ x:100, y:30 } });

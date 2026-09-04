@@ -85,12 +85,33 @@ try {
   // Duck is in a live match today (tee 06:00 < 15:00) → personalized landing on the match
   ok('personalized landing on own match', await until(()=>p1.evaluate(()=>location.hash.includes('#/match/m1'))));
   ok('big status ALL SQUARE', await until(()=>p1.locator('.bigstat').textContent().then(t=>t.includes('ALL SQUARE'))));
+  // ---- match screen chrome: setup gear top-right, one compact winner row, scores tucked away ----
+  ok('setup gear on the match screen', await p1.locator('.cupstrip .gear[data-act="hub"]').count().then(n=>n===1));
+  ok('one compact RED · HALVE · BLUE row', await p1.locator('.winrow .wbtn').count().then(n=>n===3));
+  ok('scores drawer closed by default', await p1.locator('.drawer').count().then(n=>n===0));
 
   const p2 = await newPage();
   await p2.goto(url);
   await until(()=>p2.locator('.whocard').count().then(n=>n===8));
   await p2.locator('.whofoot button').click(); // spectator
   ok('spectator lands on board', await until(()=>p2.evaluate(()=>location.hash.includes('#/day/sat'))));
+
+  // ---- board chrome: no tab strip; a day picker sheet; setup gear in the app bar ----
+  ok('no day tab strip on the canvas', await p2.locator('.daytabs, .dt').count().then(n=>n===0));
+  ok('setup gear in the app bar', await p2.locator('.appbar .gear[data-act="hub"]').count().then(n=>n===1));
+  ok('day pill says TODAY', await p2.locator('.daypick').textContent().then(t=>/SAT/.test(t) && /TODAY/.test(t)));
+  await p2.locator('.daypick').click();
+  ok('day sheet lists all four days', await until(()=>p2.locator('#sheetbox .dayrow').count().then(n=>n===4)));
+  ok('current day highlighted in the sheet', await p2.locator('#sheetbox .dayrow.on[data-d="sat"]').count().then(n=>n===1));
+  await p2.locator('#sheetbox .dayrow[data-d="sun"]').click();
+  ok('picking a day switches the board', await until(()=>p2.evaluate(()=>location.hash.includes('#/day/sun') && !ui.sheet)));
+  await p2.locator('.daypick').click();
+  await p2.locator('#sheetbox .dayrow[data-d="sat"]').click();
+  await until(()=>p2.evaluate(()=>location.hash.includes('#/day/sat')));
+  await p2.locator('.appbar .gear').click();
+  ok('gear opens the setup hub', await until(()=>p2.locator('#sheetbox h3').textContent().then(t=>/Setup/i.test(t))));
+  await p2.locator('#sheetlayer .scrim').click({ position:{ x:10, y:10 } }); // top corner — the sheet covers the middle
+  await until(()=>p2.evaluate(()=>!ui.sheet));
 
   // ---- unstarted matches must not project (bone gap in the bar) ----
   const proj0 = await p2.evaluate(()=>{ const c = cup(); return c.pRed + c.pBlue; });
@@ -131,7 +152,7 @@ try {
   ok('incomplete entry does not derive', await until(()=>p1.locator('.dbanner').textContent().then(t=>/Waiting/i.test(t))));
   await setRow(1,5); await setRow(2,5); await setRow(3,5);
   ok('derivation banner appears', await until(()=>p1.locator('.dbanner').textContent().then(t=>/Derived: RED/i.test(t))));
-  const lit = p1.locator('.mini3 .mR.lit');
+  const lit = p1.locator('.wbtn.R.lit');
   ok('red mini pill lit', await until(()=>lit.count().then(n=>n===1)));
   await lit.click();
   ok('hole 2 committed via strokes', await until(()=>p1.locator('.bigstat').textContent().then(t=>t.includes('RED 2UP'))));
@@ -140,7 +161,7 @@ try {
   await p1.context().setOffline(true);
   // p1 (offline) scores hole 3 RED
   await until(()=>p1.locator('.hctx .h1').textContent().then(t=>t.includes('HOLE 3')));
-  await p1.locator('.mini3 .mR').first().click();
+  await p1.locator('.wbtn.R').first().click();
   ok('offline pill shows queued', await until(()=>p1.locator('.pill').first().textContent().then(t=>/QUEUED/.test(t))));
   // p2 scores m2 hole 1 BLUE meanwhile
   await p2.locator('[data-act="match"]').nth(1).click();
@@ -161,7 +182,7 @@ try {
 
   // ---- closure: drive m2 to 10&8 on page2, closure sheet appears ----
   for (let h=2; h<=10; h++){
-    await p2.locator('.wbtn.B, .mini3 .mB').first().click();
+    await p2.locator('.wbtn.B').first().click();
     await sleep(760); // lockout
   }
   ok('closure sheet fired', await until(()=>p2.locator('#sheetbox').textContent().then(t=>/TAKE IT|Point posted/i.test(t))));
