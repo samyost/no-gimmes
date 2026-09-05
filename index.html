@@ -585,7 +585,9 @@ a{color:var(--brass)}
 .bbstand .tm .pts{font-family:'Saira Condensed';font-weight:800;font-size:28px;line-height:1.05;display:block}
 .bbstand .tm .lab{font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage);display:block}
 .bbstand .tm::before{content:'';position:absolute;left:8px;right:8px;top:0;height:3px;border-radius:0 0 3px 3px}
-.t1{--tc:var(--red)} .t2{--tc:var(--blue)} .t3{--tc:var(--live)}
+.t0{--tc:var(--ink)} .t1{--tc:var(--red)} .t2{--tc:var(--blue)} .t3{--tc:var(--live)}
+.cardtbl td.under{color:var(--red);font-weight:700} .cardtbl td.over{color:var(--blue)}
+.mapbtn{color:var(--brass);font-weight:700;text-decoration:none;border:1px solid var(--brass);border-radius:99px;padding:2px 8px}
 .bbstand .tm::before{background:var(--tc)}
 .bbopen{font-size:12.5px;color:var(--brass);margin:2px 0 8px;line-height:1.4}
 .bbteams{display:flex;gap:6px;margin:8px 0 4px}
@@ -663,6 +665,7 @@ const FORMATS = {
   foursomes: { name:'FOURSOMES',  desc:'one ball, alternate everything (the purist’s format)', oneBall:true },
   singles:   { name:'SINGLES',    desc:'1 v 1',                                      oneBall:false },
   mixer:     { name:'MIXER',      desc:'a different game every few holes',           oneBall:false },
+  casual:    { name:'CASUAL',     desc:'no matches — everyone just keeps their own card', oneBall:false },
 };
 const MIXER_DEFAULT = { seg:3, formats:['scramble','greensomes','fourball'], flip:true };
 const WHS_DEFAULTS = { singles:100, fourball:90, shamble:85, foursomes:50, greensomes:60, chapman:60, scramble:35 };
@@ -1056,7 +1059,7 @@ function effTeam(d, pid){
 function dayNet(d){ const dc = dayCfg(d); return dc.net == null ? cfg().net : dc.net; }
 function sanitizeMix(m){
   m = m || {};
-  const fmts = arr(m.formats).filter(f=>FORMATS[f] && f!=='mixer');
+  const fmts = arr(m.formats).filter(f=>FORMATS[f] && f!=='mixer' && f!=='casual');
   return { seg: [3,6,9].includes(m.seg) ? m.seg : 3,
            formats: fmts.length ? fmts : MIXER_DEFAULT.formats.slice(),
            flip: m.flip !== false };
@@ -1162,13 +1165,23 @@ function playingCH(d, p){
 // ever sees one
 function matchesFor(d){
   return Object.entries(S.matches||{}).map(([id,m])=>Object.assign({id},m))
-    .filter(m=>m.day===d && !m.side)
+    .filter(m=>m.day===d && !m.side && !m.card && !String(m.id).startsWith('card_'))
     .sort((a,b)=> (a.group||'a').localeCompare(b.group||'a') || (a.ord||0)-(b.ord||0));
 }
 function cupMatchesFor(d){ return matchesFor(d); }
 function mFormat(m, n){ return holeFormat(m.day, n); }
 function allMatches(){ return DAYS.flatMap(matchesFor); }
-function theMatch(id){ const m=(S.matches||{})[id]; return m && !m.side ? Object.assign({id},m) : null; }
+function theMatch(id){
+  if (typeof id === 'string' && id.startsWith('card_')){ const d = id.slice(5); return DAYS.includes(d) ? cardMatch(d) : null; }
+  const m=(S.matches||{})[id]; return m && !m.side ? Object.assign({id},m) : null; }
+// the day's "card match": a virtual match holding everyone present on one
+// side so the hole map and shot traces work on a casual day (or for anyone
+// scoring their own ball outside their match). Only its holes are ever
+// written (matches/card_<d>/holes/...); it is never a cup match.
+function cardMatch(d){
+  const raw = (S.matches||{})['card_'+d] || {};
+  return { id:'card_'+d, day:d, card:true, red:presentIds(d), blue:[], holes: raw.holes || {} };
+}
 function sideIds(m, side){ const v = m[side==='A'?'red':'blue']; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v||{}).filter(Boolean); }
 function engineHoles(m){
   const out = {};
@@ -1423,17 +1436,13 @@ function ouEntry(d, pid){
 // gross for the round as the card has it — every hole posted for that player
 // (individual-ball formats only; a scramble ball belongs to the team).
 function ouCardScore(d, pid){
-  for (const m of cupMatchesFor(d)){
-    if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
-    let tot = 0, all = true;
-    for (let n=1; n<=18; n++){
-      const v = (effStrokes(m, n)||{})[pid];
-      if (typeof v !== 'number' || !(v > 0)){ all = false; break; }
-      tot += v;
-    }
-    if (all) return tot;
+  let tot = 0;
+  for (let n=1; n<=18; n++){
+    const v = cardGross(d, n, pid);
+    if (typeof v !== 'number' || !(v > 0)) return null;
+    tot += v;
   }
-  return null;
+  return tot;
 }
 // the score the bets settle on: a posted number wins, else the card's total
 function ouScore(d, pid){
@@ -1616,14 +1625,52 @@ function bbStrokes(d){
 }
 // a player's gross on a hole for this game: typed here, else off the card
 function bbGross(d, n, pid){
-  const hand = ((bbDay(d).strokes||{})[n]||{})[pid];
-  if (hand === 'pickup' || (typeof hand === 'number' && hand > 0)) return { v:hand, from:'hand' };
-  const v = cardGross(d, n, pid);
+  const hand = handGross(d, n, pid);
+  if (hand != null) return { v:hand, from:'hand' };
+  const t = mapGross(d, n, pid);
+  if (t != null) return { v:t, from:'map' };
+  const v = matchGross(d, n, pid);
   return v == null ? { v:null, from:null } : { v, from:'card' };
 }
-// one player's gross on one hole as the card has it: a posted number, a
-// completed shot trace, or 'pickup'; null when nothing is in yet
+// a completed shot trace on the day's card match
+function mapGross(d, n, pid){
+  const cm = cardMatch(d);
+  if (!cm.holes[n]) return null;
+  const v = (effStrokes(cm, n)||{})[pid];
+  return (v === 'pickup' || (typeof v === 'number' && v > 0)) ? v : null;
+}
+// running totals for everyone present: thru, gross, to par, net off the full course handicap
+function cardTotals(d){
+  const hs = holesFor(d);
+  return presentIds(d).map(pid=>{
+    let thru = 0, gross = 0, par = 0, picked = false;
+    for (let n=1; n<=18; n++){
+      const v = cardGross(d, n, pid);
+      if (v == null) continue;
+      if (v === 'pickup'){ picked = true; continue; }
+      thru++; gross += v; par += hs[n-1].par;
+    }
+    const p = player(pid);
+    const ch = (p.hcp == null || p.hcp === '') ? null : playingCH(d, p);
+    return { pid, thru, gross, par, toPar: gross - par, picked, ch, net: ch == null ? null : gross - Math.round(ch * thru / 18) };
+  }).sort((a,b)=> (b.thru>0) - (a.thru>0) || a.toPar - b.toPar || a.gross - b.gross || (player(a.pid).ord||0) - (player(b.pid).ord||0));
+}
+function toParTxt(n){ return n === 0 ? 'E' : (n > 0 ? '+'+n : String(n)); }
+// one player's gross on one hole as the card has it: a number typed on the
+// card / best-ball page, else a posted number or completed shot trace in a
+// match, or 'pickup'; null when nothing is in yet
 function cardGross(d, n, pid){
+  const h = handGross(d, n, pid);
+  if (h != null) return h;
+  const t = mapGross(d, n, pid);
+  if (t != null) return t;
+  return matchGross(d, n, pid);
+}
+function handGross(d, n, pid){
+  const v = ((bbDay(d).strokes||{})[n]||{})[pid];
+  return (v === 'pickup' || (typeof v === 'number' && v > 0)) ? v : null;
+}
+function matchGross(d, n, pid){
   for (const m of cupMatchesFor(d)){
     if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
     const v = (effStrokes(m, n)||{})[pid];
@@ -2008,6 +2055,7 @@ function dayRulesTxt(d){
   const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
   const net = dayNet(d) && anyH && dc.course !== 'tbd';
   const pct = dayAllowancePct(d);
+  if (dc.format === 'casual') return bits.concat(['OWN CARD', net ? 'GROSS & NET' : 'GROSS', 'NO CUP POINTS']).join(' · ');
   bits.push(net ? (dc.format==='mixer' ? 'NET · WHS PER SEGMENT' : 'NET '+pct+'%') : (dayNet(d) ? 'GROSS (no hcps yet)' : 'GROSS'));
   const worth = (dc.points||1) * ((dc.x2 && dc.format==='singles')?2:1);
   bits.push(`${halfTxt(worth)} PT${worth===1?'':'S'}`);
@@ -2099,7 +2147,9 @@ function renderBoard(d){
     body += `<div class="mlist">` + gm.map(m => preview ? matchRowHtml(m) : matchRowHtml(m)).join('') + `</div>`;
     if (!gm.length) body += `<div class="empty" style="padding:10px">No matches in this wave yet.</div>`;
   }
-  if (!ms.length && !anyCart){
+  if (dc.format === 'casual'){
+    body = cardBoardHtml(d);
+  } else if (!ms.length && !anyCart){
     body = `<div class="empty">Nothing on the tee sheet for ${DAYMETA[d].name} yet.<br>
       <button class="cta" data-act="setup" data-d="${d}">Set up ${DAYMETA[d].name}</button></div>`;
   } else if (!ms.length){
@@ -2747,13 +2797,14 @@ function renderSetupDay(d){
     </div>
 
     <h2 id="matches">5 · Matches</h2>
-    <div class="block">
+    ${dc.format==='casual' ? `<div class="block"><div class="mut" style="font-size:13.5px;line-height:1.5">Casual day — no matches, no cup points. Everyone keeps their own card and the board shows the running totals.</div>
+      <button class="cta" style="margin:8px 0 0" data-act="card" data-d="${d}">Open the card</button></div>` : `<div class="block">
       <button class="cta" style="margin:0 0 4px" data-act="makematches" data-d="${d}">${makeLabel}</button>
       ${mCards}
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="ghostbtn" data-act="addmatch" data-d="${d}">+ Add match</button>
       <button class="ghostbtn" data-act="ou" data-d="${d}">🤝 Head-to-head bets live under Side action</button>
       <span class="mut" style="font-size:12px">Tap a name in a match, then a bench/other name to swap.</span></div>
-    </div>
+    </div>`}
 
     <h2>6 · Format &amp; points today</h2>
     <div class="block">
@@ -3076,35 +3127,41 @@ function bbLedgerHtml(d, st){
       const res = (r.winner ? em(r.winner) : `<span class="push">PUSH → ${n<18?'hole '+(n+1):'open'}</span>`) + r.decided.map(dd=>` · +${dd.from} ${em(dd.winner)}`).join('');
       return `<tr><td class="num">${n}</td>${teams.map(t=>`<td class="num t${t.id} ${r.net[t.id]===low?'lo':''}">${bbNetTxt(r.net[t.id])}</td>`).join('')}<td class="res">${res}</td></tr>`; }).join('')}</table>`;
 }
+// one player's quick-number row for hole n, writing to bb/{d}/strokes; cls
+// colours the set number (t1..t3 for best-ball teams, t0 for the plain card)
+function bbQRow(d, n, pid, si, cls, withMap){
+  const h = holesFor(d)[n-1];
+  const p = player(pid);
+  const g = bbGross(d, n, pid);
+  const curNum = typeof g.v === 'number' ? g.v : null;
+  const dotN = bbDots(d, si, n, pid);
+  const fromCard = g.from === 'card' || g.from === 'map';
+  const nums = [];
+  for (let v = Math.max(1,h.par-2); v <= h.par+2; v++){
+    const set = curNum === v;
+    nums.push(`<button class="qn ${set?('set '+cls):(v===h.par&&curNum==null?'ghost':'')} ${set&&fromCard?'card':''}" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${v}">${v}</button>`);
+  }
+  const minus = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)-1}">−</button>`;
+  const plus  = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)+1}">+</button>`;
+  const outlier = (curNum!=null && (curNum < Math.max(1,h.par-2) || curNum > h.par+2)) ? `<span class="netlab">${curNum}</span>` : '';
+  const bits = [];
+  if (dotN && curNum!=null) bits.push(`<span class="netlab">${curNum} → net ${curNum-dotN}</span>`);
+  if (g.v==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up</span>`);
+  if (g.from === 'card') bits.push(`<span class="brass" style="font-size:12px">${withMap ? 'match card' : 'from the match card'}</span>`);
+  if (g.from === 'map') bits.push(`<span class="brass" style="font-size:12px">⛳ mapped</span>`);
+  if (withMap){ const ti = traceInfo(traceFor(cardMatch(d), n, pid));
+    bits.push(`<button class="pickup mapbtn" data-act="cardmap" data-d="${d}" data-n="${n}" data-p="${pid}">🗺 map${ti.started && !ti.complete ? ` · ${ti.n} so far` : ''}</button>`); }
+  bits.push(`<button class="pickup" data-act="bbpickup" data-d="${d}" data-n="${n}" data-p="${pid}">${g.v==='pickup'?'back in':'pickup'}</button>`);
+  const dot = dotN ? ` <span class="brass">${'●'.repeat(Math.min(dotN,2))}</span>` : '';
+  return `<div class="srow ${g.v==='pickup'?'picked':''}"><span class="who ${cls}">${p.emoji||'❔'} ${esc((p.name||'??').split(' ')[0])}${dot}</span><div class="qnums">${minus}${nums.join('')}${plus}</div>${outlier}</div>
+    <div class="srowsub">${bits.join(' · ')}</div>`;
+}
 function bbHoleHtml(d, st, n){
   const h = holesFor(d)[n-1];
-  const hand = (bbDay(d).strokes||{})[n]||{};
   let rows = '';
   for (const tm of bbTeams(d)){
     const nets = bbHoleNets(d, n, st.si);
-    const qrow = pid => {
-      const p = player(pid);
-      const g = bbGross(d, n, pid);
-      const curNum = typeof g.v === 'number' ? g.v : null;
-      const dotN = bbDots(d, st.si, n, pid);
-      const fromCard = g.from === 'card';
-      const nums = [];
-      for (let v = Math.max(1,h.par-2); v <= h.par+2; v++){
-        const set = curNum === v;
-        nums.push(`<button class="qn ${set?('set t'+tm.id):(v===h.par&&curNum==null?'ghost':'')} ${set&&fromCard?'card':''}" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${v}">${v}</button>`);
-      }
-      const minus = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)-1}">−</button>`;
-      const plus  = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)+1}">+</button>`;
-      const outlier = (curNum!=null && (curNum < Math.max(1,h.par-2) || curNum > h.par+2)) ? `<span class="netlab">${curNum}</span>` : '';
-      const bits = [];
-      if (dotN && curNum!=null) bits.push(`<span class="netlab">${curNum} → net ${curNum-dotN}</span>`);
-      if (g.v==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up</span>`);
-      if (fromCard) bits.push(`<span class="brass" style="font-size:12px">from the card</span>`);
-      bits.push(`<button class="pickup" data-act="bbpickup" data-d="${d}" data-n="${n}" data-p="${pid}">${g.v==='pickup'?'back in':'pickup'}</button>`);
-      const dot = dotN ? ` <span class="brass">${'●'.repeat(Math.min(dotN,2))}</span>` : '';
-      return `<div class="srow ${g.v==='pickup'?'picked':''}"><span class="who t${tm.id}">${p.emoji||'❔'} ${esc((p.name||'??').split(' ')[0])}${dot}</span><div class="qnums">${minus}${nums.join('')}${plus}</div>${outlier}</div>
-        <div class="srowsub">${bits.join(' · ')}</div>`;
-    };
+    const qrow = pid => bbQRow(d, n, pid, st.si, 't'+tm.id);
     rows += `<div class="bbtm t${tm.id}"><div class="th">TEAM ${tm.id} <span>${bbTeamEm(d, tm.id)}</span><span class="best">${nets[tm.id]==null?'':`best ${st.si.net?'net ':''}${bbNetTxt(nets[tm.id])}`}</span></div>${tm.ids.map(qrow).join('')}</div>`;
   }
   const posted = !!st.perHole[n];
@@ -3149,6 +3206,59 @@ function renderBB(d){
     <div class="mut" style="font-size:12px;margin-top:14px">Each team’s best ${dayNet(d)?'net ':''}ball counts. Low team takes the hole. Two (or three) teams tied for low is a <b>push</b>: that hole rides to the next hole and goes to whichever of the tied teams is lower there — even if a third team wins that hole outright. Tied again, it keeps riding. Scores in brass came off the card; tap a number to override it here (tap it again to clear). Nothing here touches the cup.</div>
   </div>`;
 }
+// ---- the card: a casual day, everyone keeps their own score -------------------
+function cardTableHtml(d){
+  const rows = cardTotals(d);
+  const anyNet = rows.some(r=>r.net != null);
+  return `<table class="bbledger cardtbl"><tr><th style="text-align:left">PLAYER</th><th>THRU</th><th>GROSS</th><th>TO PAR</th>${anyNet?'<th>NET</th>':''}</tr>
+    ${rows.map(r=>`<tr><td style="text-align:left;font-weight:700">${player(r.pid).emoji} ${esc(player(r.pid).name)}</td><td class="num">${r.thru||'—'}</td><td class="num">${r.thru?r.gross:'—'}</td><td class="num ${r.thru?(r.toPar<0?'under':r.toPar>0?'over':''):''}">${r.thru?toParTxt(r.toPar):'—'}</td>${anyNet?`<td class="num">${r.thru&&r.net!=null?r.net:'—'}</td>`:''}</tr>`).join('')}</table>`;
+}
+function cardBoardHtml(d){
+  if (!presentIds(d).length) return `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`;
+  return `<div class="tgh">📋 THE CARD — casual, own score, nothing to the cup</div>
+    <div style="padding:0 14px">${cardTableHtml(d)}
+    <button class="cta" style="margin:10px 0 4px;width:100%" data-act="card" data-d="${d}">SCORE</button></div>`;
+}
+function cardCurHole(d){
+  const h = (ui.cardHole||{})[d];
+  if (h) return h;
+  const ids = presentIds(d);
+  for (let n=1; n<=18; n++) if (ids.some(pid=>cardGross(d, n, pid) == null)) return n;
+  return 18;
+}
+function renderCard(d){
+  const ids = presentIds(d);
+  const hs = holesFor(d);
+  const n = cardCurHole(d);
+  const h = hs[n-1];
+  const cl = courseLabel(d);
+  const si = { kind:'individual', players:{}, sides:{A:0,B:0}, net:false, missingHcp:[] };
+  const dayChips = DAYS.map(x=>`<button class="selopt ${x===d?'on':''}" data-act="card" data-d="${x}" style="min-width:64px">${DAYMETA[x].label}<span class="sub">${FORMATS[dayCfg(x).format].name.toLowerCase()}</span></button>`).join('');
+  const rail = `<div class="bbrail" id="bbrail">${hs.map(x=>{
+    const done = ids.length && ids.every(pid=>cardGross(d, x.no, pid) != null);
+    const some = !done && ids.some(pid=>cardGross(d, x.no, pid) != null);
+    return `<button class="cell ${x.no===n?'cur':''}" id="bbcell${x.no}" data-act="cardhole" data-d="${d}" data-n="${x.no}">${x.no}<span class="r">${done?'●':some?'·':''}</span></button>`; }).join('')}</div>`;
+  const posted = ids.length && ids.every(pid=>cardGross(d, n, pid) != null);
+  const me = LS.get('id', null);
+  const order = ids.slice().sort((a,b)=> (a===me?-1:b===me?1:0)); // your own row first
+  return `
+  <div class="appbar"><button class="backbtn" data-act="board">‹</button>
+    <span class="wordmark sc">THE CARD</span><span class="sp"></span>${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
+  <div class="spage oupage bbpage">
+    <div class="selrow">${dayChips}</div>
+    <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · ${ids.length} playing · everyone keeps their own score, nothing to the cup.</div>
+    ${ids.length ? `${rail}
+    <div class="bbhole"><button class="nav" data-act="cardhole" data-d="${d}" data-n="${n-1}" ${n<=1?'disabled':''}>‹</button>
+      <span class="hn">HOLE ${n}</span><span class="hm">PAR ${h.par} · SI ${h.si}${h.yds?' · '+h.yds+' yds':''}${h.nine?' · '+esc(h.nine):''}</span><span class="sp" style="flex:1"></span>
+      <button class="nav" data-act="cardhole" data-d="${d}" data-n="${n+1}" ${n>=18?'disabled':''}>›</button></div>
+    <div class="bbtm t0">${order.map(pid=>bbQRow(d, n, pid, si, 't0', true)).join('')}</div>
+    ${posted && n < 18 ? `<div class="bbnext"><button class="bigbtn pri" data-act="cardhole" data-d="${d}" data-n="${n+1}">NEXT HOLE ›</button></div>` : ''}
+    ${cardTableHtml(d)}
+    <div class="mut" style="font-size:12px;margin-top:14px">Tap your number, or − and + to nudge it; tap the set number again to clear it. <b>map</b> opens the hole to mark shots where they stopped — holed out, the count becomes your score unless you type over it. Net is gross less the course handicap, pro-rated to the holes played. Over/under and head-to-head settle off these totals like any other day.</div>`
+    : `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}
+  </div>`;
+}
 // ---- hub, cup sheet, who, kickoff -----------------------------------------
 function hubSheetHtml(){
   const c = cfg();
@@ -3178,6 +3288,8 @@ function hubSheetHtml(){
         const lines = Object.values((S.ou||{})[d]||{}).filter(e=>e && e.line != null).length;
         return `${DAYMETA[d].label}: ${t.n ? t.n+' matchup'+(t.n>1?'s':'')+(t.red+t.blue ? ` ${teamName('A')} ${t.red}–${t.blue} ${teamName('B')}` : '') : 'no matchups'} · ${lines ? lines+' line'+(lines>1?'s':'') : 'no lines'} · ${b.settled+b.open ? (b.settled+b.open)+' bet'+((b.settled+b.open)>1?'s':'')+' on the trip' : 'no bets yet'}`; })()}</div></div>
       <span class="chev">›</span></button>
+    <button class="hubrow" data-act="card"><div><div class="hl">The card</div>
+      <div class="hv">Everyone’s own score for the day — casual rounds live here</div></div><span class="chev">›</span></button>
     <button class="hubrow" data-act="bb"><div><div class="hl">Best Ball · 2 v 2 v 3</div>
       <div class="hv">${(()=>{ const d = ui.day || resolveDay(); if (!bbOn(d)) return `${DAYMETA[d].label}: no teams yet · three teams, a point a hole, pushes ride`;
         const st = bbState(d); return `${DAYMETA[d].label}: ${bbTeams(d).map(t=>bbTeamEm(d,t.id)+' '+(st.won[t.id]||0)).join(' · ')} · ${st.scored} of 18${st.carries.length?` · ${st.carries.length} riding`:''}`; })()}</div></div>
@@ -3345,6 +3457,7 @@ function renderScreen(){
   if (ui.screen === 'settings') return renderSettings();
   if (ui.screen === 'ou') return renderOU(ui.day || resolveDay());
   if (ui.screen === 'bb') return renderBB(ui.day || resolveDay());
+  if (ui.screen === 'card') return renderCard(ui.day || resolveDay());
   return renderBoard(ui.day || resolveDay());
 }
 function postRender(){
@@ -3386,6 +3499,7 @@ function parseRoute(){
   if (parts[0]==='settings'){ ui.screen='settings'; return; }
   if (parts[0]==='ou'){ ui.screen='ou'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
   if (parts[0]==='bb'){ ui.screen='bb'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
+  if (parts[0]==='card'){ ui.screen='card'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
   ui.screen='board'; ui.day = ui.day || resolveDay();
 }
 window.addEventListener('hashchange', ()=>{ parseRoute(); requestRender(); });
@@ -3437,7 +3551,7 @@ function sheetHtml(sh){
     const segSel = [3,6,9].map(s=>`<button class="selopt ${mx.seg===s?'on':''}" data-act="mixseg" data-id="${sh.id}" data-v="${s}">${s}-hole turns</button>`).join('');
     const rotChips = mx.formats.map((f,i)=>
       `<button class="selopt on" data-act="mixdel" data-id="${sh.id}" data-i="${i}">${FORMATS[f].name} ✕</button>`).join('');
-    const palette = Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles').map(f=>
+    const palette = Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles' && f!=='casual').map(f=>
       `<button class="selopt" data-act="mixadd" data-id="${sh.id}" data-v="${f}">+ ${FORMATS[f].name}</button>`).join('');
     const used = daysUsingMix(sh.id);
     return `<h3>Mix designer</h3>
@@ -3683,6 +3797,13 @@ function sheetHtml(sh){
         <button class="bigbtn pri" data-act="ouplace" ${why?'disabled':''}>${existing ? 'Change it' : 'Place it'} · $${amt}</button>
       </div>`;
   }
+  if (t==='cardmap'){
+    const cm = cardMatch(sh.d);
+    const h = holesFor(sh.d)[sh.n-1];
+    return `<h3>${pName(sh.pid)} · hole ${sh.n} <span class="mut" style="font-weight:400;font-size:13px">par ${h.par}</span></h3>
+      ${holeMapHtml(cm, sh.d, sh.n)}
+      <div class="btnrow" style="margin-top:10px"><button class="bigbtn pri" data-act="sheet-close">Done</button></div>`;
+  }
   if (t==='h2h'){
     const d = sh.d, ids = presentIds(d);
     const existing = sh.id ? h2hRow(d, sh.id) : null;
@@ -3836,6 +3957,7 @@ function makeMatches(d){
   const ms = cupMatchesFor(d);
   const scored = ms.filter(m=>Object.values(m.holes||{}).some(h=>h&&h.winner));
   for (const m of ms) if (!scored.includes(m)) op('matches/'+m.id, null);
+  if (dc.format === 'casual') return; // no matches on a casual day
   const usedPids = new Set(scored.flatMap(m=>[...sideIds(m,'A'),...sideIds(m,'B')]));
   const leftovers = [];
   let ord = scored.length;
@@ -4084,6 +4206,9 @@ document.addEventListener('click', (ev)=>{
 
     // best ball (three teams)
     case 'bb': closeSheet(true); navigate('#/bb/'+(a.d||ui.day||resolveDay())); break;
+    case 'card': closeSheet(true); navigate('#/card/'+(a.d||ui.day||resolveDay())); break;
+    case 'cardmap': { ui.sel['card_'+a.d] = { n:+a.n, key:a.p }; (ui.cardHole = ui.cardHole || {})[a.d] = +a.n; openSheet('cardmap', { d:a.d, n:+a.n, pid:a.p }); break; }
+    case 'cardhole': { const n = +a.n; if (n>=1 && n<=18){ (ui.cardHole = ui.cardHole || {})[a.d] = n; requestRender(); } break; }
     case 'bbteam': { // tap a name: team 1 → 2 → 3 → out → 1
       const cur = bbTeamOf(a.d, a.p);
       const next = cur == null ? '1' : (BB_TEAMS[BB_TEAMS.indexOf(cur)+1] || null);
@@ -4094,13 +4219,13 @@ document.addEventListener('click', (ev)=>{
     case 'bbedit': (ui.bbEdit = ui.bbEdit || {})[a.d] = a.v === '1'; requestRender(); break;
     case 'bbhole': { const n = +a.n; if (n>=1 && n<=18){ (ui.bbHole = ui.bbHole || {})[a.d] = n; requestRender(); } break; }
     case 'bbgross': {
-      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n; // stay on this hole until NEXT HOLE
+      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n; (ui.cardHole = ui.cardHole || {})[a.d] = +a.n; // stay on this hole until NEXT HOLE
       const v = +a.v, cur = ((bbDay(a.d).strokes||{})[a.n]||{})[a.p];
       const clear = cur === v || v < 1 || v > 15;
       op(`bb/${a.d}/strokes/${a.n}/${a.p}`, clear ? null : v); break;
     }
     case 'bbpickup': {
-      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n;
+      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n; (ui.cardHole = ui.cardHole || {})[a.d] = +a.n;
       const cur = ((bbDay(a.d).strokes||{})[a.n]||{})[a.p];
       op(`bb/${a.d}/strokes/${a.n}/${a.p}`, cur==='pickup' ? null : 'pickup'); break;
     }
@@ -4501,6 +4626,7 @@ function landHome(fromWho){
   const me = LS.get('id', null);
   const d = resolveDay();
   ui.day = d;
+  if (me && me!=='watch' && isToday(d) && dayCfg(d).format === 'casual' && isPresent(d, me)){ navigate('#/card/'+d); return; }
   if (me && me!=='watch' && (isToday(d) || tripOver()===false)){
     for (const m of cupMatchesFor(d)){
       if (!isToday(d)) break;

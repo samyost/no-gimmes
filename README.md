@@ -74,6 +74,15 @@ watch it appear on the other. That's the whole stack verified.
   underneath. *Bets by* (or a tap on anyone in the book) lists every bet one
   person has placed across the trip — what's riding, what settled, tap to
   change or pull. Handicaps, the cup, and the match screens never see any of it.
+- **Casual day** (setup → format → **CASUAL**): no matches, no cup points,
+  everyone just keeps their own card. Your phone opens straight to *The card*
+  for that day: pick the hole, and every player is a row — tap the exact
+  number, **−** / **+** to nudge it, **pickup**, or **map** to open the hole
+  and mark shots where they stopped (holed out, the count becomes the score
+  unless a number is typed over it). Running gross, to-par, and net (course
+  handicap pro-rated to holes played) sit underneath and on the board.
+  Over/under and head-to-head settle off these totals like any other day.
+  *The card* is also under the gear menu on any day.
 - **Best ball, three teams** (gear → *Side action*): the seven-man answer. Its
   own page, one game per day. Draw teams (2·2·3 with seven, 2·3·3 with eight;
   tap a name to move it) and score hole by hole: each team's best net ball
@@ -138,6 +147,7 @@ node dev/maps.test.mjs     # hole maps / ball marks / hole notes (needs: cd dev 
 node dev/ou.test.mjs       # over/under lines, bets, the max, settlement (needs: cd dev && npm i)
 node dev/bb.test.mjs       # three-team best ball: draw, card read-through, pushes riding (needs: cd dev && npm i)
 node dev/h2h.test.mjs      # head-to-head: negotiated strokes, draw, ledger, grudge matches gone (needs: cd dev && npm i)
+node dev/casual.test.mjs   # casual day: the card, totals, the map sheet, over/under off typed scores (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
 ```
 
