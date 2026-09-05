@@ -104,14 +104,14 @@ try {
   ok('one card per player on the day', await until(()=>p.locator('.oucard').count().then(n=>n===4)));
   ok('board has no over/under section', await p.evaluate(()=>!/OVER \/ UNDER/.test(renderBoard('sun'))));
   ok('Sly’s score fills in from the card', await p.locator('#ou-p3 [data-input="ouscore"]').getAttribute('placeholder').then(v=>v==='90'));
-  ok('no betting until a line is set', await p.locator('#ou-p1 .oubtn').count().then(n=>n===0));
+  ok('no betting until a line is set', await p.locator('#ou-p1 .oubtn').isDisabled());
 
   // --- set a line on Duck, half-point, syncs ---
   await p.locator('#ou-p1 [data-input="ouline"]').fill('88.5');
   await p.locator('#ou-p1 [data-input="ouline"]').press('Enter');
   await p.locator('#ou-p1 [data-input="ouline"]').blur();
   ok('line saved to the trip', await until(async()=>{ const o = await ouGet(); return o && o.sun && o.sun.p1 && o.sun.p1.line===88.5; }));
-  ok('+ BET appears once a line is set', await until(()=>p.locator('#ou-p1 .oubtn').count().then(n=>n===1)));
+  ok('BET opens up once a line is set', await until(()=>p.locator('#ou-p1 .oubtn').isEnabled()));
 
   // --- Duck (this phone) can't take the over on himself ---
   await p.locator('#ou-p1 .oubtn').click();
