@@ -59,7 +59,9 @@ watch it appear on the other. That's the whole stack verified.
   default). One rule: you can't take the over on yourself. Even money against
   the book. The score fills in from the card once all 18 gross scores are
   posted, or type the total; the day's book and the trip total settle
-  underneath. Handicaps, the cup, and the match screens never see any of it.
+  underneath. *Bets by* (or a tap on anyone in the book) lists every bet one
+  person has placed across the trip — what's riding, what settled, tap to
+  change or pull. Handicaps, the cup, and the match screens never see any of it.
 
 ## Honesty box
 

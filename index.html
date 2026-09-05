@@ -509,27 +509,30 @@ a{color:var(--brass)}
 .hnotebtn{color:var(--brass);font-size:11.5px;border:1px dashed var(--pencil);border-radius:8px;padding:3px 8px;flex:0 0 auto}
 /* ---- over / under (its own page) ---- */
 .oupage .lnk{color:var(--brass);text-decoration:underline;text-underline-offset:2px}
-.ouintro{font-size:13.5px;color:var(--sage);margin:10px 0 12px;line-height:1.5}
+.ouintro{font-size:12.5px;color:var(--sage);margin:8px 0 8px;line-height:1.45}
 .ouintro b{color:var(--ink)}
-.oucard{background:var(--card);border:1px solid var(--pencil);border-radius:12px;padding:10px 12px;margin-bottom:10px}
-.ouhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.ouhead .em{font-size:22px}
-.ouhead .nm{font-weight:700;font-size:16px}
-.ouhead .verdict{margin-left:auto;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
-.ouhead .verdict.over{color:var(--ob)} .ouhead .verdict.under{color:var(--live)} .ouhead .verdict.push{color:var(--brass)}
-.ounums{display:flex;align-items:flex-end;gap:12px;margin-top:8px;flex-wrap:wrap}
-.ounums .sp{flex:1}
-.oufield{display:flex;flex-direction:column;gap:3px}
-.oufield .lab{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.08em;color:var(--sage)}
-.oufield input{width:84px;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:8px 8px;font-size:18px;
+/* one row per player: name (+ verdict under it) · LINE · SCORE · BET, labels once in a header */
+.ouhdr{display:flex;align-items:flex-end;gap:8px;padding:0 9px 2px;font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage)}
+.ouhdr .sp{flex:1}
+.ouhdr span:not(.sp):not(.bw){width:62px;text-align:center}
+.ouhdr .bw{width:52px}
+.oucard{background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:6px 8px;margin-bottom:6px}
+.ourow{display:flex;align-items:center;gap:8px}
+.ourow .em{font-size:19px;flex:0 0 auto}
+.ourow .who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.ourow .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ourow .verdict{font-family:'Saira Condensed';font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.ourow .verdict.over{color:var(--ob)} .ourow .verdict.under{color:var(--live)} .ourow .verdict.push{color:var(--brass)}
+.ouin{width:62px;flex:0 0 62px;height:40px;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:0 4px;font-size:17px;
   font-family:'Saira Condensed';font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
-.oufield .from{color:var(--brass)}
-.oubtn{font-family:'Saira Condensed';font-weight:700;font-size:15px;letter-spacing:.06em;border:2px solid var(--ink);border-radius:10px;padding:9px 14px;min-height:44px}
-.oubets{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--pencil)}
-.oubet{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--pencil);border-radius:99px;padding:5px 10px 5px 8px;font-size:13.5px;background:var(--bone);min-height:36px}
-.oubet .side{font-family:'Saira Condensed';font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--sage)}
+.ouin.card::placeholder{color:var(--brass);opacity:1}
+.oubtn{width:52px;flex:0 0 52px;height:40px;font-family:'Saira Condensed';font-weight:700;font-size:14px;letter-spacing:.06em;border:2px solid var(--ink);border-radius:9px}
+.oubtn[disabled]{opacity:.3;cursor:default}
+.oubets{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--pencil)}
+.oubet{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--pencil);border-radius:99px;padding:2px 8px 2px 6px;font-size:12.5px;background:var(--bone);min-height:28px}
+.oubet .side{font-family:'Saira Condensed';font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--sage)}
 .oubet .amt{font-weight:700}
-.oubet .net{font-family:'Saira Condensed';font-weight:800;font-size:13px;padding-left:6px;border-left:1px solid var(--pencil)}
+.oubet .net{font-family:'Saira Condensed';font-weight:800;font-size:12px;padding-left:5px;border-left:1px solid var(--pencil)}
 .oubet.win{border-color:var(--live)} .oubet.win .net{color:var(--live)}
 .oubet.lose{border-color:var(--ob);opacity:.85} .oubet.lose .net{color:var(--ob)}
 .oubet.push .net{color:var(--brass)}
@@ -537,6 +540,19 @@ a{color:var(--brass)}
 .oubook h4{margin:0 0 6px;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--brass)}
 .oubook .brow{display:flex;justify-content:space-between;padding:3px 0}
 .oubook .brow .win{color:var(--live);font-weight:700} .oubook .brow .lose{color:var(--ob);font-weight:700}
+.oubyrow{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:0 0 8px}
+.oubyrow .lab{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.08em;color:var(--sage);margin-right:2px}
+.oubyrow .selopt{padding:4px 8px;font-size:12.5px}
+.oubook button.brow{cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.oubetsum{font-size:13.5px;color:var(--sage);margin:10px 0 4px}
+.oubetsum .win{color:var(--live)} .oubetsum .lose{color:var(--ob)}
+.oubetsday{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;color:var(--brass)}
+.oubetrow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--bone);border:1.5px solid var(--pencil);border-radius:10px;padding:8px 10px;margin-bottom:6px;min-height:48px;font-size:14px}
+.oubetrow .on{flex:0 0 auto}
+.oubetrow .what{flex:1;color:var(--sage);font-size:13px}
+.oubetrow .what b{color:var(--ink);font-size:15px}
+.oubetrow .tag{font-family:'Saira Condensed';font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.oubetrow .tag.win{color:var(--live)} .oubetrow .tag.lose{color:var(--ob)} .oubetrow .tag.push{color:var(--brass)}
 .ousheetline{font-size:14.5px}
 .ousheetline b{font-size:20px;margin-left:2px}
 .ousides{display:flex;gap:8px;margin-top:10px}
@@ -1278,7 +1294,7 @@ function ouEntry(d, pid){
   const bets = {};
   for (const [b, v] of Object.entries(e.bets||{})){
     if (!v || !OU_SIDES[v.side] || !(+v.amt > 0)) continue;
-    bets[b] = { side:v.side, amt:Math.round(+v.amt) };
+    bets[b] = { side:v.side, amt:Math.round(+v.amt), t:+v.t || 0 }; // t: when it was placed — orders the chips and the bets-by list
   }
   return { line: (isFinite(line) && line > 0) ? line : null, score: (isFinite(score) && score > 0) ? score : null, bets };
 }
@@ -1355,6 +1371,20 @@ function ouTripBook(){
     settled += b.settled; open += b.open; book += b.book;
   }
   return { net, settled, open, book };
+}
+// every bet one person has placed, across the trip, oldest first within a day
+function ouBetsBy(bettor){
+  const out = [];
+  for (const d of DAYS){
+    for (const pid of Object.keys((S.ou||{})[d]||{})){
+      const e = ouEntry(d, pid);
+      const bet = e.bets[bettor]; if (!bet) continue;
+      const sc = ouScore(d, pid);
+      const result = ouResult(e.line, sc.score);
+      out.push({ d, pid, bet, line:e.line, score:sc.score, result, net: ouBetNet(bet, result) });
+    }
+  }
+  return out.sort((a,b)=> DAYS.indexOf(a.d)-DAYS.indexOf(b.d) || (a.bet.t||0)-(b.bet.t||0));
 }
 function money(n){ const a = Math.abs(Math.round(n)); return (n < 0 ? '−' : n > 0 ? '+' : '') + '$' + a; }
 function ouLineTxt(v){ return v == null ? '—' : (Math.abs(v % 1) === 0.5 ? String(v) : String(Math.round(v*10)/10)); }
@@ -2612,25 +2642,18 @@ function ouCardHtml(d, pid){
   const r = ouResult(e.line, sc.score);
   const bets = Object.entries(e.bets).sort((a,b)=>((a[1].t||0)-(b[1].t||0)));
   let verdict = '';
-  if (r === 'push') verdict = `<span class="verdict push">PUSH — right on the number</span>`;
+  if (r === 'push') verdict = `<span class="verdict push">PUSH</span>`;
   else if (r) verdict = `<span class="verdict ${r}">${OU_SIDES[r]} by ${ouLineTxt(Math.abs(sc.score - e.line))}</span>`;
   else if (e.line == null) verdict = `<span class="verdict mut">no line yet</span>`;
   else verdict = `<span class="verdict mut">${bets.length ? bets.length + ' bet' + (bets.length>1?'s':'') + ' riding' : 'open'}</span>`;
-  const scoreHint = sc.from === 'card' && e.score == null ? ` <span class="from">· CARD</span>` : '';
+  const fromCard = sc.from === 'card' && e.score == null;
   return `<div class="oucard" id="ou-${pid}">
-    <div class="ouhead">
-      <span class="em">${p.emoji||'❔'}</span><span class="nm">${esc(p.name||'??')}</span>
-      ${verdict}
-    </div>
-    <div class="ounums">
-      <label class="oufield"><span class="lab">LINE</span>
-        <input type="number" step="0.5" inputmode="decimal" placeholder="—" value="${e.line==null?'':esc(e.line)}" data-input="ouline" data-d="${d}" data-p="${pid}"></label>
-      <label class="oufield"><span class="lab">SCORE${scoreHint}</span>
-        <input type="number" step="1" inputmode="numeric" placeholder="${sc.from==='card'?esc(sc.score):'—'}" value="${e.score==null?'':esc(e.score)}" data-input="ouscore" data-d="${d}" data-p="${pid}"></label>
-      <span class="sp"></span>
-      ${e.line != null
-        ? `<button class="oubtn" data-act="oubet" data-d="${d}" data-p="${pid}">+ BET</button>`
-        : `<span class="mut" style="font-size:12px">set a line to open betting</span>`}
+    <div class="ourow">
+      <span class="em">${p.emoji||'❔'}</span>
+      <span class="who"><span class="nm">${esc(p.name||'??')}</span>${verdict}</span>
+      <input class="ouin" type="number" step="0.5" inputmode="decimal" placeholder="—" aria-label="Line" value="${e.line==null?'':esc(e.line)}" data-input="ouline" data-d="${d}" data-p="${pid}">
+      <input class="ouin ${fromCard?'card':''}" type="number" step="1" inputmode="numeric" placeholder="${fromCard?esc(sc.score):'—'}" aria-label="Score${fromCard?' (from the card)':''}" title="${fromCard?'From the card — type a number to override':''}" value="${e.score==null?'':esc(e.score)}" data-input="ouscore" data-d="${d}" data-p="${pid}">
+      <button class="oubtn" data-act="oubet" data-d="${d}" data-p="${pid}" ${e.line==null?'disabled title="Set a line first"':''}>BET</button>
     </div>
     ${bets.length ? `<div class="oubets">${bets.map(([b,bet])=>ouBetChipHtml(d, pid, b, bet, r)).join('')}</div>` : ''}
   </div>`;
@@ -2640,7 +2663,7 @@ function ouBookHtml(title, book, foot){
     .sort((a,b)=>b[1]-a[1] || (player(a[0]).ord||0)-(player(b[0]).ord||0));
   if (!rows.length) return '';
   return `<div class="oubook"><h4 class="sc caps">${title}</h4>
-    ${rows.map(([pid,v])=>`<div class="brow"><span>${pName(pid)}</span><span class="num ${v>0?'win':v<0?'lose':''}">${money(v)}</span></div>`).join('')}
+    ${rows.map(([pid,v])=>`<button class="brow" data-act="oubets" data-p="${pid}"><span>${pName(pid)}</span><span class="num ${v>0?'win':v<0?'lose':''}">${money(v)}</span></button>`).join('')}
     ${book.book ? `<div class="brow mut"><span>The book</span><span class="num">${money(book.book)}</span></div>` : ''}
     ${foot ? `<div class="mut" style="font-size:12px;margin-top:4px">${foot}</div>` : ''}
   </div>`;
@@ -2661,13 +2684,14 @@ function renderOU(d){
     <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
   <div class="spage oupage">
     <div class="selrow" style="margin-top:10px">${dayChips}</div>
-    <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''}. Gross score for the round — handicaps don’t come into it.
-      Anyone sets a line; anyone bets it, up to <b>$${ouMax()}</b> a bet (<button data-act="settings" class="lnk">Settings</button>).
-      Even money against the book. <b>One rule: you can’t take the over on yourself.</b></div>
+    <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · gross score · max <b>$${ouMax()}</b> a bet (<button data-act="settings" class="lnk">Settings</button>) · <b>no over on yourself</b></div>
+    <div class="oubyrow"><span class="lab">BETS BY</span>${namedPlayers().map(p=>
+      `<button class="selopt" data-act="oubets" data-p="${p.id}" title="Every bet ${esc(p.name)} has placed"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('')}</div>
+    ${cards ? `<div class="ouhdr"><span class="sp"></span><span>LINE</span><span>SCORE</span><span class="bw"></span></div>` : ''}
     ${cards || `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}
     ${ouBookHtml(DAYMETA[d].name + ' book', dayBook, dayBook.open ? `${dayBook.open} bet${dayBook.open>1?'s':''} still riding — post scores to settle them.` : '')}
     ${trip.settled && DAYS.some(x=>x!==d && ouDayBook(x).settled) ? ouBookHtml('Trip so far', trip, 'Every settled line, all days.') : ''}
-    <div class="mut" style="font-size:12px;margin-top:14px">Bets ride on whatever the line is now — settle the number before anybody bets. Scores fill in from the card once all 18 are posted, or type the total.</div>
+    <div class="mut" style="font-size:12px;margin-top:14px">Anyone sets a line; anyone bets it, even money against the book. Bets ride on whatever the line is now — settle the number before anybody bets. A score in brass came off the card (all 18 posted); type a total to override it.</div>
   </div>`;
 }
 // ---- hub, cup sheet, who, kickoff -----------------------------------------
@@ -3147,6 +3171,36 @@ function sheetHtml(sh){
         <button class="bigbtn ghost" data-act="odd-b" data-d="${sh.d}">Odd man rides — junk &amp; skins only</button>
       </div>`;
   }
+  if (t==='oubets'){
+    const bettor = sh.bettor && (S.players||{})[sh.bettor] ? sh.bettor : ouBettorDefault();
+    const rows = bettor ? ouBetsBy(bettor) : [];
+    const who = namedPlayers().map(p=>
+      `<button class="selopt ${p.id===bettor?'on':''}" data-act="oubetsfor" data-p="${p.id}"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('');
+    const riding = rows.filter(r=>r.net==null), settled = rows.filter(r=>r.net!=null);
+    const inPlay = riding.reduce((a,r)=>a+r.bet.amt, 0), net = settled.reduce((a,r)=>a+r.net, 0);
+    const sum = rows.length
+      ? `${riding.length ? `${riding.length} riding · $${inPlay} in play` : 'nothing riding'}${settled.length ? ` · settled <b class="num ${net>0?'win':net<0?'lose':''}">${money(net)}</b>` : ''}`
+      : 'No bets yet. Nothing ventured.';
+    let list = '';
+    for (const d of DAYS){
+      const dr = rows.filter(r=>r.d===d); if (!dr.length) continue;
+      list += `<h4 class="sc caps oubetsday">${DAYMETA[d].name}</h4>` + dr.map(r=>{
+        const tail = r.net == null ? `<span class="tag mut">riding</span>`
+          : r.net === 0 ? `<span class="tag push">PUSH</span>`
+          : `<span class="tag ${r.net>0?'win':'lose'}">${money(r.net)}</span>`;
+        const shot = r.score != null ? ` · shot ${r.score}` : '';
+        return `<button class="oubetrow" data-act="oubet" data-d="${r.d}" data-p="${r.pid}" data-b="${bettor}">
+          <span class="on">on ${pName(r.pid)}</span>
+          <span class="what"><b class="sc">${OU_SIDES[r.bet.side]} ${ouLineTxt(r.line)}</b> · $${r.bet.amt}${shot}</span>
+          ${tail}</button>`;
+      }).join('');
+    }
+    return `<h3>${bettor ? pName(bettor) + '’s bets' : 'Bets'}</h3>
+      <div class="selrow">${who}</div>
+      <div class="oubetsum">${sum}</div>
+      ${list}
+      ${rows.length ? `<div class="mut" style="font-size:12px;margin-top:8px">Tap a bet to change or pull it.</div>` : ''}`;
+  }
   if (t==='oubet'){
     const d = sh.d, pid = sh.pid;
     const e = ouEntry(d, pid);
@@ -3557,6 +3611,8 @@ document.addEventListener('click', (ev)=>{
 
     // over / under
     case 'ou': closeSheet(true); navigate('#/ou/'+(a.d||ui.day||resolveDay())); break;
+    case 'oubets': openSheet('oubets', { bettor: a.p || ouBettorDefault() }); break;
+    case 'oubetsfor': { if (!ui.sheet || ui.sheet.type!=='oubets') break; ui.sheet.bettor = a.p; $sheetbox.innerHTML = sheetHtml(ui.sheet); break; }
     case 'oubet': {
       const e = ouEntry(a.d, a.p);
       if (e.line == null){ toastSnack('Set the line first.'); break; }
