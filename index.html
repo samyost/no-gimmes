@@ -557,6 +557,54 @@ a{color:var(--brass)}
 .ousheetline b{font-size:20px;margin-left:2px}
 .ousides{display:flex;gap:8px;margin-top:10px}
 .ousides .bigbtn[disabled]{opacity:.35}
+/* ---- best ball, three teams (its own page) ---- */
+.bbpage .selrow{margin-top:10px}
+.bbstand{display:flex;gap:6px;margin:10px 0 4px}
+.bbstand .tm{flex:1;min-width:0;background:var(--card);border:1.5px solid var(--pencil);border-radius:10px;padding:6px 8px;text-align:center;position:relative}
+.bbstand .tm.lead{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.bbstand .tm .em{font-size:17px;letter-spacing:-2px;white-space:nowrap;overflow:hidden;display:block}
+.bbstand .tm .pts{font-family:'Saira Condensed';font-weight:800;font-size:28px;line-height:1.05;display:block}
+.bbstand .tm .lab{font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage);display:block}
+.bbstand .tm::before{content:'';position:absolute;left:8px;right:8px;top:0;height:3px;border-radius:0 0 3px 3px}
+.t1{--tc:var(--red)} .t2{--tc:var(--blue)} .t3{--tc:var(--live)}
+.bbstand .tm::before{background:var(--tc)}
+.bbopen{font-size:12.5px;color:var(--brass);margin:2px 0 8px;line-height:1.4}
+.bbteams{display:flex;gap:6px;margin:8px 0 4px}
+.bbteams .tbox{flex:1;min-width:0;border:1.5px dashed var(--pencil);border-radius:10px;padding:6px;min-height:64px}
+.bbteams .tbox h5{margin:0 0 4px;font-family:'Saira Condensed';font-weight:700;font-size:11px;letter-spacing:.08em;color:var(--tc)}
+.bbteams .tbox.out h5{color:var(--sage)}
+.bbchip{display:flex;align-items:center;gap:4px;width:100%;text-align:left;font-size:13px;font-weight:600;padding:5px 4px;border-radius:7px;background:var(--card);margin-bottom:3px;border:1px solid var(--pencil)}
+.bbchip .em{font-size:15px}
+.bbchip .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bbchip .dots{margin-left:auto;color:var(--brass);font-size:10px;letter-spacing:-1px}
+.bbrail{display:flex;gap:3px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
+.bbrail::-webkit-scrollbar{display:none}
+.bbrail .cell{flex:0 0 34px;height:42px;border-radius:8px;border:1.5px solid var(--pencil);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Saira Condensed';font-weight:700;font-size:13px}
+.bbrail .cell.cur{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.bbrail .cell .r{font-size:10px;line-height:1;height:10px;margin-top:2px;color:var(--brass)}
+.bbrail .cell .r.w{width:9px;height:9px;border-radius:50%;background:var(--tc)}
+.bbhole{display:flex;align-items:center;gap:8px;margin:6px 0 2px}
+.bbhole .hn{font-family:'Saira Condensed';font-weight:800;font-size:22px;letter-spacing:.02em}
+.bbhole .hm{font-size:12.5px;color:var(--sage)}
+.bbhole .nav{width:44px;height:40px;border-radius:9px;border:1.5px solid var(--pencil);font-size:22px;background:var(--card)}
+.bbhole .nav[disabled]{opacity:.3}
+.bbtm{background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:4px 8px 6px;margin-bottom:6px;border-left:4px solid var(--tc)}
+.bbtm .th{display:flex;align-items:baseline;gap:6px;font-family:'Saira Condensed';font-weight:700;font-size:12.5px;letter-spacing:.06em;color:var(--tc);padding:3px 0}
+.bbtm .th .best{margin-left:auto;color:var(--ink);font-size:13px}
+.bbtm .srow .who{flex:0 0 84px}
+.bbtm .srow .who.t1,.bbtm .srow .who.t2,.bbtm .srow .who.t3{color:var(--ink)}
+.qn.set.t1,.qn.set.t2,.qn.set.t3{background:var(--tc);border-color:var(--tc);color:#FCF8EF}
+.qn.card{border-color:var(--brass);color:var(--brass);border-style:dashed}
+.bbverdict{margin:6px 0 4px;padding:9px 12px;border-radius:10px;background:var(--card);border:1px solid var(--pencil);font-size:14px;line-height:1.4}
+.bbverdict .w{font-weight:700}
+.bbverdict .push{color:var(--brass);font-weight:700}
+.bbnext{display:flex;gap:8px;margin:8px 0 4px}
+.bbledger{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.bbledger th{font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage);text-align:center;padding:2px 4px;border-bottom:1px solid var(--pencil)}
+.bbledger td{text-align:center;padding:3px 4px;border-bottom:1px dashed var(--pencil)}
+.bbledger td.lo{font-weight:800;color:var(--tc)}
+.bbledger td.res{font-size:12px;color:var(--sage);text-align:left;white-space:nowrap}
+.bbledger td.res .push{color:var(--brass);font-weight:700}
 .sheet .bigbtn[disabled]{opacity:.45;cursor:default}
 </style>
 </head>
@@ -846,8 +894,59 @@ const ENG = (() => {
     return Math.round(index * (slope / 113) + cr);
   }
 
+
+  // ---- best ball, any number of teams (2v2v3 etc.) --------------------------
+  // holes: {holeNo: {teamId: bestNet|null}} — a team's best net ball on that
+  // hole; null/missing = no ball posted yet. A hole is "scored" once every
+  // team has a number. order: hole numbers in play order. Each hole is worth
+  // one point to the outright low team. A tie for low is a PUSH between the
+  // tied teams: that hole's point carries and is decided on the next scored
+  // hole by comparing ONLY the tied teams — whoever of them is lower there
+  // takes it, whether or not they win that hole outright. Still tied → the
+  // tied subset carries on again. Nothing decided at the end stays open.
+  function bestBall(holes, order, teamIds) {
+    const teams = teamIds && teamIds.length ? teamIds.slice()
+      : Array.from(new Set(order.flatMap((n) => Object.keys(holes[n] || {})))).sort();
+    const won = {}; teams.forEach((t) => { won[t] = 0; });
+    const perHole = {};   // holeNo -> {winner|null, push:[...]|null, decided:[{from, winner}], net}
+    let carries = [];     // [{from:holeNo, teams:[...]}] still open, oldest first
+    let scored = 0;
+    const lowOf = (net, among) => {
+      let best = null, who = [];
+      for (const t of among) {
+        const v = net[t];
+        if (v == null) continue;
+        if (best === null || v < best) { best = v; who = [t]; }
+        else if (v === best) who.push(t);
+      }
+      return who;
+    };
+    for (const n of order) {
+      const net = holes[n];
+      if (!net) continue;
+      if (!teams.every((t) => typeof net[t] === 'number')) continue; // not fully posted yet
+      scored++;
+      const rec = { winner: null, push: null, decided: [], net };
+      // earlier pushes first: each is settled among its own teams on this hole
+      const still = [];
+      for (const c of carries) {
+        const low = lowOf(net, c.teams);
+        if (low.length === 1) { won[low[0]]++; rec.decided.push({ from: c.from, winner: low[0] }); }
+        else still.push({ from: c.from, teams: low });
+      }
+      carries = still;
+      const low = lowOf(net, teams);
+      if (low.length === 1) { won[low[0]]++; rec.winner = low[0]; }
+      else { rec.push = low; carries.push({ from: n, teams: low }); }
+      perHole[n] = rec;
+    }
+    const order2 = teams.slice().sort((a, b) => won[b] - won[a] || teams.indexOf(a) - teams.indexOf(b));
+    const lead = order2.length > 1 && won[order2[0]] > won[order2[1]] ? order2[0] : null;
+    return { teams, won, perHole, carries, scored, remaining: order.length - scored, leader: lead, standings: order2 };
+  }
+
   return { matchState, matchPoints, projectedPoints, playingStrokes, dotsOnHole,
-           holeWinnerFromStrokes, cupTargets, courseHandicap, ALLOWANCES };
+           holeWinnerFromStrokes, cupTargets, courseHandicap, bestBall, ALLOWANCES };
 })();
 /* ===END ENGINE=== */
 /* ===CORE STATE=== */
@@ -1389,6 +1488,106 @@ function ouBetsBy(bettor){
 function money(n){ const a = Math.abs(Math.round(n)); return (n < 0 ? '−' : n > 0 ? '+' : '') + '$' + a; }
 function ouLineTxt(v){ return v == null ? '—' : (Math.abs(v % 1) === 0.5 ? String(v) : String(Math.round(v*10)/10)); }
 
+// ---- best ball: three teams, one point a hole, pushes carry -----------------
+// bb/{d}/team/{pid} = 1|2|3 (anything else: sitting out) — the day's teams.
+// bb/{d}/strokes/{n}/{pid} = gross | 'pickup' typed on the page; otherwise a
+// player's gross comes off the card (their cup or grudge match) like over/under.
+// Scoring lives in ENG.bestBall: each team's best net ball, low team takes the
+// hole, a tie for low is a push that the tied teams settle on the next hole.
+const BB_TEAMS = ['1','2','3'];
+function bbDay(d){ return ((S.bb||{})[d]) || {}; }
+function bbTeamOf(d, pid){ const t = String((bbDay(d).team||{})[pid]||''); return BB_TEAMS.includes(t) ? t : null; }
+// non-empty teams, in order: [{id:'1', ids:[pid,...]}]
+function bbTeams(d){
+  const out = [];
+  for (const t of BB_TEAMS){
+    const ids = presentIds(d).filter(pid=>bbTeamOf(d, pid)===t);
+    if (ids.length) out.push({ id:t, ids });
+  }
+  return out;
+}
+function bbIds(d){ return bbTeams(d).flatMap(t=>t.ids); }
+function bbOn(d){ return bbTeams(d).length >= 2; }
+function bbTeamEm(d, t){ const tm = bbTeams(d).find(x=>x.id===t); return tm ? tm.ids.map(pid=>player(pid).emoji||'❔').join('') : '?'; }
+// strokes: four-ball allowance, every player in the game off the low man
+function bbStrokes(d){
+  const dc = dayCfg(d);
+  const ps = bbIds(d).map(id=>({ id, ch:playingCH(d, player(id)), side:'A' }));
+  const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
+  const net = dayNet(d) && anyH && dc.course !== 'tbd';
+  const c = cfg();
+  const pct = c.flat100 ? 100 : ((c.allowances||{}).fourball != null ? c.allowances.fourball : WHS_DEFAULTS.fourball);
+  const si = ENG.playingStrokes(ps, 'fourball', { net, pctOverride: pct });
+  const cap = c.strokeCap|0;
+  if (cap > 0) for (const k in si.players) si.players[k] = Math.min(si.players[k], cap);
+  si.net = net;
+  si.missingHcp = net ? ps.filter(p=>{ const pl = player(p.id); return pl.hcp == null || pl.hcp === ''; }).map(p=>p.id) : [];
+  return si;
+}
+// a player's gross on a hole for this game: typed here, else off the card
+function bbGross(d, n, pid){
+  const hand = ((bbDay(d).strokes||{})[n]||{})[pid];
+  if (hand === 'pickup' || (typeof hand === 'number' && hand > 0)) return { v:hand, from:'hand' };
+  for (const m of [...cupMatchesFor(d), ...sideBetsFor(d)]){
+    if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
+    const v = (effStrokes(m, n)||{})[pid];
+    if (v === 'pickup' || (typeof v === 'number' && v > 0)) return { v, from:'card' };
+  }
+  return { v:null, from:null };
+}
+function bbDots(d, si, n, pid){ const h = holesFor(d)[n-1]; return si.net ? ENG.dotsOnHole(si.players[pid]||0, h.si, 18) : 0; }
+// {teamId: best net | null} for one hole; a team whose every ball is picked up
+// has a score of Infinity — it loses the hole (or pushes with another pickup)
+function bbHoleNets(d, n, si){
+  si = si || bbStrokes(d);
+  const out = {};
+  for (const tm of bbTeams(d)){
+    let best = null, any = false;
+    for (const pid of tm.ids){
+      const g = bbGross(d, n, pid).v;
+      if (g == null) continue;
+      any = true;
+      if (g === 'pickup') continue;
+      const net = g - bbDots(d, si, n, pid);
+      if (best === null || net < best) best = net;
+    }
+    out[tm.id] = any ? (best === null ? Infinity : best) : null;
+  }
+  return out;
+}
+function bbState(d){
+  const si = bbStrokes(d);
+  const holes = {};
+  for (let n=1; n<=18; n++) holes[n] = bbHoleNets(d, n, si);
+  const st = ENG.bestBall(holes, ORDER18, bbTeams(d).map(t=>t.id));
+  st.si = si;
+  return st;
+}
+// the hole this phone is looking at: last touched, else the first unposted one
+function bbCurHole(d, st){
+  const h = (ui.bbHole||{})[d];
+  if (h) return h;
+  for (let n=1; n<=18; n++) if (!st.perHole[n]) return n;
+  return 18;
+}
+// deal the present players into teams — sizes as even as they go, the odd
+// men on the last team (7 → 2·2·3, 8 → 2·3·3), shuffled
+function bbDeal(d){
+  const ids = presentIds(d).slice();
+  for (let i = ids.length-1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const team = {};
+  const sizes = bbDealSizes(ids.length);
+  let k = 0;
+  sizes.forEach((sz, ti)=>{ for (let i=0;i<sz;i++) team[ids[k++]] = BB_TEAMS[ti]; });
+  op(`bb/${d}/team`, team);
+}
+function bbDealSizes(n){
+  const T = Math.min(3, Math.max(2, Math.floor(n/2))); // 4-5 players → two teams
+  const base = Math.floor(n/T), extra = n - base*T;
+  return Array.from({length:T}, (_, i)=> base + (i >= T-extra ? 1 : 0));
+}
+function bbNetTxt(v){ return v == null ? '—' : v === Infinity ? 'X' : String(v); }
+
 // ---- date/day resolution ---------------------------------------------------
 function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function resolveDay(){
@@ -1823,6 +2022,12 @@ function renderBoard(d){
   let foot = '';
   if (out.length && named.length)
     foot = `<button class="dayfoot" data-act="setup" data-d="${d}">${named.length-out.length} of ${named.length} playing — ${out.map(pName).join(', ')} ${out.length>1?'are':'is'} out</button>`;
+  let bbL = '';
+  if (bbOn(d)){
+    const st = bbState(d);
+    bbL = `<div class="tgh">🏌️ BEST BALL — ${bbTeams(d).map(t=>t.ids.length).join(' v ')} · a point a hole · nothing to the cup</div>
+      <button class="dayfoot" data-act="bb" data-d="${d}" style="display:block;width:100%;text-align:left;padding-top:4px">${bbTeams(d).map(t=>`<span class="t${t.id}" style="color:var(--tc);font-weight:700">${bbTeamEm(d,t.id)} ${st.won[t.id]||0}</span>`).join(' · ')} · ${st.scored} of 18${st.carries.length?` · ${st.carries.length} riding`:''} ›</button>`;
+  }
   const rm = !dbConfigured() ? `<div class="banner">Range mode — nothing’s saving to the group. Add the trip link in Settings to go live.</div>` : '';
   const est = (dc.course==='breck' && dc.rot==='be') ? `<div class="banner">Bear→Elk has no printed card — net strokes use a derived allocation.</div>` : '';
   return `
@@ -1833,6 +2038,7 @@ function renderBoard(d){
   <button class="dayctx" data-act="setup" data-d="${d}"><div class="c1">${ctx1}</div><div class="c2">${dayRulesTxt(d)}</div></button>
   ${rm}${est}
   ${body}
+  ${bbL}
   ${foot}`;
 }
 
@@ -2694,6 +2900,138 @@ function renderOU(d){
     <div class="mut" style="font-size:12px;margin-top:14px">Anyone sets a line; anyone bets it, even money against the book. Bets ride on whatever the line is now — settle the number before anybody bets. A score in brass came off the card (all 18 posted); type a total to override it.</div>
   </div>`;
 }
+// ---- best ball screen -------------------------------------------------------
+function bbTeamsEditorHtml(d){
+  const ids = presentIds(d);
+  const si = bbStrokes(d);
+  const chip = pid => { const p = player(pid); const s = si.players[pid]||0;
+    return `<button class="bbchip" data-act="bbteam" data-d="${d}" data-p="${pid}" title="Tap to move to the next team">
+      <span class="em">${p.emoji||'❔'}</span><span class="nm">${esc((p.name||'??').split(' ')[0])}</span>${si.net&&s?`<span class="dots">${'●'.repeat(Math.min(s,9))}${s>9?'+'+(s-9):''}</span>`:''}</button>`; };
+  const boxes = BB_TEAMS.map(t=>`<div class="tbox t${t}"><h5>TEAM ${t}</h5>${ids.filter(pid=>bbTeamOf(d,pid)===t).map(chip).join('')}</div>`).join('');
+  const out = ids.filter(pid=>!bbTeamOf(d,pid));
+  const sizes = bbDealSizes(ids.length).join('·');
+  return `<div class="bbteams">${boxes}</div>
+    ${out.length ? `<div class="bbteams"><div class="tbox out" style="flex:1"><h5>SITTING OUT — tap to put on a team</h5><div style="display:flex;flex-wrap:wrap;gap:4px">${out.map(chip).join('')}</div></div></div>` : ''}
+    <div class="bbnext"><button class="bigbtn ghost" data-act="bbdeal" data-d="${d}" ${ids.length<4?'disabled':''}>🎲 DRAW TEAMS ${ids.length>=4?sizes:''}</button>
+      ${bbOn(d)?`<button class="bigbtn pri" data-act="bbedit" data-d="${d}" data-v="0">DONE</button>`:''}</div>
+    <div class="mut" style="font-size:12px;margin:4px 0 8px">Tap a name to move it to the next team. ${si.net?`Net: four-ball allowance (${cfg().flat100?100:((cfg().allowances||{}).fourball!=null?cfg().allowances.fourball:WHS_DEFAULTS.fourball)}%), everyone off the low man in the game.`:'Gross play.'}</div>`;
+}
+function bbRailHtml(d, st, cur){
+  const hs = holesFor(d);
+  return `<div class="bbrail" id="bbrail">${hs.map(h=>{
+    const r = st.perHole[h.no];
+    let mark = '<span class="r"></span>';
+    if (r && r.winner) mark = `<span class="r w t${r.winner}"></span>`;
+    else if (r && r.push) mark = `<span class="r">${r.push.length===3?'≡':'='}</span>`;
+    return `<button class="cell ${h.no===cur?'cur':''}" id="bbcell${h.no}" data-act="bbhole" data-d="${d}" data-n="${h.no}">${h.no}${mark}</button>`;
+  }).join('')}</div>`;
+}
+function bbVerdictHtml(d, st, n){
+  const r = st.perHole[n];
+  const em = t => `<span class="w">${bbTeamEm(d, t)}</span>`;
+  const nets = bbHoleNets(d, n, st.si);
+  if (!r){
+    const missing = bbTeams(d).filter(t=>nets[t.id]==null).map(t=>bbTeamEm(d,t.id));
+    const open = st.carries.filter(c=>c.from < n);
+    const carryTxt = open.length ? `<div class="mut" style="font-size:12.5px;margin-top:3px">Riding on this hole: ${open.map(c=>`hole ${c.from} (${c.teams.map(t=>bbTeamEm(d,t)).join(' v ')})`).join(', ')} — settled between those teams only.</div>` : '';
+    return `<div class="bbverdict"><span class="mut">${missing.length ? `Waiting on ${missing.join(' · ')}` : 'Posting…'}</span>${carryTxt}</div>`;
+  }
+  const bits = [];
+  if (r.winner) bits.push(`${em(r.winner)} take hole ${n}`);
+  else bits.push(`<span class="push">PUSH</span> — ${r.push.map(em).join(' v ')} tie the hole; it rides to the next hole and only they can win it`);
+  for (const dd of r.decided) bits.push(`${em(dd.winner)} also take hole ${dd.from} (carried)`);
+  return `<div class="bbverdict">${bits.join('<br>')}</div>`;
+}
+function bbStandHtml(d, st){
+  const teams = bbTeams(d);
+  return `<div class="bbstand">${teams.map(t=>`<div class="tm t${t.id} ${st.leader===t.id?'lead':''}">
+      <span class="em">${t.ids.map(pid=>player(pid).emoji||'❔').join('')}</span>
+      <span class="pts num">${st.won[t.id]||0}</span><span class="lab">${(st.won[t.id]||0)===1?'HOLE':'HOLES'}</span></div>`).join('')}</div>`;
+}
+function bbLedgerHtml(d, st){
+  const teams = bbTeams(d);
+  const rows = ORDER18.filter(n=>st.perHole[n]);
+  if (!rows.length) return '';
+  const em = t => bbTeamEm(d, t);
+  return `<table class="bbledger"><tr><th>HOLE</th>${teams.map(t=>`<th class="t${t.id}" style="color:var(--tc)">${em(t.id)}</th>`).join('')}<th style="text-align:left">RESULT</th></tr>
+    ${rows.map(n=>{ const r = st.perHole[n];
+      const low = Math.min(...teams.map(t=>r.net[t.id]));
+      const res = (r.winner ? em(r.winner) : `<span class="push">PUSH → ${n<18?'hole '+(n+1):'open'}</span>`) + r.decided.map(dd=>` · +${dd.from} ${em(dd.winner)}`).join('');
+      return `<tr><td class="num">${n}</td>${teams.map(t=>`<td class="num t${t.id} ${r.net[t.id]===low?'lo':''}">${bbNetTxt(r.net[t.id])}</td>`).join('')}<td class="res">${res}</td></tr>`; }).join('')}</table>`;
+}
+function bbHoleHtml(d, st, n){
+  const h = holesFor(d)[n-1];
+  const hand = (bbDay(d).strokes||{})[n]||{};
+  let rows = '';
+  for (const tm of bbTeams(d)){
+    const nets = bbHoleNets(d, n, st.si);
+    const qrow = pid => {
+      const p = player(pid);
+      const g = bbGross(d, n, pid);
+      const curNum = typeof g.v === 'number' ? g.v : null;
+      const dotN = bbDots(d, st.si, n, pid);
+      const fromCard = g.from === 'card';
+      const nums = [];
+      for (let v = Math.max(1,h.par-2); v <= h.par+2; v++){
+        const set = curNum === v;
+        nums.push(`<button class="qn ${set?('set t'+tm.id):(v===h.par&&curNum==null?'ghost':'')} ${set&&fromCard?'card':''}" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${v}">${v}</button>`);
+      }
+      const minus = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)-1}">−</button>`;
+      const plus  = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)+1}">+</button>`;
+      const outlier = (curNum!=null && (curNum < Math.max(1,h.par-2) || curNum > h.par+2)) ? `<span class="netlab">${curNum}</span>` : '';
+      const bits = [];
+      if (dotN && curNum!=null) bits.push(`<span class="netlab">${curNum} → net ${curNum-dotN}</span>`);
+      if (g.v==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up</span>`);
+      if (fromCard) bits.push(`<span class="brass" style="font-size:12px">from the card</span>`);
+      bits.push(`<button class="pickup" data-act="bbpickup" data-d="${d}" data-n="${n}" data-p="${pid}">${g.v==='pickup'?'back in':'pickup'}</button>`);
+      const dot = dotN ? ` <span class="brass">${'●'.repeat(Math.min(dotN,2))}</span>` : '';
+      return `<div class="srow ${g.v==='pickup'?'picked':''}"><span class="who t${tm.id}">${p.emoji||'❔'} ${esc((p.name||'??').split(' ')[0])}${dot}</span><div class="qnums">${minus}${nums.join('')}${plus}</div>${outlier}</div>
+        <div class="srowsub">${bits.join(' · ')}</div>`;
+    };
+    rows += `<div class="bbtm t${tm.id}"><div class="th">TEAM ${tm.id} <span>${bbTeamEm(d, tm.id)}</span><span class="best">${nets[tm.id]==null?'':`best ${st.si.net?'net ':''}${bbNetTxt(nets[tm.id])}`}</span></div>${tm.ids.map(qrow).join('')}</div>`;
+  }
+  const posted = !!st.perHole[n];
+  return `<div class="bbhole"><button class="nav" data-act="bbhole" data-d="${d}" data-n="${n-1}" ${n<=1?'disabled':''}>‹</button>
+      <span class="hn">HOLE ${n}</span><span class="hm">PAR ${h.par} · SI ${h.si}${h.yds?' · '+h.yds+' yds':''}${h.nine?' · '+esc(h.nine):''}</span><span class="sp" style="flex:1"></span>
+      <button class="nav" data-act="bbhole" data-d="${d}" data-n="${n+1}" ${n>=18?'disabled':''}>›</button></div>
+    ${rows}
+    ${bbVerdictHtml(d, st, n)}
+    ${posted && n < 18 ? `<div class="bbnext"><button class="bigbtn pri" data-act="bbhole" data-d="${d}" data-n="${n+1}">NEXT HOLE ›</button></div>` : ''}`;
+}
+function renderBB(d){
+  const dayChips = DAYS.map(x=>{
+    const on = bbOn(x);
+    const sub = on ? bbTeams(x).map(t=>t.ids.length).join('v') : '—';
+    return `<button class="selopt ${x===d?'on':''}" data-act="bb" data-d="${x}" style="min-width:64px">${DAYMETA[x].label}<span class="sub">${sub}</span></button>`;
+  }).join('');
+  const cl = courseLabel(d);
+  const teams = bbTeams(d);
+  const editing = !bbOn(d) || (ui.bbEdit||{})[d];
+  let body = '';
+  if (editing){
+    body = `<div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · <b>${presentIds(d).length} playing</b> · best ball, one point a hole, three teams (2·2·3 with seven).</div>
+      ${presentIds(d).length ? bbTeamsEditorHtml(d) : `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}`;
+  } else {
+    const st = bbState(d);
+    const cur = bbCurHole(d, st);
+    const open = st.carries;
+    body = `${bbStandHtml(d, st)}
+      ${open.length ? `<div class="bbopen">${open.map(c=>`Hole ${c.from} still up: ${c.teams.map(t=>bbTeamEm(d,t)).join(' v ')}`).join(' · ')} — ${open.length>1?'they ride':'it rides'} to the next hole, settled between those teams only.</div>` : ''}
+      <div class="ouintro" style="margin-top:2px">${teams.map(t=>t.ids.length).join(' v ')} · ${st.scored} of 18 posted${st.si.net?' · net':' · gross'}${st.si.missingHcp.length?` · <span style="color:var(--warn)">no handicap: ${st.si.missingHcp.map(pName).join(', ')}</span>`:''} · <button class="lnk" data-act="bbedit" data-d="${d}" data-v="1">teams</button></div>
+      ${bbRailHtml(d, st, cur)}
+      ${bbHoleHtml(d, st, cur)}
+      ${bbLedgerHtml(d, st)}`;
+  }
+  return `
+  <div class="appbar"><button class="backbtn" data-act="board">‹</button>
+    <span class="wordmark sc">BEST BALL</span><span class="sp"></span>${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
+  <div class="spage oupage bbpage">
+    <div class="selrow">${dayChips}</div>
+    ${body}
+    <div class="mut" style="font-size:12px;margin-top:14px">Each team’s best ${dayNet(d)?'net ':''}ball counts. Low team takes the hole. Two (or three) teams tied for low is a <b>push</b>: that hole rides to the next hole and goes to whichever of the tied teams is lower there — even if a third team wins that hole outright. Tied again, it keeps riding. Scores in brass came off the card; tap a number to override it here (tap it again to clear). Nothing here touches the cup.</div>
+  </div>`;
+}
 // ---- hub, cup sheet, who, kickoff -----------------------------------------
 function hubSheetHtml(){
   const c = cfg();
@@ -2722,6 +3060,10 @@ function hubSheetHtml(){
       <div class="hv">${(()=>{ const d = ui.day || resolveDay(); const b = ouTripBook();
         const lines = Object.values((S.ou||{})[d]||{}).filter(e=>e && e.line != null).length;
         return `${DAYMETA[d].label}: ${lines ? lines+' line'+(lines>1?'s':'') : 'no lines yet'} · ${b.settled+b.open ? (b.settled+b.open)+' bet'+((b.settled+b.open)>1?'s':'')+' on the trip' : 'no bets yet'} · max $${ouMax()}`; })()}</div></div>
+      <span class="chev">›</span></button>
+    <button class="hubrow" data-act="bb"><div><div class="hl">Best Ball · 2 v 2 v 3</div>
+      <div class="hv">${(()=>{ const d = ui.day || resolveDay(); if (!bbOn(d)) return `${DAYMETA[d].label}: no teams yet · three teams, a point a hole, pushes ride`;
+        const st = bbState(d); return `${DAYMETA[d].label}: ${bbTeams(d).map(t=>bbTeamEm(d,t.id)+' '+(st.won[t.id]||0)).join(' · ')} · ${st.scored} of 18${st.carries.length?` · ${st.carries.length} riding`:''}`; })()}</div></div>
       <span class="chev">›</span></button>`;
 }
 function cupSheetHtml(){
@@ -2896,6 +3238,7 @@ function renderScreen(){
   if (ui.screen === 'setup' && ui.day) return renderSetupDay(ui.day);
   if (ui.screen === 'settings') return renderSettings();
   if (ui.screen === 'ou') return renderOU(ui.day || resolveDay());
+  if (ui.screen === 'bb') return renderBB(ui.day || resolveDay());
   return renderBoard(ui.day || resolveDay());
 }
 function postRender(){
@@ -2936,6 +3279,7 @@ function parseRoute(){
   }
   if (parts[0]==='settings'){ ui.screen='settings'; return; }
   if (parts[0]==='ou'){ ui.screen='ou'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
+  if (parts[0]==='bb'){ ui.screen='bb'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
   ui.screen='board'; ui.day = ui.day || resolveDay();
 }
 window.addEventListener('hashchange', ()=>{ parseRoute(); requestRender(); });
@@ -3609,6 +3953,29 @@ document.addEventListener('click', (ev)=>{
       closeSheet(); requestRender(); break;
     }
 
+    // best ball (three teams)
+    case 'bb': closeSheet(true); navigate('#/bb/'+(a.d||ui.day||resolveDay())); break;
+    case 'bbteam': { // tap a name: team 1 → 2 → 3 → out → 1
+      const cur = bbTeamOf(a.d, a.p);
+      const next = cur == null ? '1' : (BB_TEAMS[BB_TEAMS.indexOf(cur)+1] || null);
+      (ui.bbEdit = ui.bbEdit || {})[a.d] = true; // stay in the editor until DONE
+      op(`bb/${a.d}/team/${a.p}`, next); break;
+    }
+    case 'bbdeal': (ui.bbEdit = ui.bbEdit || {})[a.d] = true; bbDeal(a.d); break;
+    case 'bbedit': (ui.bbEdit = ui.bbEdit || {})[a.d] = a.v === '1'; requestRender(); break;
+    case 'bbhole': { const n = +a.n; if (n>=1 && n<=18){ (ui.bbHole = ui.bbHole || {})[a.d] = n; requestRender(); } break; }
+    case 'bbgross': {
+      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n; // stay on this hole until NEXT HOLE
+      const v = +a.v, cur = ((bbDay(a.d).strokes||{})[a.n]||{})[a.p];
+      const clear = cur === v || v < 1 || v > 15;
+      op(`bb/${a.d}/strokes/${a.n}/${a.p}`, clear ? null : v); break;
+    }
+    case 'bbpickup': {
+      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n;
+      const cur = ((bbDay(a.d).strokes||{})[a.n]||{})[a.p];
+      op(`bb/${a.d}/strokes/${a.n}/${a.p}`, cur==='pickup' ? null : 'pickup'); break;
+    }
+
     // over / under
     case 'ou': closeSheet(true); navigate('#/ou/'+(a.d||ui.day||resolveDay())); break;
     case 'oubets': openSheet('oubets', { bettor: a.p || ouBettorDefault() }); break;
@@ -3874,12 +4241,12 @@ document.addEventListener('click', (ev)=>{
       aEl.href = URL.createObjectURL(blob); aEl.download = 'no-gimmes-trip.json'; aEl.click();
       break;
     }
-    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result, stroke, and over/under bet on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
+    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result, stroke, over/under bet, and best-ball hole on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
     case 'resetscores2': {
       const f = document.getElementById('confirmfield');
       if (f && f.value.trim() === cfg().tripName){
         for (const m of allMatches()){ op(`matches/${m.id}/holes`, null); op(`matches/${m.id}/concededBy`, null); op(`matches/${m.id}/concededAt`, null); }
-        op('junk', null); op('ou', null);
+        op('junk', null); op('ou', null); op('bb', null);
         closeSheet(); toastSnack('Clean card. Play well.');
       } else toastSnack('Type the trip name exactly to confirm.');
       break;

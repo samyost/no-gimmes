@@ -62,6 +62,16 @@ watch it appear on the other. That's the whole stack verified.
   underneath. *Bets by* (or a tap on anyone in the book) lists every bet one
   person has placed across the trip — what's riding, what settled, tap to
   change or pull. Handicaps, the cup, and the match screens never see any of it.
+- **Best ball, three teams** (gear → *Side action*): the seven-man answer. Its
+  own page, one game per day. Draw teams (2·2·3 with seven, 2·3·3 with eight;
+  tap a name to move it) and score hole by hole: each team's best net ball
+  counts (four-ball allowance, everyone off the low man), low team takes the
+  hole, one point a hole. A tie for low is a **push** that rides to the next
+  hole and is settled between the tied teams only — whichever of them is lower
+  there takes it, even if the third team wins that hole outright; tied again,
+  it keeps riding. Gross scores already on the card (a cup or grudge match that
+  day) fill in automatically in brass; tap a number to override, tap it again
+  to go back to the card. Nothing here touches the cup.
 
 ## Honesty box
 
@@ -114,6 +124,7 @@ node dev/features.test.mjs # mixer / mix library / side-bet browser tests (needs
 node dev/sync.test.mjs     # two-browser integration tests (needs: cd dev && npm i)
 node dev/maps.test.mjs     # hole maps / ball marks / hole notes (needs: cd dev && npm i)
 node dev/ou.test.mjs       # over/under lines, bets, the max, settlement (needs: cd dev && npm i)
+node dev/bb.test.mjs       # three-team best ball: draw, card read-through, pushes riding (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
 ```
 

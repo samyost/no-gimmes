@@ -209,8 +209,59 @@ const ENG = (() => {
     return Math.round(index * (slope / 113) + cr);
   }
 
+
+  // ---- best ball, any number of teams (2v2v3 etc.) --------------------------
+  // holes: {holeNo: {teamId: bestNet|null}} — a team's best net ball on that
+  // hole; null/missing = no ball posted yet. A hole is "scored" once every
+  // team has a number. order: hole numbers in play order. Each hole is worth
+  // one point to the outright low team. A tie for low is a PUSH between the
+  // tied teams: that hole's point carries and is decided on the next scored
+  // hole by comparing ONLY the tied teams — whoever of them is lower there
+  // takes it, whether or not they win that hole outright. Still tied → the
+  // tied subset carries on again. Nothing decided at the end stays open.
+  function bestBall(holes, order, teamIds) {
+    const teams = teamIds && teamIds.length ? teamIds.slice()
+      : Array.from(new Set(order.flatMap((n) => Object.keys(holes[n] || {})))).sort();
+    const won = {}; teams.forEach((t) => { won[t] = 0; });
+    const perHole = {};   // holeNo -> {winner|null, push:[...]|null, decided:[{from, winner}], net}
+    let carries = [];     // [{from:holeNo, teams:[...]}] still open, oldest first
+    let scored = 0;
+    const lowOf = (net, among) => {
+      let best = null, who = [];
+      for (const t of among) {
+        const v = net[t];
+        if (v == null) continue;
+        if (best === null || v < best) { best = v; who = [t]; }
+        else if (v === best) who.push(t);
+      }
+      return who;
+    };
+    for (const n of order) {
+      const net = holes[n];
+      if (!net) continue;
+      if (!teams.every((t) => typeof net[t] === 'number')) continue; // not fully posted yet
+      scored++;
+      const rec = { winner: null, push: null, decided: [], net };
+      // earlier pushes first: each is settled among its own teams on this hole
+      const still = [];
+      for (const c of carries) {
+        const low = lowOf(net, c.teams);
+        if (low.length === 1) { won[low[0]]++; rec.decided.push({ from: c.from, winner: low[0] }); }
+        else still.push({ from: c.from, teams: low });
+      }
+      carries = still;
+      const low = lowOf(net, teams);
+      if (low.length === 1) { won[low[0]]++; rec.winner = low[0]; }
+      else { rec.push = low; carries.push({ from: n, teams: low }); }
+      perHole[n] = rec;
+    }
+    const order2 = teams.slice().sort((a, b) => won[b] - won[a] || teams.indexOf(a) - teams.indexOf(b));
+    const lead = order2.length > 1 && won[order2[0]] > won[order2[1]] ? order2[0] : null;
+    return { teams, won, perHole, carries, scored, remaining: order.length - scored, leader: lead, standings: order2 };
+  }
+
   return { matchState, matchPoints, projectedPoints, playingStrokes, dotsOnHole,
-           holeWinnerFromStrokes, cupTargets, courseHandicap, ALLOWANCES };
+           holeWinnerFromStrokes, cupTargets, courseHandicap, bestBall, ALLOWANCES };
 })();
 /* ===END ENGINE=== */
 

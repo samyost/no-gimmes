@@ -213,5 +213,45 @@ const O9 = Array.from({ length: 9 }, (_, i) => i + 1);
   eq('course hcp null index', ENG.courseHandicap(null, 132, 71.2, 71), null);
 }
 
+// ---- best ball, three teams, pushes carry to the next hole -----------------
+{
+  const T = ['x', 'y', 'z'];
+  const bb = (rows) => { // rows: [[x,y,z], ...] on holes 1..n
+    const holes = {};
+    rows.forEach((r, i) => { if (r) holes[i + 1] = { x: r[0], y: r[1], z: r[2] }; });
+    return ENG.bestBall(holes, O18, T);
+  };
+  let r = bb([[4, 5, 5]]);
+  eq('outright low wins the hole', [r.won, r.perHole[1].winner], [{ x: 1, y: 0, z: 0 }, 'x']);
+  r = bb([[4, 4, 5]]);
+  eq('two-way tie is a push, carried', [r.won, r.perHole[1].push, r.carries], [{ x: 0, y: 0, z: 0 }, ['x', 'y'], [{ from: 1, teams: ['x', 'y'] }]]);
+  // the key rule: z wins hole 2 outright, but hole 1's point goes to whichever of x/y was lower on 2
+  r = bb([[4, 4, 5], [4, 5, 3]]);
+  eq('carried push settled between the tied teams even though a third team won the hole',
+     [r.won, r.perHole[2].winner, r.perHole[2].decided], [{ x: 1, y: 0, z: 1 }, 'z', [{ from: 1, winner: 'x' }]]);
+  eq('nothing left open', r.carries, []);
+  // still tied on the next hole → keeps carrying, then settles
+  r = bb([[4, 4, 5], [3, 3, 3], [5, 4, 4]]);
+  eq('push carries through another tie', r.perHole[2].decided, []);
+  eq('three-way tie is its own push', r.perHole[2].push, ['x', 'y', 'z']);
+  eq('hole 1 settles on 3; the 3-way carry narrows to y/z', [r.perHole[3].decided, r.carries[0]], [[{ from: 1, winner: 'y' }], { from: 2, teams: ['y', 'z'] }]);
+  eq('hole 3 itself is a y/z push', [r.won, r.perHole[3].push, r.carries[1]], [{ x: 0, y: 1, z: 0 }, ['y', 'z'], { from: 3, teams: ['y', 'z'] }]);
+  // a carry narrows to the tied subset
+  r = bb([[4, 4, 4], [4, 4, 5]]);
+  eq('three-way carry narrows to the two still tied', r.carries, [{ from: 1, teams: ['x', 'y'] }, { from: 2, teams: ['x', 'y'] }]);
+  // an unposted hole is skipped, not decided
+  r = bb([[4, 4, 5], null, [3, 5, 3]]);
+  eq('gap hole skipped, next posted hole decides', [r.won, r.scored, r.remaining, r.carries], [{ x: 1, y: 0, z: 0 }, 2, 16, [{ from: 3, teams: ['x', 'z'] }]]);
+  r = bb([[4, 4, 5], [4, null, 3]]);
+  eq('partly posted hole is not scored yet', [r.scored, r.carries.length, r.perHole[2]], [1, 1, undefined]);
+  r = bb([[4, 5, 5], [5, 4, 5], [5, 5, 5]]);
+  eq('standings and leader', [r.standings, r.leader], [['x', 'y', 'z'], null]);
+  r = bb([[4, 5, 5], [4, 5, 5]]);
+  eq('clear leader', r.leader, 'x');
+  // teams inferred from the data when not given
+  const r2 = ENG.bestBall({ 1: { a: 4, b: 5 } }, O18);
+  eq('teams inferred', [r2.teams, r2.won], [['a', 'b'], { a: 1, b: 0 }]);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
