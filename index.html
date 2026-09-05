@@ -1272,6 +1272,7 @@ const OU_SIDES = { over:'OVER', under:'UNDER' };
 function ouMax(){ const v = +cfg().ouMax; return (v > 0 && isFinite(v)) ? Math.round(v) : 10; }
 function ouEntry(d, pid){
   const e = (((S.ou||{})[d]||{})[pid]) || {};
+  // a line or score is a golf score: anything that isn't a positive number is unset
   const line = (e.line == null || e.line === '') ? null : +e.line;
   const score = (e.score == null || e.score === '') ? null : +e.score;
   const bets = {};
@@ -1279,12 +1280,15 @@ function ouEntry(d, pid){
     if (!v || !OU_SIDES[v.side] || !(+v.amt > 0)) continue;
     bets[b] = { side:v.side, amt:Math.round(+v.amt) };
   }
-  return { line: isFinite(line) ? line : null, score: isFinite(score) ? score : null, bets };
+  return { line: (isFinite(line) && line > 0) ? line : null, score: (isFinite(score) && score > 0) ? score : null, bets };
 }
 // gross for the round as the card has it — every hole posted for that player
-// (individual-ball formats only; a scramble ball belongs to the team)
+// (individual-ball formats only; a scramble ball belongs to the team). A grudge
+// match is the same round, so its strokes are the same card — and on a
+// one-ball day it's the only place a player's own gross gets posted. The cup
+// match is asked first; a side match only stands in when the cup match can't.
 function ouCardScore(d, pid){
-  for (const m of matchesFor(d)){
+  for (const m of [...cupMatchesFor(d), ...sideBetsFor(d)]){
     if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
     let tot = 0, all = true;
     for (let n=1; n<=18; n++){

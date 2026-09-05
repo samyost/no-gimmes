@@ -81,6 +81,20 @@ try {
   ok('over on yourself is refused, under is fine, over on someone else is fine', !!logic.selfOver && logic.selfUnder==='' && logic.otherOver==='');
   ok('even money: win +stake, lose −stake, push 0', logic.win===10 && logic.lose===-10 && logic.pushNet===0);
   ok('card-derived gross needs all 18 posted', logic.card===90 && logic.noCard===null);
+  const edge = await p.evaluate(()=>{
+    S.ou = { sun: { p1:{ line:0, score:-3 }, p2:{ line:'88.5', score:'91' } } };
+    const bad = ouEntry('sun','p1'), good = ouEntry('sun','p2');
+    delete S.ou;
+    // a grudge match on the same day with different (complete) strokes for Sly, and Tank only posted there
+    const holes = {}; for (let n=1;n<=18;n++) holes[n] = { strokes:{ p3:6, p2:4 } };
+    S.matches.sb9 = { day:'sun', side:true, group:'a', ord:90, red:['p3'], blue:['p2'], holes };
+    const r = { sly: ouCardScore('sun','p3'), tank: ouCardScore('sun','p2') };
+    delete S.matches.sb9;
+    return { bad, good, r };
+  });
+  ok('non-positive line/score read as unset', edge.bad.line===null && edge.bad.score===null && edge.good.line===88.5 && edge.good.score===91);
+  ok('cup match card beats a grudge match card', edge.r.sly===90);
+  ok('grudge match stands in when the cup match has no per-player card', edge.r.tank===72);
 
   // --- its own page, reached from the gear hub ---
   await p.locator('.gear').first().click();
