@@ -557,6 +557,25 @@ a{color:var(--brass)}
 .ousheetline b{font-size:20px;margin-left:2px}
 .ousides{display:flex;gap:8px;margin-top:10px}
 .ousides .bigbtn[disabled]{opacity:.35}
+/* ---- head-to-head (on the side action page) ---- */
+.h2hhdr{display:flex;align-items:center;gap:8px;margin:12px 0 6px}
+.h2hhdr h4{margin:0;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--sage)}
+.h2hhdr .tally{font-family:'Saira Condensed';font-weight:800;font-size:15px;white-space:nowrap}
+.h2hhdr .selopt{padding:4px 8px;font-size:12.5px}
+.h2hrow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:7px 10px;margin-bottom:6px;min-height:52px}
+.h2hrow .vs{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.h2hrow .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h2hrow .nm .r{color:var(--red)} .h2hrow .nm .b{color:var(--blue)}
+.h2hrow .terms{font-size:12.5px;color:var(--sage)}
+.h2hrow .out{text-align:right;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.04em;line-height:1.25;white-space:nowrap}
+.h2hrow .out .live{color:var(--brass)} .h2hrow .out .win{color:var(--live)} .h2hrow .out .push{color:var(--brass)}
+.h2hrow .out .mut{font-weight:600;font-size:11.5px}
+.h2hvs{font-size:15px;font-weight:700;margin:0 0 8px;min-height:22px}
+.h2hvs .mut{font-weight:400}
+.h2hstep{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.h2hstep .nav{width:44px;height:44px;border-radius:9px;border:1.5px solid var(--pencil);font-size:22px;background:var(--card)}
+.h2hstep .nav[disabled]{opacity:.3}
+.h2hstep .n{font-family:'Saira Condensed';font-weight:800;font-size:26px;min-width:36px;text-align:center}
 /* ---- best ball, three teams (its own page) ---- */
 .bbpage .selrow{margin-top:10px}
 .bbstand{display:flex;gap:6px;margin:10px 0 4px}
@@ -576,7 +595,7 @@ a{color:var(--brass)}
 .bbchip{display:flex;align-items:center;gap:4px;width:100%;text-align:left;font-size:13px;font-weight:600;padding:5px 4px;border-radius:7px;background:var(--card);margin-bottom:3px;border:1px solid var(--pencil)}
 .bbchip .em{font-size:15px}
 .bbchip .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.bbchip .dots{margin-left:auto;color:var(--brass);font-size:10px;letter-spacing:-1px}
+.bbchip .dots{margin-left:auto;color:var(--brass);font-size:11.5px;font-weight:700;white-space:nowrap}
 .bbrail{display:flex;gap:3px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
 .bbrail::-webkit-scrollbar{display:none}
 .bbrail .cell{flex:0 0 34px;height:42px;border-radius:8px;border:1.5px solid var(--pencil);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Saira Condensed';font-weight:700;font-size:13px}
@@ -591,7 +610,10 @@ a{color:var(--brass)}
 .bbtm{background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:4px 8px 6px;margin-bottom:6px;border-left:4px solid var(--tc)}
 .bbtm .th{display:flex;align-items:baseline;gap:6px;font-family:'Saira Condensed';font-weight:700;font-size:12.5px;letter-spacing:.06em;color:var(--tc);padding:3px 0}
 .bbtm .th .best{margin-left:auto;color:var(--ink);font-size:13px}
-.bbtm .srow .who{flex:0 0 84px}
+.bbtm .srow .who{flex:0 0 68px;font-size:13px}
+.bbtm .qn{width:35px}
+.bbtm .qn.step{width:28px}
+.bbtm .qnums{gap:3px}
 .bbtm .srow .who.t1,.bbtm .srow .who.t2,.bbtm .srow .who.t3{color:var(--ink)}
 .qn.set.t1,.qn.set.t2,.qn.set.t3{background:var(--tc);border-color:var(--tc);color:#FCF8EF}
 .qn.card{border-color:var(--brass);color:var(--brass);border-style:dashed}
@@ -996,7 +1018,7 @@ function defConfig(){
     net:false, allowances:Object.assign({}, WHS_DEFAULTS), flat100:false, strokeCap:0,
     junk:false, junkTypes:{birdie:true, eagle:true, greenie:true, sandie:true, barkie:false},
     skins:false, skinsNet:true, skinsCarry:true,
-    ouMax:10,
+    ouMax:10, h2hStake:10,
   };
 }
 function defDay(d){
@@ -1135,17 +1157,18 @@ function playingCH(d, p){
 }
 
 // ---- matches ---------------------------------------------------------------
+// grudge matches (matches/sb*, side:true) were retired for head-to-head
+// matchups; any still in the database are filtered out here so no renderer
+// ever sees one
 function matchesFor(d){
   return Object.entries(S.matches||{}).map(([id,m])=>Object.assign({id},m))
-    .filter(m=>m.day===d)
-    .sort((a,b)=> (a.side?1:0)-(b.side?1:0) || (a.group||'a').localeCompare(b.group||'a') || (a.ord||0)-(b.ord||0));
+    .filter(m=>m.day===d && !m.side)
+    .sort((a,b)=> (a.group||'a').localeCompare(b.group||'a') || (a.ord||0)-(b.ord||0));
 }
-function cupMatchesFor(d){ return matchesFor(d).filter(m=>!m.side); }
-function sideBetsFor(d){ return matchesFor(d).filter(m=>m.side); }
-// side bets are always a straight 1v1 regardless of the day's game
-function mFormat(m, n){ return m.side ? 'singles' : holeFormat(m.day, n); }
+function cupMatchesFor(d){ return matchesFor(d); }
+function mFormat(m, n){ return holeFormat(m.day, n); }
 function allMatches(){ return DAYS.flatMap(matchesFor); }
-function theMatch(id){ const m=(S.matches||{})[id]; return m ? Object.assign({id},m) : null; }
+function theMatch(id){ const m=(S.matches||{})[id]; return m && !m.side ? Object.assign({id},m) : null; }
 function sideIds(m, side){ const v = m[side==='A'?'red':'blue']; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v||{}).filter(Boolean); }
 function engineHoles(m){
   const out = {};
@@ -1398,12 +1421,9 @@ function ouEntry(d, pid){
   return { line: (isFinite(line) && line > 0) ? line : null, score: (isFinite(score) && score > 0) ? score : null, bets };
 }
 // gross for the round as the card has it — every hole posted for that player
-// (individual-ball formats only; a scramble ball belongs to the team). A grudge
-// match is the same round, so its strokes are the same card — and on a
-// one-ball day it's the only place a player's own gross gets posted. The cup
-// match is asked first; a side match only stands in when the cup match can't.
+// (individual-ball formats only; a scramble ball belongs to the team).
 function ouCardScore(d, pid){
-  for (const m of [...cupMatchesFor(d), ...sideBetsFor(d)]){
+  for (const m of cupMatchesFor(d)){
     if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
     let tot = 0, all = true;
     for (let n=1; n<=18; n++){
@@ -1460,6 +1480,15 @@ function ouDayBook(d){
       net[b] = (net[b]||0) + v; book -= v;
     }
   }
+  // head-to-head matchups settle player to player into the same ledger, so
+  // one person has one number for the trip; the book isn't in those
+  for (const r of h2hRows(d)){
+    const res = h2hResult(r);
+    if (!res.done){ open++; continue; }
+    settled++;
+    net[r.a] = (net[r.a]||0) + h2hNet(r, res, r.a);
+    net[r.b] = (net[r.b]||0) + h2hNet(r, res, r.b);
+  }
   return { net, settled, open, book };
 }
 function ouTripBook(){
@@ -1488,10 +1517,71 @@ function ouBetsBy(bettor){
 function money(n){ const a = Math.abs(Math.round(n)); return (n < 0 ? '−' : n > 0 ? '+' : '') + '$' + a; }
 function ouLineTxt(v){ return v == null ? '—' : (Math.abs(v % 1) === 0.5 ? String(v) : String(Math.round(v*10)/10)); }
 
+// ---- head-to-head: stroke play, negotiated strokes, one bet per matchup ------
+// h2h/{d}/{id} = { a, b, give:{to, n}, stake, t }. Pure arithmetic on the round
+// totals over/under already collects (ouScore: a posted total beats the card):
+// a.gross − b.gross ± the negotiated strokes, flat off the total. Handicaps are
+// never read. Display only for the teams; the cup never sees it.
+function h2hStake(){ const v = +cfg().h2hStake; return (v > 0 && isFinite(v)) ? Math.round(v) : 10; }
+function h2hRow(d, id){
+  const r = ((S.h2h||{})[d]||{})[id];
+  if (!r || !r.a || !r.b || r.a === r.b) return null;
+  const give = r.give || {};
+  const n = Math.max(0, Math.round(+give.n || 0));
+  return { id, d, a:r.a, b:r.b, n, to: n && (give.to===r.a || give.to===r.b) ? give.to : null,
+           stake: (+r.stake > 0) ? Math.round(+r.stake) : h2hStake(), t:+r.t || 0 };
+}
+function h2hRows(d){ return Object.keys((S.h2h||{})[d]||{}).map(id=>h2hRow(d, id)).filter(Boolean).sort((x,y)=>x.t-y.t || x.id.localeCompare(y.id)); }
+function h2hResult(r){
+  const sa = ouScore(r.d, r.a).score, sb = ouScore(r.d, r.b).score;
+  if (sa != null && sb != null){
+    const diff = (sa - (r.to===r.a ? r.n : 0)) - (sb - (r.to===r.b ? r.n : 0)); // negative → a wins
+    return { done:true, winner: diff === 0 ? null : (diff < 0 ? r.a : r.b), margin: Math.abs(diff), sa, sb };
+  }
+  // live: the gross running diff over the holes both players have posted
+  let thru = 0, diff = 0;
+  for (let n=1; n<=18; n++){
+    const ga = cardGross(r.d, n, r.a), gb = cardGross(r.d, n, r.b);
+    if (typeof ga !== 'number' || typeof gb !== 'number') continue;
+    thru++; diff += ga - gb;
+  }
+  return { done:false, thru, diff, sa, sb };
+}
+// what a matchup is worth to one of its two players once it settles
+function h2hNet(r, res, pid){ if (!res || !res.done) return null; if (!res.winner) return 0; return res.winner === pid ? r.stake : -r.stake; }
+function h2hTally(d){
+  const t = { red:0, blue:0, push:0, open:0, n:0 };
+  for (const r of h2hRows(d)){
+    t.n++;
+    const res = h2hResult(r);
+    if (!res.done){ t.open++; continue; }
+    if (!res.winner){ t.push++; continue; }
+    const tm = effTeam(d, res.winner);
+    if (tm === 'red') t.red++; else if (tm === 'blue') t.blue++;
+  }
+  return t;
+}
+// pair today's reds against today's blues at random; on an uneven day the
+// short side doubles up, and who doubles is part of the draw
+function h2hDraw(d){
+  const shuf = a => { a = a.slice(); for (let i=a.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const ids = presentIds(d);
+  const reds = shuf(ids.filter(p=>effTeam(d,p)==='red')), blues = shuf(ids.filter(p=>effTeam(d,p)==='blue'));
+  if (!reds.length || !blues.length) return 0;
+  const long = reds.length >= blues.length ? reds : blues, short = long === reds ? blues : reds;
+  const rows = {}, t0 = Date.now(), stake = h2hStake();
+  long.forEach((p, i) => {
+    const q = short[i % short.length];
+    rows[uid()] = { a: long === reds ? p : q, b: long === reds ? q : p, give:{ n:0 }, stake, t: t0 + i };
+  });
+  op(`h2h/${d}`, rows);
+  return long.length;
+}
+
 // ---- best ball: three teams, one point a hole, pushes carry -----------------
 // bb/{d}/team/{pid} = 1|2|3 (anything else: sitting out) — the day's teams.
 // bb/{d}/strokes/{n}/{pid} = gross | 'pickup' typed on the page; otherwise a
-// player's gross comes off the card (their cup or grudge match) like over/under.
+// player's gross comes off the card (their cup match) like over/under.
 // Scoring lives in ENG.bestBall: each team's best net ball, low team takes the
 // hole, a tie for low is a push that the tied teams settle on the next hole.
 const BB_TEAMS = ['1','2','3'];
@@ -1528,12 +1618,18 @@ function bbStrokes(d){
 function bbGross(d, n, pid){
   const hand = ((bbDay(d).strokes||{})[n]||{})[pid];
   if (hand === 'pickup' || (typeof hand === 'number' && hand > 0)) return { v:hand, from:'hand' };
-  for (const m of [...cupMatchesFor(d), ...sideBetsFor(d)]){
+  const v = cardGross(d, n, pid);
+  return v == null ? { v:null, from:null } : { v, from:'card' };
+}
+// one player's gross on one hole as the card has it: a posted number, a
+// completed shot trace, or 'pickup'; null when nothing is in yet
+function cardGross(d, n, pid){
+  for (const m of cupMatchesFor(d)){
     if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
     const v = (effStrokes(m, n)||{})[pid];
-    if (v === 'pickup' || (typeof v === 'number' && v > 0)) return { v, from:'card' };
+    if (v === 'pickup' || (typeof v === 'number' && v > 0)) return v;
   }
-  return { v:null, from:null };
+  return null;
 }
 function bbDots(d, si, n, pid){ const h = holesFor(d)[n-1]; return si.net ? ENG.dotsOnHole(si.players[pid]||0, h.si, 18) : 0; }
 // {teamId: best net | null} for one hole; a team whose every ball is picked up
@@ -2003,12 +2099,6 @@ function renderBoard(d){
     body += `<div class="mlist">` + gm.map(m => preview ? matchRowHtml(m) : matchRowHtml(m)).join('') + `</div>`;
     if (!gm.length) body += `<div class="empty" style="padding:10px">No matches in this wave yet.</div>`;
   }
-  const sides = sideBetsFor(d);
-  if (sides.length){
-    body += `<div class="tgh">🥊 GRUDGE MATCHES — bragging rights only</div>`;
-    body += `<div class="mlist">` + sides.map(matchRowHtml).join('') + `</div>`;
-  }
-  const cupsOnly = ms.filter(m=>!m.side);
   if (!ms.length && !anyCart){
     body = `<div class="empty">Nothing on the tee sheet for ${DAYMETA[d].name} yet.<br>
       <button class="cta" data-act="setup" data-d="${d}">Set up ${DAYMETA[d].name}</button></div>`;
@@ -2661,7 +2751,7 @@ function renderSetupDay(d){
       <button class="cta" style="margin:0 0 4px" data-act="makematches" data-d="${d}">${makeLabel}</button>
       ${mCards}
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="ghostbtn" data-act="addmatch" data-d="${d}">+ Add match</button>
-      <button class="ghostbtn" data-act="addsidebet" data-d="${d}">🥊 + Side bet (1v1, no cup points)</button>
+      <button class="ghostbtn" data-act="ou" data-d="${d}">🤝 Head-to-head bets live under Side action</button>
       <span class="mut" style="font-size:12px">Tap a name in a match, then a bench/other name to swap.</span></div>
     </div>
 
@@ -2798,10 +2888,12 @@ function renderSettings(){
         <button class="selopt ${c.skinsCarry?'on':''}" data-act="skinscarry">Carryovers ${c.skinsCarry?'on':'off'}</button></div>`:''}
     </div>
 
-    <h2>Over / under <span class="ct">its own game — see the gear menu</span></h2>
+    <h2>Side action <span class="ct">its own page — see the gear menu</span></h2>
     <div class="block">
-      <div class="field"><label>Max per bet ($) <span class="mut" style="font-size:12px">even money, gross score, can’t take the over on yourself</span></label>
+      <div class="field"><label>Over / under: max per bet ($) <span class="mut" style="font-size:12px">even money, gross score, can’t take the over on yourself</span></label>
         <input type="number" min="1" step="1" inputmode="numeric" value="${ouMax()}" data-input="oumax" style="width:74px"></div>
+      <div class="field"><label>Head-to-head: stake per matchup ($) <span class="mut" style="font-size:12px">the default — each matchup can change its own</span></label>
+        <input type="number" min="1" step="1" inputmode="numeric" value="${h2hStake()}" data-input="h2hstake" style="width:74px"></div>
     </div>
 
     <h2 id="data">Data &amp; this phone</h2>
@@ -2874,6 +2966,30 @@ function ouBookHtml(title, book, foot){
     ${foot ? `<div class="mut" style="font-size:12px;margin-top:4px">${foot}</div>` : ''}
   </div>`;
 }
+function h2hRowHtml(r){
+  const res = h2hResult(r);
+  const nm = pid => { const t = effTeam(r.d, pid); return `<span class="${t==='red'?'r':t==='blue'?'b':''}">${pName(pid)}</span>`; };
+  const terms = `${r.n ? `${pName(r.to===r.a ? r.b : r.a)} gives ${r.n}` : 'no strokes'} · $${r.stake}`;
+  let out;
+  if (res.done){
+    if (!res.winner) out = `<span class="push">PUSH</span><br><span class="mut">${res.sa} v ${res.sb}${r.n?` · ${r.n} given`:''}</span>`;
+    else out = `<span class="win">${pName(res.winner)} by ${res.margin} ✓</span><br><span class="win">${money(r.stake)} ${esc((player(res.winner).name||'').split(' ')[0])}</span>`;
+  } else if (res.thru){
+    out = `<span class="live">${res.diff === 0 ? 'LEVEL' : `${pName(res.diff < 0 ? r.a : r.b)} −${Math.abs(res.diff)}`}</span><br><span class="mut">gross thru ${res.thru}${r.n?` · ${r.n} to come`:''}</span>`;
+  } else out = `<span class="mut">no scores yet</span>`;
+  return `<button class="h2hrow" data-act="h2hedit" data-d="${r.d}" data-id="${r.id}">
+    <span class="vs"><span class="nm">${nm(r.a)} <span class="mut" style="font-weight:400">vs</span> ${nm(r.b)}</span><span class="terms">${terms}</span></span>
+    <span class="out">${out}</span></button>`;
+}
+function h2hSectionHtml(d){
+  const rows = h2hRows(d), t = h2hTally(d);
+  const tally = rows.length ? `<span class="tally"><span class="tRed">${teamName('A')} ${t.red}</span> <span class="mut">–</span> <span class="tBlue">${t.blue} ${teamName('B')}</span>${t.push?` <span class="mut" style="font-weight:400;font-size:12px">· ${t.push} push${t.push>1?'es':''}</span>`:''}</span>` : '';
+  const canDraw = presentIds(d).some(p=>effTeam(d,p)==='red') && presentIds(d).some(p=>effTeam(d,p)==='blue');
+  return `<div class="h2hhdr"><h4>HEAD-TO-HEAD</h4>${tally}<span class="sp" style="flex:1"></span>
+      <button class="selopt" data-act="h2hdraw" data-d="${d}" ${canDraw?'':'disabled'}>🎲 Draw</button>
+      <button class="selopt" data-act="h2hnew" data-d="${d}">+ Matchup</button></div>
+    ${rows.map(h2hRowHtml).join('') || `<div class="mut" style="font-size:12.5px;margin-bottom:6px">Stroke play, one on one, strokes negotiated between the two of you, $${h2hStake()} a matchup unless you say otherwise. <b>Draw</b> pairs today’s ${teamName('A')} against ${teamName('B')} — on an uneven day the short side doubles up, and who doubles is part of the draw.</div>`}`;
+}
 function renderOU(d){
   const ids = presentIds(d);
   const dayChips = DAYS.map(x=>{
@@ -2886,17 +3002,18 @@ function renderOU(d){
   const cl = courseLabel(d);
   return `
   <div class="appbar"><button class="backbtn" data-act="board">‹</button>
-    <span class="wordmark sc">OVER / UNDER</span><span class="sp"></span>${pillHtml()}
+    <span class="wordmark sc">SIDE ACTION</span><span class="sp"></span>${pillHtml()}
     <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
   <div class="spage oupage">
     <div class="selrow" style="margin-top:10px">${dayChips}</div>
     <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · gross score · max <b>$${ouMax()}</b> a bet (<button data-act="settings" class="lnk">Settings</button>) · <b>no over on yourself</b></div>
     <div class="oubyrow"><span class="lab">BETS BY</span>${namedPlayers().map(p=>
       `<button class="selopt" data-act="oubets" data-p="${p.id}" title="Every bet ${esc(p.name)} has placed"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('')}</div>
-    ${cards ? `<div class="ouhdr"><span class="sp"></span><span>LINE</span><span>SCORE</span><span class="bw"></span></div>` : ''}
+    ${ids.length ? h2hSectionHtml(d) : ''}
+    ${cards ? `<div class="h2hhdr" style="margin-top:14px"><h4>OVER / UNDER</h4></div><div class="ouhdr"><span class="sp"></span><span>LINE</span><span>SCORE</span><span class="bw"></span></div>` : ''}
     ${cards || `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}
-    ${ouBookHtml(DAYMETA[d].name + ' book', dayBook, dayBook.open ? `${dayBook.open} bet${dayBook.open>1?'s':''} still riding — post scores to settle them.` : '')}
-    ${trip.settled && DAYS.some(x=>x!==d && ouDayBook(x).settled) ? ouBookHtml('Trip so far', trip, 'Every settled line, all days.') : ''}
+    ${ouBookHtml(DAYMETA[d].name + ' ledger', dayBook, dayBook.open ? `${dayBook.open} bet${dayBook.open>1?'s':''} still riding — post scores to settle them.` : '')}
+    ${trip.settled && DAYS.some(x=>x!==d && ouDayBook(x).settled) ? ouBookHtml('Trip so far', trip, 'Every settled line and matchup, all days.') : ''}
     <div class="mut" style="font-size:12px;margin-top:14px">Anyone sets a line; anyone bets it, even money against the book. Bets ride on whatever the line is now — settle the number before anybody bets. A score in brass came off the card (all 18 posted); type a total to override it.</div>
   </div>`;
 }
@@ -2906,7 +3023,7 @@ function bbTeamsEditorHtml(d){
   const si = bbStrokes(d);
   const chip = pid => { const p = player(pid); const s = si.players[pid]||0;
     return `<button class="bbchip" data-act="bbteam" data-d="${d}" data-p="${pid}" title="Tap to move to the next team">
-      <span class="em">${p.emoji||'❔'}</span><span class="nm">${esc((p.name||'??').split(' ')[0])}</span>${si.net&&s?`<span class="dots">${'●'.repeat(Math.min(s,9))}${s>9?'+'+(s-9):''}</span>`:''}</button>`; };
+      <span class="em">${p.emoji||'❔'}</span><span class="nm">${esc((p.name||'??').split(' ')[0])}</span>${si.net&&s?`<span class="dots">${s}●</span>`:''}</button>`; };
   const boxes = BB_TEAMS.map(t=>`<div class="tbox t${t}"><h5>TEAM ${t}</h5>${ids.filter(pid=>bbTeamOf(d,pid)===t).map(chip).join('')}</div>`).join('');
   const out = ids.filter(pid=>!bbTeamOf(d,pid));
   const sizes = bbDealSizes(ids.length).join('·');
@@ -3056,10 +3173,10 @@ function hubSheetHtml(){
     <button class="hubrow" data-act="settings"><div><div class="hl">Extras &amp; data</div>
       <div class="hv">MVP on · Junk ${c.junk?'on':'off'} · Skins ${c.skins?'on':'off'} · ${dbConfigured()?'● live':'range mode'}</div></div><span class="chev">›</span></button>
     <h4 style="margin:14px 0 4px" class="sc caps">Side action</h4>
-    <button class="hubrow" data-act="ou"><div><div class="hl">Over / Under</div>
-      <div class="hv">${(()=>{ const d = ui.day || resolveDay(); const b = ouTripBook();
+    <button class="hubrow" data-act="ou"><div><div class="hl">Head-to-head · Over / Under</div>
+      <div class="hv">${(()=>{ const d = ui.day || resolveDay(); const b = ouTripBook(); const t = h2hTally(d);
         const lines = Object.values((S.ou||{})[d]||{}).filter(e=>e && e.line != null).length;
-        return `${DAYMETA[d].label}: ${lines ? lines+' line'+(lines>1?'s':'') : 'no lines yet'} · ${b.settled+b.open ? (b.settled+b.open)+' bet'+((b.settled+b.open)>1?'s':'')+' on the trip' : 'no bets yet'} · max $${ouMax()}`; })()}</div></div>
+        return `${DAYMETA[d].label}: ${t.n ? t.n+' matchup'+(t.n>1?'s':'')+(t.red+t.blue ? ` ${teamName('A')} ${t.red}–${t.blue} ${teamName('B')}` : '') : 'no matchups'} · ${lines ? lines+' line'+(lines>1?'s':'') : 'no lines'} · ${b.settled+b.open ? (b.settled+b.open)+' bet'+((b.settled+b.open)>1?'s':'')+' on the trip' : 'no bets yet'}`; })()}</div></div>
       <span class="chev">›</span></button>
     <button class="hubrow" data-act="bb"><div><div class="hl">Best Ball · 2 v 2 v 3</div>
       <div class="hv">${(()=>{ const d = ui.day || resolveDay(); if (!bbOn(d)) return `${DAYMETA[d].label}: no teams yet · three teams, a point a hole, pushes ride`;
@@ -3079,17 +3196,6 @@ function cupSheetHtml(){
     return `<button class="selopt" data-act="day" data-d="${d}" style="min-width:70px">${DAYMETA[d].label}
       <span class="sub">${dp.any ? halfTxt(dp.red)+'–'+halfTxt(dp.blue) : '—'}</span></button>`;
   }).join('');
-  let grudgeL = '';
-  const allSides = DAYS.flatMap(sideBetsFor);
-  if (allSides.length){
-    grudgeL = `<h4 style="margin:14px 0 4px" class="sc caps">Grudge matches</h4>` + allSides.map(m=>{
-      const dr = mDer(m);
-      const a = sideIds(m,'A')[0], b = sideIds(m,'B')[0];
-      return `<button class="hubrow" data-act="match" data-id="${m.id}" style="margin-bottom:6px"><div>
-        <div class="hl" style="font-size:14px">${a?pName(a):'?'} vs ${b?pName(b):'?'} <span class="mut" style="font-size:11px">· ${DAYMETA[m.day].label}</span></div></div>
-        <span style="margin-left:auto">${chipHtml(m, dr)}</span></button>`;
-    }).join('');
-  }
   let junkL = '';
   if (conf.junk){
     const counts = {};
@@ -3107,7 +3213,7 @@ function cupSheetHtml(){
     ${tugHtml(c)}${projLine}
     <h4 style="margin:14px 0 4px" class="sc caps">MVP</h4>${mvpT||'<div class="mut">No matches finished yet.</div>'}
     <h4 style="margin:14px 0 4px" class="sc caps">By day</h4><div class="selrow">${byday}</div>
-    ${grudgeL}${junkL}${skinsL}
+    ${junkL}${skinsL}
     <div class="agr"><h4>The agreement</h4>
       <div>Tie: ${TIEBREAKS[conf.tieRule].label}${conf.holder?` · Holder: ${teamName(conf.holder==='red'?'A':'B')}`:''}</div>
       <div>Gimmes: ${GIMMES[conf.gimme]}</div>
@@ -3577,6 +3683,29 @@ function sheetHtml(sh){
         <button class="bigbtn pri" data-act="ouplace" ${why?'disabled':''}>${existing ? 'Change it' : 'Place it'} · $${amt}</button>
       </div>`;
   }
+  if (t==='h2h'){
+    const d = sh.d, ids = presentIds(d);
+    const existing = sh.id ? h2hRow(d, sh.id) : null;
+    const chip = pid => { const p = player(pid), tm = effTeam(d, pid); const sel = sh.a===pid || sh.b===pid;
+      return `<button class="pchip ${tm==='red'?'redx':tm==='blue'?'bluex':''} ${sel?'sel':''}" data-act="h2hpick" data-p="${pid}">
+        <span class="em">${p.emoji}</span><span class="nm">${esc((p.name||'').split(' ')[0])}</span>${sel?`<span class="mut" style="margin-left:auto;font-size:11px">${sh.a===pid?'1st':'2nd'}</span>`:''}</button>`; };
+    const stakes = [5,10,20,25,50,100]; if (!stakes.includes(sh.stake)) stakes.push(sh.stake); stakes.sort((x,y)=>x-y);
+    const ready = !!(sh.a && sh.b && sh.a !== sh.b);
+    const scored = ready && h2hResult({ d, a:sh.a, b:sh.b, n:0, to:null, stake:0 }).done;
+    return `<h3>${existing ? 'Matchup' : 'New matchup'}</h3>
+      <div class="h2hvs">${sh.a ? pName(sh.a) : '<span class="mut">tap a player</span>'} <span class="mut">vs</span> ${sh.b ? pName(sh.b) : '<span class="mut">tap another</span>'}</div>
+      <div class="pchips">${ids.map(chip).join('')}</div>
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">Strokes <span class="mut">— negotiated, flat off the round total</span></div>
+      <div class="h2hstep"><button class="nav" data-act="h2hn" data-v="${sh.n-1}" ${sh.n<=0?'disabled':''}>−</button><span class="n num">${sh.n}</span><button class="nav" data-act="h2hn" data-v="${sh.n+1}">+</button>
+        ${sh.n && ready ? `<button class="selopt ${sh.to===sh.b?'on':''}" data-act="h2hto" data-p="${sh.b}">${pName(sh.a)} gives</button><button class="selopt ${sh.to===sh.a?'on':''}" data-act="h2hto" data-p="${sh.a}">${pName(sh.b)} gives</button>` : ''}</div>
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">Stake <span class="mut">(even money, player to player)</span></div>
+      <div class="selrow">${stakes.map(v=>`<button class="selopt ${v===sh.stake?'on':''}" data-act="h2hstake" data-v="${v}">$${v}</button>`).join('')}</div>
+      ${scored ? `<div class="warnchip" style="margin-top:8px">Both scores are already in. A matchup made now is on your conscience.</div>` : ''}
+      <div class="btnrow">
+        ${existing ? `<button class="bigbtn danger" data-act="h2hdel">Delete</button>` : `<button class="bigbtn ghost" data-act="sheet-close">Never mind</button>`}
+        <button class="bigbtn pri" data-act="h2hsave" ${ready && (!sh.n || sh.to) ? '' : 'disabled'}>${existing ? 'Save' : 'Add it'}</button>
+      </div>`;
+  }
   if (t==='confirmtext'){
     return `<h3>${esc(sh.title)}</h3><div>${esc(sh.body)} <b>Type the trip name. No mulligans on this one.</b></div>
       <input type="text" class="wide" id="confirmfield" style="width:100%;margin-top:10px;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:10px" placeholder="${esc(cfg().tripName)}">
@@ -3976,6 +4105,50 @@ document.addEventListener('click', (ev)=>{
       op(`bb/${a.d}/strokes/${a.n}/${a.p}`, cur==='pickup' ? null : 'pickup'); break;
     }
 
+    // head-to-head
+    case 'h2hnew': openSheet('h2h', { d:a.d, id:null, a:null, b:null, to:null, n:0, stake:h2hStake() }); break;
+    case 'h2hedit': { const r = h2hRow(a.d, a.id); if (r) openSheet('h2h', { d:a.d, id:a.id, a:r.a, b:r.b, to:r.to, n:r.n, stake:r.stake }); break; }
+    case 'h2hpick': { // first tap picks the first player, second the opponent; tapping a picked player clears him
+      const sh = ui.sheet; if (!sh || sh.type!=='h2h') break;
+      if (sh.a === a.p) sh.a = null; else if (sh.b === a.p) sh.b = null;
+      else if (!sh.a) sh.a = a.p; else sh.b = a.p;
+      if (sh.to && sh.to !== sh.a && sh.to !== sh.b) sh.to = null;
+      $sheetbox.innerHTML = sheetHtml(sh); break;
+    }
+    case 'h2hn': {
+      const sh = ui.sheet; if (!sh || sh.type!=='h2h') break;
+      sh.n = Math.max(0, Math.min(36, +a.v|0));
+      if (!sh.n) sh.to = null; else if (!sh.to) sh.to = sh.b || sh.a; // somebody has to get them; the toggle flips it
+      $sheetbox.innerHTML = sheetHtml(sh); break;
+    }
+    case 'h2hto': { const sh = ui.sheet; if (!sh || sh.type!=='h2h') break; sh.to = a.p; $sheetbox.innerHTML = sheetHtml(sh); break; }
+    case 'h2hstake': { const sh = ui.sheet; if (!sh || sh.type!=='h2h') break; sh.stake = Math.max(1, +a.v|0); $sheetbox.innerHTML = sheetHtml(sh); break; }
+    case 'h2hsave': {
+      const sh = ui.sheet; if (!sh || sh.type!=='h2h') break;
+      if (!sh.a || !sh.b || sh.a === sh.b){ toastSnack('Pick two players.'); break; }
+      if (sh.n && !sh.to){ toastSnack('Who gets the strokes?'); break; }
+      const old = sh.id ? h2hRow(sh.d, sh.id) : null;
+      const id = sh.id || uid();
+      op(`h2h/${sh.d}/${id}`, { a:sh.a, b:sh.b, give: sh.n ? { to:sh.to, n:sh.n } : { n:0 }, stake:sh.stake, t: old ? old.t : Date.now() });
+      closeSheet();
+      toastSnack(`${pName(sh.a)} vs ${pName(sh.b)} · ${sh.n ? `${pName(sh.to===sh.a?sh.b:sh.a)} gives ${sh.n}` : 'no strokes'} · $${sh.stake}`);
+      break;
+    }
+    case 'h2hdel': {
+      const sh = ui.sheet; if (!sh || !sh.id) break;
+      const raw = ((S.h2h||{})[sh.d]||{})[sh.id];
+      op(`h2h/${sh.d}/${sh.id}`, null); closeSheet();
+      if (raw) snack(`${pName(raw.a)} vs ${pName(raw.b)} scrapped`, 'UNDO', ()=>op(`h2h/${sh.d}/${sh.id}`, raw));
+      break;
+    }
+    case 'h2hdraw': {
+      const have = h2hRows(a.d).length;
+      if (have && !window.confirm(`Replace the ${have} matchup${have>1?'s':''} already drawn for ${DAYMETA[a.d].name}?`)) break;
+      const n = h2hDraw(a.d);
+      toastSnack(n ? `${n} matchup${n>1?'s':''} drawn. Now go negotiate.` : `Need someone on each team today to draw.`);
+      break;
+    }
+
     // over / under
     case 'ou': closeSheet(true); navigate('#/ou/'+(a.d||ui.day||resolveDay())); break;
     case 'oubets': openSheet('oubets', { bettor: a.p || ouBettorDefault() }); break;
@@ -4163,7 +4336,6 @@ document.addEventListener('click', (ev)=>{
     }
     case 'odd-b': closeSheet(); toastSnack('Odd man rides — he’s in the tee group, out of the matches.'); break;
     case 'addmatch': op('matches/m'+uid(), { day:a.d, group:'a', ord: matchesFor(a.d).length, red:[], blue:[], holes:{} }); break;
-    case 'addsidebet': op('matches/sb'+uid(), { day:a.d, side:true, group:'a', ord: 90+sideBetsFor(a.d).length, red:[], blue:[], holes:{} }); break;
     case 'delmatch': {
       const m = theMatch(a.mid);
       const scored = m && Object.values(m.holes||{}).some(h=>h&&h.winner);
@@ -4241,12 +4413,12 @@ document.addEventListener('click', (ev)=>{
       aEl.href = URL.createObjectURL(blob); aEl.download = 'no-gimmes-trip.json'; aEl.click();
       break;
     }
-    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result, stroke, over/under bet, and best-ball hole on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
+    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result, stroke, over/under bet, head-to-head matchup, and best-ball hole on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
     case 'resetscores2': {
       const f = document.getElementById('confirmfield');
       if (f && f.value.trim() === cfg().tripName){
         for (const m of allMatches()){ op(`matches/${m.id}/holes`, null); op(`matches/${m.id}/concededBy`, null); op(`matches/${m.id}/concededAt`, null); }
-        op('junk', null); op('ou', null); op('bb', null);
+        op('junk', null); op('ou', null); op('bb', null); op('h2h', null);
         closeSheet(); toastSnack('Clean card. Play well.');
       } else toastSnack('Type the trip name exactly to confirm.');
       break;
@@ -4300,6 +4472,7 @@ document.addEventListener('change', (ev)=>{
       op(`ou/${a.d}/${a.p}/score`, n); break;
     }
     case 'oumax': op('config/ouMax', Math.max(1, Math.min(1000, Math.round(+v)||10))); break;
+    case 'h2hstake': op('config/h2hStake', Math.max(1, Math.min(1000, Math.round(+v)||10))); break;
     case 'holenote': ui.noteEdit = null; op(`notes/${a.c}/${a.hn}`, v.trim().slice(0,90) || null); break;
   }
 });
@@ -4329,8 +4502,7 @@ function landHome(fromWho){
   const d = resolveDay();
   ui.day = d;
   if (me && me!=='watch' && (isToday(d) || tripOver()===false)){
-    const landable = [...cupMatchesFor(d), ...sideBetsFor(d)];
-    for (const m of landable){
+    for (const m of cupMatchesFor(d)){
       if (!isToday(d)) break;
       const mine = sideIds(m,'A').includes(me) || sideIds(m,'B').includes(me);
       if (!mine) continue;

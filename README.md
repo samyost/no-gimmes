@@ -53,7 +53,19 @@ watch it appear on the other. That's the whole stack verified.
   per match, double singles, gimme policy, tie rule, junk dots, skins.
 - **Offline**: scores save on the phone instantly and sync when signal returns
   (the pill in the corner tells the truth: `LIVE` / `3 QUEUED`).
-- **Over / under** (gear → *Side action*): its own page, its own game, one per
+- **Head-to-head** (gear → *Side action*): the singles-day bet. Stroke play
+  over the round, one on one, any strokes negotiated between the two of you
+  ("Mike gives Will 10", flat off the round total — handicaps never enter
+  it), one stake per matchup ($10 by default in Settings, editable per row).
+  Nothing to score: totals come off the card (or the posted total), so a row
+  reads `Will by 2 ✓ · +$20 Will` the moment both cards are in, and a live
+  gross running diff before that. **Draw** pairs today's Red against today's
+  Blue at random; on an uneven day the short side doubles up, and who doubles
+  is part of the draw. The header keeps a Red–Blue tally of matchups won —
+  display only, the cup never sees it. Settles into the same ledger as
+  over/under, so everyone has one number for the trip. This replaced the old
+  grudge matches (hole-by-hole 1v1 side matches), which are gone.
+- **Over / under** (same page): its own game, one per
   day. Every player gets a line on their gross score for the round; anyone sets
   it, anyone bets over or under it, up to the max per bet in Settings ($10 by
   default). One rule: you can't take the over on yourself. Even money against
@@ -69,8 +81,8 @@ watch it appear on the other. That's the whole stack verified.
   hole, one point a hole. A tie for low is a **push** that rides to the next
   hole and is settled between the tied teams only — whichever of them is lower
   there takes it, even if the third team wins that hole outright; tied again,
-  it keeps riding. Gross scores already on the card (a cup or grudge match that
-  day) fill in automatically in brass; tap a number to override, tap it again
+  it keeps riding. Gross scores already on the card (that day's cup match)
+  fill in automatically in brass; tap a number to override, tap it again
   to go back to the card. Nothing here touches the cup.
 
 ## Honesty box
@@ -125,6 +137,7 @@ node dev/sync.test.mjs     # two-browser integration tests (needs: cd dev && npm
 node dev/maps.test.mjs     # hole maps / ball marks / hole notes (needs: cd dev && npm i)
 node dev/ou.test.mjs       # over/under lines, bets, the max, settlement (needs: cd dev && npm i)
 node dev/bb.test.mjs       # three-team best ball: draw, card read-through, pushes riding (needs: cd dev && npm i)
+node dev/h2h.test.mjs      # head-to-head: negotiated strokes, draw, ledger, grudge matches gone (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
 ```
 

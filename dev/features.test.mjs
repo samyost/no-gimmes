@@ -1,6 +1,6 @@
 // Feature tests: the Mixer day format (rotating segments + back-nine flip),
 // the shared mix library (day-independent rotations a day picks from),
-// and grudge-match side bets (1v1, zero cup points).
+// and the retired grudge-match side bets staying invisible.
 //   node dev/features.test.mjs
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
@@ -97,22 +97,16 @@ try {
   await p.locator('#cell13').click();
   ok('hole 13 is GREENSOMES under the flip', await until(()=>p.locator('.hctx .h1').textContent().then(t=>/GREENSOMES/.test(t))));
 
-  // --- side bet: board section, zero cup impact ---
+  // --- grudge matches retired: a stale side:true row in the database is invisible ---
   await p.locator('.backbtn').first().click();
-  ok('grudge section on the board', await until(()=>p.locator('.tgh', { hasText:'GRUDGE' }).count().then(n=>n===1)));
-  await p.evaluate(()=>location.hash='#/match/sb1');
-  ok('side-bet meta says no cup points', await until(()=>p.locator('.mmeta').textContent().then(t=>/SIDE BET/.test(t) && /NO CUP POINTS/.test(t))));
-  // score a hole for Duck; the cup must not move
-  await p.locator('.wbtn.R').first().click();
-  await until(()=>p.locator('.mmeta .mst').textContent().then(t=>/1UP/.test(t)));
-  const c = await p.evaluate(()=>{ const c = cup(); return { pts: c.red + c.blue, proj: c.pRed + c.pBlue, sched: c.scheduled }; });
-  ok('side-bet hole moves nothing on the cup', c.pts === 0 && c.proj === 0);
-  ok('side bet not in the scheduled pool', c.sched === 1);
-  // side bet uses singles rows (2), not the mixer segment shape
-  ok('side bet drawer is 1v1', await until(async()=>{
-    if (await p.locator('.drawer .srow').count() === 0) await p.locator('.drawerh').click();
-    return p.locator('.srow').count().then(n=>n===2);
-  }));
+  await until(()=>p.locator('.tgh').count().then(n=>n>=1));
+  ok('no grudge section on the board', await p.locator('.tgh', { hasText:'GRUDGE' }).count().then(n=>n===0));
+  ok('stale side bet is not a match the app knows', await p.evaluate(()=>!matchesFor('sun').some(m=>m.id==='sb1') && !theMatch('sb1') && cup().scheduled===1));
+  await p.evaluate(()=>{ location.hash='#/match/sb1'; });
+  ok('its old route falls through to the board', await until(()=>p.evaluate(()=>ui.screen==='board')));
+  await p.evaluate(()=>{ location.hash='#/day/sun/setup'; });
+  await until(()=>p.locator('[data-act="addmatch"]').count().then(n=>n===1));
+  ok('setup no longer offers + Side bet', await p.locator('[data-act="addsidebet"]').count().then(n=>n===0));
 
   // --- mix library: shared day-independent rotations ---
   // sun resolves its rotation through mixes/mx1 (all the mixer checks above

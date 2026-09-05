@@ -5,6 +5,118 @@ here is a commitment; it's here so it doesn't get lost between trips.
 
 ---
 
+## Head-to-head day — stroke play, negotiated strokes, one bet per matchup
+
+**Built** (Sept 2026, from the group chat). What shipped, and where it departs
+from the design below:
+
+- Lives on the Side action page (`#/ou/<day>`) above Over/Under, exactly as
+  drawn: one row per matchup, tap to edit, **+ Matchup** and **🎲 Draw**.
+  Data is `h2h/<day>/<id> = { a, b, give:{to, n}, stake, t }`; the trip
+  default stake is `config.h2hStake` (Settings, next to the over/under max).
+- Results are derived from `ouScore` (posted total beats card total) and
+  settle even money player to player into `ouDayBook` / `ouTripBook`, so the
+  day and trip ledgers carry over/under and head-to-head together; the book
+  line only reflects over/under. Open matchups count as "riding".
+- The live view is the gross running diff over the holes both players have
+  posted, with the negotiated strokes shown as "to come" rather than applied
+  mid-round.
+- The draw pairs shuffled reds against shuffled blues; the long side plays in
+  order and the short side is cycled, so on 4 v 3 exactly one blue doubles and
+  who that is comes from the shuffle.
+- Grudge matches are retired: `matchesFor` drops any `side:true` row and
+  `theMatch` returns null for one, so stale data can't reach a renderer; the
+  **+ Side bet** button, the board and cup-sheet grudge sections,
+  `sideBetsFor`, and the `ouCardScore` fallback are gone. The `m.side`
+  branches inside the match screen and its sheets are still in the source
+  but unreachable — a later tidy, not behaviour.
+- Tests: `dev/h2h.test.mjs`.
+
+---
+
+### The original proposal
+
+### The ask
+
+Ryder-Cup-spirit singles day: every player gets a head-to-head against someone
+on the other team. Stroke play over the round. Any strokes given are negotiated
+between the two players ("Mike gives Will 10"), not derived from handicaps. On
+a 4 v 3 day one of the three, chosen at random, plays two matchups and
+negotiates each separately. Each match is worth a point of value TBD.
+
+### Derive it, don't score it
+
+The app already collects every player's 18 gross scores (SCORES drawer or the
+shot map) and already totals them for over/under (`ouCardScore` / `ouScore`,
+posted total beating card total). A head-to-head is then pure arithmetic on
+numbers we have: `a.gross − b.gross ± strokes`. No new scoring surface, no
+new match entity, nothing hole-by-hole. That is the whole design.
+
+- **Data:** `h2h/<day>/<id> = { a, b, give:{ to:<pid>, n:10 }, stake, t }`.
+  `give.to` is who receives the strokes; `n` is a flat integer off the round
+  total. No stroke-index allocation because it's stroke play.
+- **Result:** both totals known → winner and margin, or PUSH on a tie. One
+  total known → nothing yet. Neither → `thru N` with a live running diff over
+  the holes both players have posted — the fun part on the course, and free.
+- **Money:** `stake` in dollars per matchup, defaulting from one trip setting
+  (`h2hStake`, next to `ouMax`) and editable per row. Settles even money into
+  the same trip ledger as over/under so a person has one number for the trip.
+- **Team tally:** the section header shows matchups won `RED 3 – BLUE 2`.
+  Display only; the cup never sees it (same rule as over/under).
+- **Handicaps:** never read. Gross plus negotiated strokes, full stop.
+
+### Where it lives
+
+The existing Side action page (`#/ou/<day>`) gains a Head-to-head section
+above Over/Under. One row per matchup:
+
+    Mike vs Will · Mike gives 10 · $20        Will by 2 ✓ · +$20 Will
+
+Tap a row to change strokes, stake, or delete it. **+ Matchup** picks one red
+and one blue player (today's teams via `effTeam`). **Draw matchups** pairs the
+present reds and blues at random; on an uneven day it also draws which player
+on the short side doubles up. Strokes start at 0 and get typed in after the
+negotiation.
+
+### What comes out: grudge matches
+
+Grudge matches (`matches/sb*`, `side:true`) were the previous answer to "a
+1v1 side game" and lose on every axis this feature cares about: match play
+instead of stroke play, WHS net strokes instead of a negotiated number, and
+their own hole-by-hole scoring in a separate match screen. `m.side` is
+threaded through ~36 sites (match screen, concede and closure sheets, chips,
+cup sheet, pick-a-fighter, the ouCardScore fallback). All of it goes:
+the `+ Side bet` button, `sideBetsFor`, the SIDE branches, the Grudge
+matches block on the cup sheet, and the `matches/sb*` fallback in
+`ouCardScore`. Any `side:true` match already in the database is filtered out
+on load so stale data can't reach the renderers.
+
+### What stays: handicaps
+
+The WHS allowance machinery drives the cup's net matches. Whether the trip
+plays the cup net is a separate decision; this feature simply never touches
+it. Trimming allowances, stroke cap and the percent sheet is a possible
+follow-up, not part of this.
+
+### Edge cases
+
+- **Scramble / one-ball day:** no individual gross exists. Type the totals
+  (already how over/under works). The feature is aimed at fourball/singles
+  days anyway.
+- **Doubled-up player:** two independent rows. Same gross, different strokes.
+- **Strokes to the wrong guy:** `give.to` is a two-way toggle on the row's
+  sheet ("Mike gives" / "Will gives"), so fixing it is one tap.
+- **Not present today:** draw uses `presentIds(d)` only.
+
+### Size
+
+About 250 lines in (section render, matchup sheet, draw, settle), about 150
+out (grudge). A `dev/h2h.test.mjs` shaped like `ou.test.mjs`: draw pairs
+red with blue and doubles exactly one on 4 v 3; result flips with strokes;
+push on a tie; ledger nets with over/under; grudge matches no longer render.
+
+---
+
 ## Select a golfer, then score for them — three ways to count a hole
 
 **Built** (Sept 2026). What shipped, and where it departs from the design
