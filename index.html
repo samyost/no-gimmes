@@ -543,7 +543,7 @@ a{color:var(--brass)}
 .oubyrow{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:0 0 8px}
 .oubyrow .lab{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.08em;color:var(--sage);margin-right:2px}
 .oubyrow .selopt{padding:4px 8px;font-size:12.5px}
-.oubook .brow{cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.oubook button.brow{cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
 .oubetsum{font-size:13.5px;color:var(--sage);margin:10px 0 4px}
 .oubetsum .win{color:var(--live)} .oubetsum .lose{color:var(--ob)}
 .oubetsday{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;color:var(--brass)}
@@ -1294,7 +1294,7 @@ function ouEntry(d, pid){
   const bets = {};
   for (const [b, v] of Object.entries(e.bets||{})){
     if (!v || !OU_SIDES[v.side] || !(+v.amt > 0)) continue;
-    bets[b] = { side:v.side, amt:Math.round(+v.amt) };
+    bets[b] = { side:v.side, amt:Math.round(+v.amt), t:+v.t || 0 }; // t: when it was placed — orders the chips and the bets-by list
   }
   return { line: (isFinite(line) && line > 0) ? line : null, score: (isFinite(score) && score > 0) ? score : null, bets };
 }

@@ -175,6 +175,13 @@ try {
   await p.locator('#sheetbox [data-act="oubetsfor"][data-p="p3"]').click();
   ok('a player with no bets gets the empty line', await until(()=>p.locator('#sheetbox .oubetsum').textContent().then(t=>/No bets yet/.test(t))));
   ok('ouBetsBy spans days and lines', await p.evaluate(()=>{ const r = ouBetsBy('p1'); return r.length===2 && r[0].pid==='p1' && r[1].pid==='p3' && r[1].net===0; }));
+  ok('bets keep their timestamp and sort oldest first', await p.evaluate(()=>{
+    const e = ouEntry('sun','p1');
+    const ts = Object.values(e.bets).map(b=>b.t);
+    const chips = [...document.querySelectorAll('#ou-p1 .oubet')].map(c=>c.dataset.b);
+    const byT = Object.entries(e.bets).sort((a,b)=>a[1].t-b[1].t).map(([b])=>b);
+    return ts.every(x=>x>0) && chips.join()===byT.join() && ouBetsBy('p1').every((r,i,a)=>i===0 || a[i-1].bet.t<=r.bet.t);
+  }));
   // a row opens the bet editor for that bet
   await p.locator('#sheetbox [data-act="oubetsfor"][data-p="p1"]').click();
   await p.locator('#sheetbox .oubetrow[data-p="p3"]').click();
