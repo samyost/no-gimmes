@@ -156,6 +156,35 @@ try {
   ok('max syncs to config', await until(async()=>{ const r = await fetch(`${DB}/t/no-gimmes-2026/config/ouMax.json`); return (await r.json())===20; }));
   ok('ouMax follows the setting', await p.evaluate(()=>ouMax()===20));
 
+  // --- one place for everything one person has placed ---
+  await p.evaluate(()=>{ location.hash='#/ou/sun'; });
+  await until(()=>p.locator('.oubyrow [data-act="oubets"]').count().then(n=>n===4));
+  // Duck also takes the under on Sly at 90 (a push) so the list spans lines
+  await p.evaluate(()=>{ op('ou/sun/p3/line', 90); ouPlaceBet('sun','p3','p1','under',10); });
+  await p.locator('.oubyrow [data-act="oubets"][data-p="p1"]').click();
+  ok('bets-by sheet opens on Duck', await until(()=>p.locator('#sheetbox h3').textContent().then(t=>/Duck’s bets/.test(t))));
+  ok('lists both of Duck’s bets', await until(()=>p.locator('#sheetbox .oubetrow').count().then(n=>n===2)));
+  ok('each row names the line, side, stake and outcome', await p.evaluate(()=>{
+    const rows = [...document.querySelectorAll('#sheetbox .oubetrow')].map(r=>r.textContent.replace(/\s+/g,' '));
+    return rows.some(t=>/on .*Duck/.test(t) && /UNDER 88\.5/.test(t) && /\$5/.test(t) && /−\$5/.test(t))
+        && rows.some(t=>/on .*Sly/.test(t) && /UNDER 90/.test(t) && /\$10/.test(t) && /PUSH/.test(t));
+  }));
+  ok('summary nets the settled bets', await p.locator('#sheetbox .oubetsum').textContent().then(t=>/settled/.test(t) && /−\$5/.test(t)));
+  await p.locator('#sheetbox [data-act="oubetsfor"][data-p="p2"]').click();
+  ok('switching to Tank shows his one bet', await until(()=>p.locator('#sheetbox h3').textContent().then(t=>/Tank’s bets/.test(t))) && await p.locator('#sheetbox .oubetrow').count().then(n=>n===1));
+  await p.locator('#sheetbox [data-act="oubetsfor"][data-p="p3"]').click();
+  ok('a player with no bets gets the empty line', await until(()=>p.locator('#sheetbox .oubetsum').textContent().then(t=>/No bets yet/.test(t))));
+  ok('ouBetsBy spans days and lines', await p.evaluate(()=>{ const r = ouBetsBy('p1'); return r.length===2 && r[0].pid==='p1' && r[1].pid==='p3' && r[1].net===0; }));
+  // a row opens the bet editor for that bet
+  await p.locator('#sheetbox [data-act="oubetsfor"][data-p="p1"]').click();
+  await p.locator('#sheetbox .oubetrow[data-p="p3"]').click();
+  ok('tapping a bet opens its editor', await until(()=>p.locator('#sheetbox h3').textContent().then(t=>/Bet on .*Sly/.test(t))));
+  await p.evaluate(()=>closeSheet(true));
+  // the book rows open the same sheet
+  await p.locator('.oubook .brow[data-p="p2"]').first().click();
+  ok('book row opens that person’s bets', await until(()=>p.locator('#sheetbox h3').textContent().then(t=>/Tank’s bets/.test(t))));
+  await p.evaluate(()=>closeSheet(true));
+
   // --- pulling a bet ---
   await p.evaluate(()=>{ location.hash='#/ou/sun'; });
   await until(()=>p.locator('#ou-p1 .oubet').count().then(n=>n===3));
