@@ -53,6 +53,13 @@ watch it appear on the other. That's the whole stack verified.
   per match, double singles, gimme policy, tie rule, junk dots, skins.
 - **Offline**: scores save on the phone instantly and sync when signal returns
   (the pill in the corner tells the truth: `LIVE` / `3 QUEUED`).
+- **Over / under** (gear → *Side action*): its own page, its own game, one per
+  day. Every player gets a line on their gross score for the round; anyone sets
+  it, anyone bets over or under it, up to the max per bet in Settings ($10 by
+  default). One rule: you can't take the over on yourself. Even money against
+  the book. The score fills in from the card once all 18 gross scores are
+  posted, or type the total; the day's book and the trip total settle
+  underneath. Handicaps, the cup, and the match screens never see any of it.
 
 ## Honesty box
 
@@ -104,6 +111,7 @@ node dev/engine.test.mjs   # unit tests for the scoring engine
 node dev/features.test.mjs # mixer / mix library / side-bet browser tests (needs: cd dev && npm i)
 node dev/sync.test.mjs     # two-browser integration tests (needs: cd dev && npm i)
 node dev/maps.test.mjs     # hole maps / ball marks / hole notes (needs: cd dev && npm i)
+node dev/ou.test.mjs       # over/under lines, bets, the max, settlement (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
 ```
 

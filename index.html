@@ -507,6 +507,41 @@ a{color:var(--brass)}
 .hnote{margin:6px 14px 0;font-size:12.5px;color:var(--sage);display:flex;gap:7px;align-items:center;line-height:1.4}
 .hnote input{flex:1;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:7px 10px;font-size:13.5px}
 .hnotebtn{color:var(--brass);font-size:11.5px;border:1px dashed var(--pencil);border-radius:8px;padding:3px 8px;flex:0 0 auto}
+/* ---- over / under (its own page) ---- */
+.oupage .lnk{color:var(--brass);text-decoration:underline;text-underline-offset:2px}
+.ouintro{font-size:13.5px;color:var(--sage);margin:10px 0 12px;line-height:1.5}
+.ouintro b{color:var(--ink)}
+.oucard{background:var(--card);border:1px solid var(--pencil);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.ouhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ouhead .em{font-size:22px}
+.ouhead .nm{font-weight:700;font-size:16px}
+.ouhead .verdict{margin-left:auto;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.ouhead .verdict.over{color:var(--ob)} .ouhead .verdict.under{color:var(--live)} .ouhead .verdict.push{color:var(--brass)}
+.ounums{display:flex;align-items:flex-end;gap:12px;margin-top:8px;flex-wrap:wrap}
+.ounums .sp{flex:1}
+.oufield{display:flex;flex-direction:column;gap:3px}
+.oufield .lab{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.08em;color:var(--sage)}
+.oufield input{width:84px;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:8px 8px;font-size:18px;
+  font-family:'Saira Condensed';font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.oufield .from{color:var(--brass)}
+.oubtn{font-family:'Saira Condensed';font-weight:700;font-size:15px;letter-spacing:.06em;border:2px solid var(--ink);border-radius:10px;padding:9px 14px;min-height:44px}
+.oubets{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--pencil)}
+.oubet{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--pencil);border-radius:99px;padding:5px 10px 5px 8px;font-size:13.5px;background:var(--bone);min-height:36px}
+.oubet .side{font-family:'Saira Condensed';font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--sage)}
+.oubet .amt{font-weight:700}
+.oubet .net{font-family:'Saira Condensed';font-weight:800;font-size:13px;padding-left:6px;border-left:1px solid var(--pencil)}
+.oubet.win{border-color:var(--live)} .oubet.win .net{color:var(--live)}
+.oubet.lose{border-color:var(--ob);opacity:.85} .oubet.lose .net{color:var(--ob)}
+.oubet.push .net{color:var(--brass)}
+.oubook{margin-top:14px;border:1px solid var(--brass);border-radius:10px;padding:10px 12px;font-size:14px}
+.oubook h4{margin:0 0 6px;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--brass)}
+.oubook .brow{display:flex;justify-content:space-between;padding:3px 0}
+.oubook .brow .win{color:var(--live);font-weight:700} .oubook .brow .lose{color:var(--ob);font-weight:700}
+.ousheetline{font-size:14.5px}
+.ousheetline b{font-size:20px;margin-left:2px}
+.ousides{display:flex;gap:8px;margin-top:10px}
+.ousides .bigbtn[disabled]{opacity:.35}
+.sheet .bigbtn[disabled]{opacity:.45;cursor:default}
 </style>
 </head>
 <body>
@@ -846,6 +881,7 @@ function defConfig(){
     net:false, allowances:Object.assign({}, WHS_DEFAULTS), flat100:false, strokeCap:0,
     junk:false, junkTypes:{birdie:true, eagle:true, greenie:true, sandie:true, barkie:false},
     skins:false, skinsNet:true, skinsCarry:true,
+    ouMax:10,
   };
 }
 function defDay(d){
@@ -1225,6 +1261,103 @@ function mvpRows(){
   }
   return Object.values(rows).sort((a,b)=> b.pts-a.pts || b.w-a.w || a.p.ord-b.p.ord);
 }
+
+// ---- over / under ----------------------------------------------------------
+// Its own game, kept apart from the cup, the handicaps and the match screens.
+// Every player on a day gets a line on their GROSS score for the round; anyone
+// can set it, anyone can bet over or under it for up to the trip's max
+// (Settings). One rule: you can't take the over on yourself. Bets pay even
+// money against the book. Tree: ou/<day>/<pid> = { line, score, bets:{<bettor>:{side, amt}} }
+const OU_SIDES = { over:'OVER', under:'UNDER' };
+function ouMax(){ const v = +cfg().ouMax; return (v > 0 && isFinite(v)) ? Math.round(v) : 10; }
+function ouEntry(d, pid){
+  const e = (((S.ou||{})[d]||{})[pid]) || {};
+  // a line or score is a golf score: anything that isn't a positive number is unset
+  const line = (e.line == null || e.line === '') ? null : +e.line;
+  const score = (e.score == null || e.score === '') ? null : +e.score;
+  const bets = {};
+  for (const [b, v] of Object.entries(e.bets||{})){
+    if (!v || !OU_SIDES[v.side] || !(+v.amt > 0)) continue;
+    bets[b] = { side:v.side, amt:Math.round(+v.amt) };
+  }
+  return { line: (isFinite(line) && line > 0) ? line : null, score: (isFinite(score) && score > 0) ? score : null, bets };
+}
+// gross for the round as the card has it — every hole posted for that player
+// (individual-ball formats only; a scramble ball belongs to the team). A grudge
+// match is the same round, so its strokes are the same card — and on a
+// one-ball day it's the only place a player's own gross gets posted. The cup
+// match is asked first; a side match only stands in when the cup match can't.
+function ouCardScore(d, pid){
+  for (const m of [...cupMatchesFor(d), ...sideBetsFor(d)]){
+    if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
+    let tot = 0, all = true;
+    for (let n=1; n<=18; n++){
+      const v = (effStrokes(m, n)||{})[pid];
+      if (typeof v !== 'number' || !(v > 0)){ all = false; break; }
+      tot += v;
+    }
+    if (all) return tot;
+  }
+  return null;
+}
+// the score the bets settle on: a posted number wins, else the card's total
+function ouScore(d, pid){
+  const e = ouEntry(d, pid);
+  if (e.score != null) return { score:e.score, from:'posted' };
+  const c = ouCardScore(d, pid);
+  return c != null ? { score:c, from:'card' } : { score:null, from:null };
+}
+function ouResult(line, score){
+  if (line == null || score == null) return null;
+  return score > line ? 'over' : score < line ? 'under' : 'push';
+}
+// can this bettor take this side on this line? returns '' or the reason
+function ouBetProblem(pid, bettor, side){
+  if (!bettor || !(S.players||{})[bettor]) return 'Pick who’s betting.';
+  if (!OU_SIDES[side]) return 'Over or under?';
+  if (side === 'over' && bettor === pid) return 'You can’t take the over on yourself.';
+  return '';
+}
+function ouPlaceBet(d, pid, bettor, side, amt){
+  const why = ouBetProblem(pid, bettor, side);
+  if (why) return why;
+  if (ouEntry(d, pid).line == null) return 'Set the line first.';
+  const a = Math.max(1, Math.min(ouMax(), Math.round(+amt || 0)));
+  op(`ou/${d}/${pid}/bets/${bettor}`, { side, amt:a, t:Date.now() });
+  return '';
+}
+// what one bet is worth once the line settles: +amt, -amt, or 0 on a push
+function ouBetNet(bet, result){
+  if (!result) return null;
+  if (result === 'push') return 0;
+  return bet.side === result ? bet.amt : -bet.amt;
+}
+// per-person net for one day (settled lines only) and a count of what's open
+function ouDayBook(d){
+  const net = {}; let settled = 0, open = 0, book = 0;
+  for (const pid of Object.keys((S.ou||{})[d]||{})){
+    const e = ouEntry(d, pid);
+    const r = ouResult(e.line, ouScore(d, pid).score);
+    for (const [b, bet] of Object.entries(e.bets)){
+      if (!r){ open++; continue; }
+      settled++;
+      const v = ouBetNet(bet, r);
+      net[b] = (net[b]||0) + v; book -= v;
+    }
+  }
+  return { net, settled, open, book };
+}
+function ouTripBook(){
+  const net = {}; let settled = 0, open = 0, book = 0;
+  for (const d of DAYS){
+    const b = ouDayBook(d);
+    for (const [p, v] of Object.entries(b.net)) net[p] = (net[p]||0) + v;
+    settled += b.settled; open += b.open; book += b.book;
+  }
+  return { net, settled, open, book };
+}
+function money(n){ const a = Math.abs(Math.round(n)); return (n < 0 ? '−' : n > 0 ? '+' : '') + '$' + a; }
+function ouLineTxt(v){ return v == null ? '—' : (Math.abs(v % 1) === 0.5 ? String(v) : String(Math.round(v*10)/10)); }
 
 // ---- date/day resolution ---------------------------------------------------
 function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -2429,6 +2562,12 @@ function renderSettings(){
         <button class="selopt ${c.skinsCarry?'on':''}" data-act="skinscarry">Carryovers ${c.skinsCarry?'on':'off'}</button></div>`:''}
     </div>
 
+    <h2>Over / under <span class="ct">its own game — see the gear menu</span></h2>
+    <div class="block">
+      <div class="field"><label>Max per bet ($) <span class="mut" style="font-size:12px">even money, gross score, can’t take the over on yourself</span></label>
+        <input type="number" min="1" step="1" inputmode="numeric" value="${ouMax()}" data-input="oumax" style="width:74px"></div>
+    </div>
+
     <h2 id="data">Data &amp; this phone</h2>
     <div class="block">
       <div class="togg"><span>Sync</span><span>${pillHtml()}</span></div>
@@ -2452,6 +2591,85 @@ function renderSettings(){
   </div>`;
 }
 
+// ---- over / under screen ---------------------------------------------------
+function ouBettorDefault(){
+  const me = LS.get('id', null);
+  if (me && me !== 'watch' && (S.players||{})[me]) return me;
+  const first = namedPlayers()[0];
+  return first ? first.id : null;
+}
+function ouBetChipHtml(d, pid, bettor, bet, result){
+  const v = ouBetNet(bet, result);
+  const cls = v == null ? '' : v > 0 ? 'win' : v < 0 ? 'lose' : 'push';
+  const tail = v == null ? '' : `<span class="net num">${v === 0 ? 'PUSH' : money(v)}</span>`;
+  return `<button class="oubet ${cls}" data-act="oubet" data-d="${d}" data-p="${pid}" data-b="${bettor}">
+    <span class="who">${pName(bettor)}</span><span class="side sc">${OU_SIDES[bet.side]}</span><span class="amt num">$${bet.amt}</span>${tail}</button>`;
+}
+function ouCardHtml(d, pid){
+  const p = player(pid);
+  const e = ouEntry(d, pid);
+  const sc = ouScore(d, pid);
+  const r = ouResult(e.line, sc.score);
+  const bets = Object.entries(e.bets).sort((a,b)=>((a[1].t||0)-(b[1].t||0)));
+  let verdict = '';
+  if (r === 'push') verdict = `<span class="verdict push">PUSH — right on the number</span>`;
+  else if (r) verdict = `<span class="verdict ${r}">${OU_SIDES[r]} by ${ouLineTxt(Math.abs(sc.score - e.line))}</span>`;
+  else if (e.line == null) verdict = `<span class="verdict mut">no line yet</span>`;
+  else verdict = `<span class="verdict mut">${bets.length ? bets.length + ' bet' + (bets.length>1?'s':'') + ' riding' : 'open'}</span>`;
+  const scoreHint = sc.from === 'card' && e.score == null ? ` <span class="from">· CARD</span>` : '';
+  return `<div class="oucard" id="ou-${pid}">
+    <div class="ouhead">
+      <span class="em">${p.emoji||'❔'}</span><span class="nm">${esc(p.name||'??')}</span>
+      ${verdict}
+    </div>
+    <div class="ounums">
+      <label class="oufield"><span class="lab">LINE</span>
+        <input type="number" step="0.5" inputmode="decimal" placeholder="—" value="${e.line==null?'':esc(e.line)}" data-input="ouline" data-d="${d}" data-p="${pid}"></label>
+      <label class="oufield"><span class="lab">SCORE${scoreHint}</span>
+        <input type="number" step="1" inputmode="numeric" placeholder="${sc.from==='card'?esc(sc.score):'—'}" value="${e.score==null?'':esc(e.score)}" data-input="ouscore" data-d="${d}" data-p="${pid}"></label>
+      <span class="sp"></span>
+      ${e.line != null
+        ? `<button class="oubtn" data-act="oubet" data-d="${d}" data-p="${pid}">+ BET</button>`
+        : `<span class="mut" style="font-size:12px">set a line to open betting</span>`}
+    </div>
+    ${bets.length ? `<div class="oubets">${bets.map(([b,bet])=>ouBetChipHtml(d, pid, b, bet, r)).join('')}</div>` : ''}
+  </div>`;
+}
+function ouBookHtml(title, book, foot){
+  const rows = Object.entries(book.net).filter(([pid])=>(S.players||{})[pid])
+    .sort((a,b)=>b[1]-a[1] || (player(a[0]).ord||0)-(player(b[0]).ord||0));
+  if (!rows.length) return '';
+  return `<div class="oubook"><h4 class="sc caps">${title}</h4>
+    ${rows.map(([pid,v])=>`<div class="brow"><span>${pName(pid)}</span><span class="num ${v>0?'win':v<0?'lose':''}">${money(v)}</span></div>`).join('')}
+    ${book.book ? `<div class="brow mut"><span>The book</span><span class="num">${money(book.book)}</span></div>` : ''}
+    ${foot ? `<div class="mut" style="font-size:12px;margin-top:4px">${foot}</div>` : ''}
+  </div>`;
+}
+function renderOU(d){
+  const ids = presentIds(d);
+  const dayChips = DAYS.map(x=>{
+    const n = Object.values((S.ou||{})[x]||{}).filter(e=>e && e.line != null).length;
+    return `<button class="selopt ${x===d?'on':''}" data-act="ou" data-d="${x}" style="min-width:64px">${DAYMETA[x].label}
+      <span class="sub">${n ? n+' line'+(n>1?'s':'') : '—'}</span></button>`;
+  }).join('');
+  const cards = ids.map(pid=>ouCardHtml(d, pid)).join('');
+  const dayBook = ouDayBook(d), trip = ouTripBook();
+  const cl = courseLabel(d);
+  return `
+  <div class="appbar"><button class="backbtn" data-act="board">‹</button>
+    <span class="wordmark sc">OVER / UNDER</span><span class="sp"></span>${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
+  <div class="spage oupage">
+    <div class="selrow" style="margin-top:10px">${dayChips}</div>
+    <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''}. Gross score for the round — handicaps don’t come into it.
+      Anyone sets a line; anyone bets it, up to <b>$${ouMax()}</b> a bet (<button data-act="settings" class="lnk">Settings</button>).
+      Even money against the book. <b>One rule: you can’t take the over on yourself.</b></div>
+    ${cards || `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}
+    ${ouBookHtml(DAYMETA[d].name + ' book', dayBook, dayBook.open ? `${dayBook.open} bet${dayBook.open>1?'s':''} still riding — post scores to settle them.` : '')}
+    ${trip.settled && DAYS.some(x=>x!==d && ouDayBook(x).settled) ? ouBookHtml('Trip so far', trip, 'Every settled line, all days.') : ''}
+    <div class="mut" style="font-size:12px;margin-top:14px">Bets ride on whatever the line is now — settle the number before anybody bets. Scores fill in from the card once all 18 are posted, or type the total.</div>
+  </div>`;
+}
 // ---- hub, cup sheet, who, kickoff -----------------------------------------
 function hubSheetHtml(){
   const c = cfg();
@@ -2474,7 +2692,13 @@ function hubSheetHtml(){
     <button class="hubrow" data-act="settings"><div><div class="hl">Trip &amp; rules</div>
       <div class="hv">${c.net?'Net':'Gross'} · ${c.flat100?'flat 100%':'WHS allowances'} · gimmes: ${ {conc:'concessions only',leather:'inside the leather',two:'2 ft',three:'3 ft',none:'none'}[c.gimme] }</div></div><span class="chev">›</span></button>
     <button class="hubrow" data-act="settings"><div><div class="hl">Extras &amp; data</div>
-      <div class="hv">MVP on · Junk ${c.junk?'on':'off'} · Skins ${c.skins?'on':'off'} · ${dbConfigured()?'● live':'range mode'}</div></div><span class="chev">›</span></button>`;
+      <div class="hv">MVP on · Junk ${c.junk?'on':'off'} · Skins ${c.skins?'on':'off'} · ${dbConfigured()?'● live':'range mode'}</div></div><span class="chev">›</span></button>
+    <h4 style="margin:14px 0 4px" class="sc caps">Side action</h4>
+    <button class="hubrow" data-act="ou"><div><div class="hl">Over / Under</div>
+      <div class="hv">${(()=>{ const d = ui.day || resolveDay(); const b = ouTripBook();
+        const lines = Object.values((S.ou||{})[d]||{}).filter(e=>e && e.line != null).length;
+        return `${DAYMETA[d].label}: ${lines ? lines+' line'+(lines>1?'s':'') : 'no lines yet'} · ${b.settled+b.open ? (b.settled+b.open)+' bet'+((b.settled+b.open)>1?'s':'')+' on the trip' : 'no bets yet'} · max $${ouMax()}`; })()}</div></div>
+      <span class="chev">›</span></button>`;
 }
 function cupSheetHtml(){
   const c = cup();
@@ -2647,6 +2871,7 @@ function renderScreen(){
   if (ui.screen === 'match' && ui.matchId) return renderMatch(ui.matchId);
   if (ui.screen === 'setup' && ui.day) return renderSetupDay(ui.day);
   if (ui.screen === 'settings') return renderSettings();
+  if (ui.screen === 'ou') return renderOU(ui.day || resolveDay());
   return renderBoard(ui.day || resolveDay());
 }
 function postRender(){
@@ -2686,6 +2911,7 @@ function parseRoute(){
     ui.screen = parts[2]==='setup' ? 'setup' : 'board'; return;
   }
   if (parts[0]==='settings'){ ui.screen='settings'; return; }
+  if (parts[0]==='ou'){ ui.screen='ou'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
   ui.screen='board'; ui.day = ui.day || resolveDay();
 }
 window.addEventListener('hashchange', ()=>{ parseRoute(); requestRender(); });
@@ -2919,6 +3145,38 @@ function sheetHtml(sh){
       <div class="btnrow" style="flex-direction:column">
         ${sh.canA?`<button class="bigbtn pri" data-act="odd-a" data-d="${sh.d}">Two-on-one — ${esc(sh.aLabel||'hero or martyr')}</button>`:''}
         <button class="bigbtn ghost" data-act="odd-b" data-d="${sh.d}">Odd man rides — junk &amp; skins only</button>
+      </div>`;
+  }
+  if (t==='oubet'){
+    const d = sh.d, pid = sh.pid;
+    const e = ouEntry(d, pid);
+    const bettor = sh.bettor;
+    const existing = bettor ? e.bets[bettor] : null;
+    const side = sh.side || (existing ? existing.side : null);
+    const max = ouMax();
+    const amt = Math.max(1, Math.min(max, sh.amt != null ? sh.amt : (existing ? existing.amt : max)));
+    const bettors = namedPlayers().map(p=>
+      `<button class="selopt ${p.id===bettor?'on':''}" data-act="oubettor" data-p="${p.id}"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('');
+    const selfOver = bettor === pid;
+    const chips = [1,2,5,10,20,25,50,100].filter(v=>v<max); if (!chips.includes(max)) chips.push(max);
+    const amts = chips.map(v=>`<button class="selopt ${v===amt?'on':''}" data-act="ouamt" data-v="${v}">$${v}${v===max?' <span class="sub">max</span>':''}</button>`).join('');
+    const why = ouBetProblem(pid, bettor, side);
+    const scored = ouScore(d, pid).score != null;
+    return `<h3>Bet on ${pName(pid)}</h3>
+      <div class="ousheetline">Line <b class="sc">${ouLineTxt(e.line)}</b> · gross for the round</div>
+      <div class="mut" style="font-size:12.5px;margin:8px 0 4px">Who’s betting</div>
+      <div class="selrow">${bettors}</div>
+      <div class="ousides">
+        <button class="bigbtn ${side==='over'?'pri':'ghost'}" data-act="ouside" data-v="over" ${selfOver?'disabled':''}>OVER</button>
+        <button class="bigbtn ${side==='under'?'pri':'ghost'}" data-act="ouside" data-v="under">UNDER</button>
+      </div>
+      ${selfOver ? `<div class="warnchip" style="margin-top:6px">That’s you. Under only — nobody bets on themselves to play badly.</div>` : ''}
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">How much <span class="mut">(max $${max})</span></div>
+      <div class="selrow">${amts}</div>
+      ${scored ? `<div class="warnchip" style="margin-top:8px">A score is already in for ${pName(pid)}. A bet placed now is on your conscience.</div>` : ''}
+      <div class="btnrow">
+        ${existing ? `<button class="bigbtn danger" data-act="ouremove">Pull it</button>` : `<button class="bigbtn ghost" data-act="sheet-close">Never mind</button>`}
+        <button class="bigbtn pri" data-act="ouplace" ${why?'disabled':''}>${existing ? 'Change it' : 'Place it'} · $${amt}</button>
       </div>`;
   }
   if (t==='confirmtext'){
@@ -3217,7 +3475,7 @@ document.addEventListener('click', (ev)=>{
     case 'iam': {
       LS.set('id', a.p); ui.screen='board';
       const h = location.hash;
-      if (/^#\/(match|settings|day)/.test(h)){ parseRoute(); requestRender(); }
+      if (/^#\/(match|settings|day|ou)/.test(h)){ parseRoute(); requestRender(); }
       else landHome(true);
       break;
     }
@@ -3297,6 +3555,51 @@ document.addEventListener('click', (ev)=>{
       closeSheet(); requestRender(); break;
     }
 
+    // over / under
+    case 'ou': closeSheet(true); navigate('#/ou/'+(a.d||ui.day||resolveDay())); break;
+    case 'oubet': {
+      const e = ouEntry(a.d, a.p);
+      if (e.line == null){ toastSnack('Set the line first.'); break; }
+      const bettor = a.b || ouBettorDefault();
+      const ex = bettor ? e.bets[bettor] : null;
+      openSheet('oubet', { d:a.d, pid:a.p, bettor, side: ex ? ex.side : (bettor===a.p ? 'under' : null), amt: ex ? ex.amt : null });
+      break;
+    }
+    case 'oubettor': {
+      if (!ui.sheet || ui.sheet.type!=='oubet') break;
+      const ex = ouEntry(ui.sheet.d, ui.sheet.pid).bets[a.p];
+      ui.sheet.bettor = a.p;
+      // a new bettor starts clean — nobody inherits the last guy's side or stake
+      if (ex){ ui.sheet.side = ex.side; ui.sheet.amt = ex.amt; }
+      else { ui.sheet.side = a.p === ui.sheet.pid ? 'under' : null; ui.sheet.amt = null; }
+      $sheetbox.innerHTML = sheetHtml(ui.sheet); break;
+    }
+    case 'ouside': {
+      if (!ui.sheet || ui.sheet.type!=='oubet') break;
+      const why = ouBetProblem(ui.sheet.pid, ui.sheet.bettor, a.v);
+      if (why && a.v==='over' && ui.sheet.bettor===ui.sheet.pid){ toastSnack(why); break; }
+      ui.sheet.side = a.v; $sheetbox.innerHTML = sheetHtml(ui.sheet); break;
+    }
+    case 'ouamt': { if (!ui.sheet || ui.sheet.type!=='oubet') break; ui.sheet.amt = +a.v; $sheetbox.innerHTML = sheetHtml(ui.sheet); break; }
+    case 'ouplace': {
+      const sh = ui.sheet; if (!sh || sh.type!=='oubet') break;
+      const e = ouEntry(sh.d, sh.pid);
+      const ex = sh.bettor ? e.bets[sh.bettor] : null;
+      const amt = sh.amt != null ? sh.amt : (ex ? ex.amt : ouMax());
+      const why = ouPlaceBet(sh.d, sh.pid, sh.bettor, sh.side || (ex ? ex.side : null), amt);
+      if (why){ toastSnack(why); break; }
+      closeSheet();
+      toastSnack(`${pName(sh.bettor)} has $${Math.min(ouMax(), Math.max(1, Math.round(amt)))} on the ${sh.side || ex.side} — ${pName(sh.pid)} at ${ouLineTxt(e.line)}.`);
+      break;
+    }
+    case 'ouremove': {
+      const sh = ui.sheet; if (!sh || sh.type!=='oubet') break;
+      const ex = ouEntry(sh.d, sh.pid).bets[sh.bettor];
+      op(`ou/${sh.d}/${sh.pid}/bets/${sh.bettor}`, null);
+      closeSheet();
+      if (ex) snack(`${pName(sh.bettor)}’s bet on ${pName(sh.pid)} pulled`, 'UNDO', ()=>op(`ou/${sh.d}/${sh.pid}/bets/${sh.bettor}`, ex));
+      break;
+    }
     // day setup
     case 'att': op(`days/${a.d}/att/${a.p}`, isPresent(a.d, a.p) ? false : true); break;
     case 'flipteam': {
@@ -3515,12 +3818,12 @@ document.addEventListener('click', (ev)=>{
       aEl.href = URL.createObjectURL(blob); aEl.download = 'no-gimmes-trip.json'; aEl.click();
       break;
     }
-    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result and stroke on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
+    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result, stroke, and over/under bet on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
     case 'resetscores2': {
       const f = document.getElementById('confirmfield');
       if (f && f.value.trim() === cfg().tripName){
         for (const m of allMatches()){ op(`matches/${m.id}/holes`, null); op(`matches/${m.id}/concededBy`, null); op(`matches/${m.id}/concededAt`, null); }
-        op('junk', null);
+        op('junk', null); op('ou', null);
         closeSheet(); toastSnack('Clean card. Play well.');
       } else toastSnack('Type the trip name exactly to confirm.');
       break;
@@ -3560,6 +3863,20 @@ document.addEventListener('change', (ev)=>{
     case 'allow': op(`config/allowances/${a.k}`, Math.max(0, Math.min(200, +v||0))); break;
     case 'strokecap': op('config/strokeCap', Math.max(0, +v|0)); break;
     case 'dburl': LS.set('db', v.trim()); sse.es && sse.es.close(); sse.es=null; sseConnect(); scheduleFlush(); requestRender(); break;
+    case 'ouline': {
+      const cur = ouEntry(a.d, a.p);
+      const n = v === '' ? null : Math.round((+v) * 2) / 2;
+      if (n != null && !(n > 0)){ toastSnack('A line is a score — try again.'); requestRender(); break; }
+      const nb = Object.keys(cur.bets).length;
+      if (nb && n !== cur.line && !window.confirm(`${nb} bet${nb>1?'s are':' is'} riding on ${ouLineTxt(cur.line)}. Move the line anyway?`)){ requestRender(); break; }
+      op(`ou/${a.d}/${a.p}/line`, n); break;
+    }
+    case 'ouscore': {
+      const n = v === '' ? null : Math.round(+v);
+      if (n != null && !(n > 0)){ toastSnack('That’s not a score.'); requestRender(); break; }
+      op(`ou/${a.d}/${a.p}/score`, n); break;
+    }
+    case 'oumax': op('config/ouMax', Math.max(1, Math.min(1000, Math.round(+v)||10))); break;
     case 'holenote': ui.noteEdit = null; op(`notes/${a.c}/${a.hn}`, v.trim().slice(0,90) || null); break;
   }
 });
