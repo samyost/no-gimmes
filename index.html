@@ -509,6 +509,129 @@ a{color:var(--brass)}
 .hnote{margin:6px 14px 0;font-size:12.5px;color:var(--sage);display:flex;gap:7px;align-items:center;line-height:1.4}
 .hnote input{flex:1;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:7px 10px;font-size:13.5px}
 .hnotebtn{color:var(--brass);font-size:11.5px;border:1px dashed var(--pencil);border-radius:8px;padding:3px 8px;flex:0 0 auto}
+/* ---- over / under (its own page) ---- */
+.oupage .lnk{color:var(--brass);text-decoration:underline;text-underline-offset:2px}
+.ouintro{font-size:12.5px;color:var(--sage);margin:8px 0 8px;line-height:1.45}
+.ouintro b{color:var(--ink)}
+/* one row per player: name (+ verdict under it) · LINE · SCORE · BET, labels once in a header */
+.ouhdr{display:flex;align-items:flex-end;gap:8px;padding:0 9px 2px;font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage)}
+.ouhdr .sp{flex:1}
+.ouhdr span:not(.sp):not(.bw){width:62px;text-align:center}
+.ouhdr .bw{width:52px}
+.oucard{background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:6px 8px;margin-bottom:6px}
+.ourow{display:flex;align-items:center;gap:8px}
+.ourow .em{font-size:19px;flex:0 0 auto}
+.ourow .who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15}
+.ourow .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ourow .verdict{font-family:'Saira Condensed';font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.ourow .verdict.over{color:var(--ob)} .ourow .verdict.under{color:var(--live)} .ourow .verdict.push{color:var(--brass)}
+.ouin{width:62px;flex:0 0 62px;height:40px;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:0 4px;font-size:17px;
+  font-family:'Saira Condensed';font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.ouin.card::placeholder{color:var(--brass);opacity:1}
+.oubtn{width:52px;flex:0 0 52px;height:40px;font-family:'Saira Condensed';font-weight:700;font-size:14px;letter-spacing:.06em;border:2px solid var(--ink);border-radius:9px}
+.oubtn[disabled]{opacity:.3;cursor:default}
+.oubets{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--pencil)}
+.oubet{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--pencil);border-radius:99px;padding:2px 8px 2px 6px;font-size:12.5px;background:var(--bone);min-height:28px}
+.oubet .side{font-family:'Saira Condensed';font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--sage)}
+.oubet .amt{font-weight:700}
+.oubet .net{font-family:'Saira Condensed';font-weight:800;font-size:12px;padding-left:5px;border-left:1px solid var(--pencil)}
+.oubet.win{border-color:var(--live)} .oubet.win .net{color:var(--live)}
+.oubet.lose{border-color:var(--ob);opacity:.85} .oubet.lose .net{color:var(--ob)}
+.oubet.push .net{color:var(--brass)}
+.oubook{margin-top:14px;border:1px solid var(--brass);border-radius:10px;padding:10px 12px;font-size:14px}
+.oubook h4{margin:0 0 6px;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--brass)}
+.oubook .brow{display:flex;justify-content:space-between;padding:3px 0}
+.oubook .brow .win{color:var(--live);font-weight:700} .oubook .brow .lose{color:var(--ob);font-weight:700}
+.oubyrow{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:0 0 8px}
+.oubyrow .lab{font-family:'Saira Condensed';font-weight:600;font-size:11px;letter-spacing:.08em;color:var(--sage);margin-right:2px}
+.oubyrow .selopt{padding:4px 8px;font-size:12.5px}
+.oubook button.brow{cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.oubetsum{font-size:13.5px;color:var(--sage);margin:10px 0 4px}
+.oubetsum .win{color:var(--live)} .oubetsum .lose{color:var(--ob)}
+.oubetsday{margin:12px 0 4px;font-size:12px;letter-spacing:.08em;color:var(--brass)}
+.oubetrow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--bone);border:1.5px solid var(--pencil);border-radius:10px;padding:8px 10px;margin-bottom:6px;min-height:48px;font-size:14px}
+.oubetrow .on{flex:0 0 auto}
+.oubetrow .what{flex:1;color:var(--sage);font-size:13px}
+.oubetrow .what b{color:var(--ink);font-size:15px}
+.oubetrow .tag{font-family:'Saira Condensed';font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.oubetrow .tag.win{color:var(--live)} .oubetrow .tag.lose{color:var(--ob)} .oubetrow .tag.push{color:var(--brass)}
+.ousheetline{font-size:14.5px}
+.ousheetline b{font-size:20px;margin-left:2px}
+.ousides{display:flex;gap:8px;margin-top:10px}
+.ousides .bigbtn[disabled]{opacity:.35}
+/* ---- head-to-head (on the side action page) ---- */
+.h2hhdr{display:flex;align-items:center;gap:8px;margin:12px 0 6px}
+.h2hhdr h4{margin:0;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--sage)}
+.h2hhdr .tally{font-family:'Saira Condensed';font-weight:800;font-size:15px;white-space:nowrap}
+.h2hhdr .selopt{padding:4px 8px;font-size:12.5px}
+.h2hrow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:7px 10px;margin-bottom:6px;min-height:52px}
+.h2hrow .vs{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.h2hrow .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h2hrow .nm .r{color:var(--red)} .h2hrow .nm .b{color:var(--blue)}
+.h2hrow .terms{font-size:12.5px;color:var(--sage)}
+.h2hrow .out{text-align:right;font-family:'Saira Condensed';font-weight:700;font-size:13px;letter-spacing:.04em;line-height:1.25;white-space:nowrap}
+.h2hrow .out .live{color:var(--brass)} .h2hrow .out .win{color:var(--live)} .h2hrow .out .push{color:var(--brass)}
+.h2hrow .out .mut{font-weight:600;font-size:11.5px}
+.h2hvs{font-size:15px;font-weight:700;margin:0 0 8px;min-height:22px}
+.h2hvs .mut{font-weight:400}
+.h2hstep{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.h2hstep .nav{width:44px;height:44px;border-radius:9px;border:1.5px solid var(--pencil);font-size:22px;background:var(--card)}
+.h2hstep .nav[disabled]{opacity:.3}
+.h2hstep .n{font-family:'Saira Condensed';font-weight:800;font-size:26px;min-width:36px;text-align:center}
+/* ---- best ball, three teams (its own page) ---- */
+.bbpage .selrow{margin-top:10px}
+.bbstand{display:flex;gap:6px;margin:10px 0 4px}
+.bbstand .tm{flex:1;min-width:0;background:var(--card);border:1.5px solid var(--pencil);border-radius:10px;padding:6px 8px;text-align:center;position:relative}
+.bbstand .tm.lead{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.bbstand .tm .em{font-size:17px;letter-spacing:-2px;white-space:nowrap;overflow:hidden;display:block}
+.bbstand .tm .pts{font-family:'Saira Condensed';font-weight:800;font-size:28px;line-height:1.05;display:block}
+.bbstand .tm .lab{font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage);display:block}
+.bbstand .tm::before{content:'';position:absolute;left:8px;right:8px;top:0;height:3px;border-radius:0 0 3px 3px}
+.t0{--tc:var(--ink)} .t1{--tc:var(--red)} .t2{--tc:var(--blue)} .t3{--tc:var(--live)}
+.cardtbl td.under{color:var(--red);font-weight:700} .cardtbl td.over{color:var(--blue)}
+.mapbtn{color:var(--brass);font-weight:700;text-decoration:none;border:1px solid var(--brass);border-radius:99px;padding:2px 8px}
+.bbstand .tm::before{background:var(--tc)}
+.bbopen{font-size:12.5px;color:var(--brass);margin:2px 0 8px;line-height:1.4}
+.bbteams{display:flex;gap:6px;margin:8px 0 4px}
+.bbteams .tbox{flex:1;min-width:0;border:1.5px dashed var(--pencil);border-radius:10px;padding:6px;min-height:64px}
+.bbteams .tbox h5{margin:0 0 4px;font-family:'Saira Condensed';font-weight:700;font-size:11px;letter-spacing:.08em;color:var(--tc)}
+.bbteams .tbox.out h5{color:var(--sage)}
+.bbchip{display:flex;align-items:center;gap:4px;width:100%;text-align:left;font-size:13px;font-weight:600;padding:5px 4px;border-radius:7px;background:var(--card);margin-bottom:3px;border:1px solid var(--pencil)}
+.bbchip .em{font-size:15px}
+.bbchip .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bbchip .dots{margin-left:auto;color:var(--brass);font-size:11.5px;font-weight:700;white-space:nowrap}
+.bbrail{display:flex;gap:3px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:none}
+.bbrail::-webkit-scrollbar{display:none}
+.bbrail .cell{flex:0 0 34px;height:42px;border-radius:8px;border:1.5px solid var(--pencil);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Saira Condensed';font-weight:700;font-size:13px}
+.bbrail .cell.cur{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.bbrail .cell .r{font-size:10px;line-height:1;height:10px;margin-top:2px;color:var(--brass)}
+.bbrail .cell .r.w{width:9px;height:9px;border-radius:50%;background:var(--tc)}
+.bbhole{display:flex;align-items:center;gap:8px;margin:6px 0 2px}
+.bbhole .hn{font-family:'Saira Condensed';font-weight:800;font-size:22px;letter-spacing:.02em}
+.bbhole .hm{font-size:12.5px;color:var(--sage)}
+.bbhole .nav{width:44px;height:40px;border-radius:9px;border:1.5px solid var(--pencil);font-size:22px;background:var(--card)}
+.bbhole .nav[disabled]{opacity:.3}
+.bbtm{background:var(--card);border:1px solid var(--pencil);border-radius:10px;padding:4px 8px 6px;margin-bottom:6px;border-left:4px solid var(--tc)}
+.bbtm .th{display:flex;align-items:baseline;gap:6px;font-family:'Saira Condensed';font-weight:700;font-size:12.5px;letter-spacing:.06em;color:var(--tc);padding:3px 0}
+.bbtm .th .best{margin-left:auto;color:var(--ink);font-size:13px}
+.bbtm .srow .who{flex:0 0 68px;font-size:13px}
+.bbtm .qn{width:35px}
+.bbtm .qn.step{width:28px}
+.bbtm .qnums{gap:3px}
+.bbtm .srow .who.t1,.bbtm .srow .who.t2,.bbtm .srow .who.t3{color:var(--ink)}
+.qn.set.t0,.qn.set.t1,.qn.set.t2,.qn.set.t3{background:var(--tc);border-color:var(--tc);color:var(--bone);font-weight:800;box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--tc)}
+.qn.set.card{background:var(--brass);border-color:var(--brass);color:var(--bone);box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--brass)} /* came off the match card or the map, not typed here */
+.bbverdict{margin:6px 0 4px;padding:9px 12px;border-radius:10px;background:var(--card);border:1px solid var(--pencil);font-size:14px;line-height:1.4}
+.bbverdict .w{font-weight:700}
+.bbverdict .push{color:var(--brass);font-weight:700}
+.bbnext{display:flex;gap:8px;margin:8px 0 4px}
+.bbledger{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.bbledger th{font-family:'Saira Condensed';font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--sage);text-align:center;padding:2px 4px;border-bottom:1px solid var(--pencil)}
+.bbledger td{text-align:center;padding:3px 4px;border-bottom:1px dashed var(--pencil)}
+.bbledger td.lo{font-weight:800;color:var(--tc)}
+.bbledger td.res{font-size:12px;color:var(--sage);text-align:left;white-space:nowrap}
+.bbledger td.res .push{color:var(--brass);font-weight:700}
+.sheet .bigbtn[disabled]{opacity:.45;cursor:default}
 </style>
 </head>
 <body>
@@ -547,6 +670,7 @@ const FORMATS = {
   figjam:    { name:'FIG JAM',    desc:'alternate shot, two mulligans a swing — take one, you play it', oneBall:true, mulligans:2 },
   singles:   { name:'SINGLES',    desc:'1 v 1',                                      oneBall:false },
   mixer:     { name:'MIXER',      desc:'a different game every few holes',           oneBall:false },
+  casual:    { name:'CASUAL',     desc:'no matches — everyone just keeps their own card', oneBall:false },
 };
 const MIXER_DEFAULT = { seg:3, formats:['scramble','greensomes','fourball'], flip:true };
 // ready-made rotations offered as a starting point in the mix library
@@ -839,8 +963,59 @@ const ENG = (() => {
     return Math.round(index * (slope / 113) + cr);
   }
 
+
+  // ---- best ball, any number of teams (2v2v3 etc.) --------------------------
+  // holes: {holeNo: {teamId: bestNet|null}} — a team's best net ball on that
+  // hole; null/missing = no ball posted yet. A hole is "scored" once every
+  // team has a number. order: hole numbers in play order. Each hole is worth
+  // one point to the outright low team. A tie for low is a PUSH between the
+  // tied teams: that hole's point carries and is decided on the next scored
+  // hole by comparing ONLY the tied teams — whoever of them is lower there
+  // takes it, whether or not they win that hole outright. Still tied → the
+  // tied subset carries on again. Nothing decided at the end stays open.
+  function bestBall(holes, order, teamIds) {
+    const teams = teamIds && teamIds.length ? teamIds.slice()
+      : Array.from(new Set(order.flatMap((n) => Object.keys(holes[n] || {})))).sort();
+    const won = {}; teams.forEach((t) => { won[t] = 0; });
+    const perHole = {};   // holeNo -> {winner|null, push:[...]|null, decided:[{from, winner}], net}
+    let carries = [];     // [{from:holeNo, teams:[...]}] still open, oldest first
+    let scored = 0;
+    const lowOf = (net, among) => {
+      let best = null, who = [];
+      for (const t of among) {
+        const v = net[t];
+        if (v == null) continue;
+        if (best === null || v < best) { best = v; who = [t]; }
+        else if (v === best) who.push(t);
+      }
+      return who;
+    };
+    for (const n of order) {
+      const net = holes[n];
+      if (!net) continue;
+      if (!teams.every((t) => typeof net[t] === 'number')) continue; // not fully posted yet
+      scored++;
+      const rec = { winner: null, push: null, decided: [], net };
+      // earlier pushes first: each is settled among its own teams on this hole
+      const still = [];
+      for (const c of carries) {
+        const low = lowOf(net, c.teams);
+        if (low.length === 1) { won[low[0]]++; rec.decided.push({ from: c.from, winner: low[0] }); }
+        else still.push({ from: c.from, teams: low });
+      }
+      carries = still;
+      const low = lowOf(net, teams);
+      if (low.length === 1) { won[low[0]]++; rec.winner = low[0]; }
+      else { rec.push = low; carries.push({ from: n, teams: low }); }
+      perHole[n] = rec;
+    }
+    const order2 = teams.slice().sort((a, b) => won[b] - won[a] || teams.indexOf(a) - teams.indexOf(b));
+    const lead = order2.length > 1 && won[order2[0]] > won[order2[1]] ? order2[0] : null;
+    return { teams, won, perHole, carries, scored, remaining: order.length - scored, leader: lead, standings: order2 };
+  }
+
   return { matchState, matchPoints, projectedPoints, playingStrokes, dotsOnHole,
-           stablefordPoints, holeWinnerFromStrokes, cupTargets, courseHandicap, ALLOWANCES };
+           stablefordPoints, holeWinnerFromStrokes, cupTargets, courseHandicap, bestBall, ALLOWANCES };
 })();
 /* ===END ENGINE=== */
 /* ===CORE STATE=== */
@@ -890,6 +1065,7 @@ function defConfig(){
     net:false, allowances:Object.assign({}, WHS_DEFAULTS), flat100:false, strokeCap:0,
     junk:false, junkTypes:{birdie:true, eagle:true, greenie:true, sandie:true, barkie:false},
     skins:false, skinsNet:true, skinsCarry:true,
+    ouMax:10, h2hStake:10,
   };
 }
 function defDay(d){
@@ -927,10 +1103,10 @@ function effTeam(d, pid){
 function dayNet(d){ const dc = dayCfg(d); return dc.net == null ? cfg().net : dc.net; }
 function sanitizeMix(m){
   m = m || {};
-  const fmts = arr(m.formats).filter(f=>FORMATS[f] && f!=='mixer');
+  const fmts = arr(m.formats).filter(f=>FORMATS[f] && f!=='mixer' && f!=='casual');
   // back: an explicit back-nine rotation (any order, not just the reverse);
   // null = derive it from flip
-  const back = arr(m.back).filter(f=>FORMATS[f] && f!=='mixer');
+  const back = arr(m.back).filter(f=>FORMATS[f] && f!=='mixer' && f!=='casual');
   return { seg: [3,6,9].includes(m.seg) ? m.seg : 3,
            formats: fmts.length ? fmts : MIXER_DEFAULT.formats.slice(),
            flip: m.flip !== false,
@@ -1048,17 +1224,28 @@ function playingCH(d, p){
 }
 
 // ---- matches ---------------------------------------------------------------
+// grudge matches (matches/sb*, side:true) were retired for head-to-head
+// matchups; any still in the database are filtered out here so no renderer
+// ever sees one
 function matchesFor(d){
   return Object.entries(S.matches||{}).map(([id,m])=>Object.assign({id},m))
-    .filter(m=>m.day===d)
-    .sort((a,b)=> (a.side?1:0)-(b.side?1:0) || (a.group||'a').localeCompare(b.group||'a') || (a.ord||0)-(b.ord||0));
+    .filter(m=>m.day===d && !m.side && !m.card && !String(m.id).startsWith('card_'))
+    .sort((a,b)=> (a.group||'a').localeCompare(b.group||'a') || (a.ord||0)-(b.ord||0));
 }
-function cupMatchesFor(d){ return matchesFor(d).filter(m=>!m.side); }
-function sideBetsFor(d){ return matchesFor(d).filter(m=>m.side); }
-// side bets are always a straight 1v1 regardless of the day's game
-function mFormat(m, n){ return m.side ? 'singles' : holeFormat(m.day, n); }
+function cupMatchesFor(d){ return matchesFor(d); }
+function mFormat(m, n){ return holeFormat(m.day, n); }
 function allMatches(){ return DAYS.flatMap(matchesFor); }
-function theMatch(id){ const m=(S.matches||{})[id]; return m ? Object.assign({id},m) : null; }
+function theMatch(id){
+  if (typeof id === 'string' && id.startsWith('card_')){ const d = id.slice(5); return DAYS.includes(d) ? cardMatch(d) : null; }
+  const m=(S.matches||{})[id]; return m && !m.side ? Object.assign({id},m) : null; }
+// the day's "card match": a virtual match holding everyone present on one
+// side so the hole map and shot traces work on a casual day (or for anyone
+// scoring their own ball outside their match). Only its holes are ever
+// written (matches/card_<d>/holes/...); it is never a cup match.
+function cardMatch(d){
+  const raw = (S.matches||{})['card_'+d] || {};
+  return { id:'card_'+d, day:d, card:true, red:presentIds(d), blue:[], holes: raw.holes || {} };
+}
 function sideIds(m, side){ const v = m[side==='A'?'red':'blue']; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v||{}).filter(Boolean); }
 function engineHoles(m){
   const out = {};
@@ -1312,6 +1499,324 @@ function mvpRows(){
   }
   return Object.values(rows).sort((a,b)=> b.pts-a.pts || b.w-a.w || a.p.ord-b.p.ord);
 }
+
+// ---- over / under ----------------------------------------------------------
+// Its own game, kept apart from the cup, the handicaps and the match screens.
+// Every player on a day gets a line on their GROSS score for the round; anyone
+// can set it, anyone can bet over or under it for up to the trip's max
+// (Settings). One rule: you can't take the over on yourself. Bets pay even
+// money against the book. Tree: ou/<day>/<pid> = { line, score, bets:{<bettor>:{side, amt}} }
+const OU_SIDES = { over:'OVER', under:'UNDER' };
+function ouMax(){ const v = +cfg().ouMax; return (v > 0 && isFinite(v)) ? Math.round(v) : 10; }
+function ouEntry(d, pid){
+  const e = (((S.ou||{})[d]||{})[pid]) || {};
+  // a line or score is a golf score: anything that isn't a positive number is unset
+  const line = (e.line == null || e.line === '') ? null : +e.line;
+  const score = (e.score == null || e.score === '') ? null : +e.score;
+  const bets = {};
+  for (const [b, v] of Object.entries(e.bets||{})){
+    if (!v || !OU_SIDES[v.side] || !(+v.amt > 0)) continue;
+    bets[b] = { side:v.side, amt:Math.round(+v.amt), t:+v.t || 0 }; // t: when it was placed — orders the chips and the bets-by list
+  }
+  return { line: (isFinite(line) && line > 0) ? line : null, score: (isFinite(score) && score > 0) ? score : null, bets };
+}
+// gross for the round as the card has it — every hole posted for that player
+// (individual-ball formats only; a scramble ball belongs to the team).
+function ouCardScore(d, pid){
+  let tot = 0;
+  for (let n=1; n<=18; n++){
+    const v = cardGross(d, n, pid);
+    if (typeof v !== 'number' || !(v > 0)) return null;
+    tot += v;
+  }
+  return tot;
+}
+// the score the bets settle on: a posted number wins, else the card's total
+function ouScore(d, pid){
+  const e = ouEntry(d, pid);
+  if (e.score != null) return { score:e.score, from:'posted' };
+  const c = ouCardScore(d, pid);
+  return c != null ? { score:c, from:'card' } : { score:null, from:null };
+}
+function ouResult(line, score){
+  if (line == null || score == null) return null;
+  return score > line ? 'over' : score < line ? 'under' : 'push';
+}
+// can this bettor take this side on this line? returns '' or the reason
+function ouBetProblem(pid, bettor, side){
+  if (!bettor || !(S.players||{})[bettor]) return 'Pick who’s betting.';
+  if (!OU_SIDES[side]) return 'Over or under?';
+  if (side === 'over' && bettor === pid) return 'You can’t take the over on yourself.';
+  return '';
+}
+function ouPlaceBet(d, pid, bettor, side, amt){
+  const why = ouBetProblem(pid, bettor, side);
+  if (why) return why;
+  if (ouEntry(d, pid).line == null) return 'Set the line first.';
+  const a = Math.max(1, Math.min(ouMax(), Math.round(+amt || 0)));
+  op(`ou/${d}/${pid}/bets/${bettor}`, { side, amt:a, t:Date.now() });
+  return '';
+}
+// what one bet is worth once the line settles: +amt, -amt, or 0 on a push
+function ouBetNet(bet, result){
+  if (!result) return null;
+  if (result === 'push') return 0;
+  return bet.side === result ? bet.amt : -bet.amt;
+}
+// per-person net for one day (settled lines only) and a count of what's open
+function ouDayBook(d){
+  const net = {}; let settled = 0, open = 0, book = 0;
+  for (const pid of Object.keys((S.ou||{})[d]||{})){
+    const e = ouEntry(d, pid);
+    const r = ouResult(e.line, ouScore(d, pid).score);
+    for (const [b, bet] of Object.entries(e.bets)){
+      if (!r){ open++; continue; }
+      settled++;
+      const v = ouBetNet(bet, r);
+      net[b] = (net[b]||0) + v; book -= v;
+    }
+  }
+  // head-to-head matchups settle player to player into the same ledger, so
+  // one person has one number for the trip; the book isn't in those
+  for (const r of h2hRows(d)){
+    const res = h2hResult(r);
+    if (!res.done){ open++; continue; }
+    settled++;
+    net[r.a] = (net[r.a]||0) + h2hNet(r, res, r.a);
+    net[r.b] = (net[r.b]||0) + h2hNet(r, res, r.b);
+  }
+  return { net, settled, open, book };
+}
+function ouTripBook(){
+  const net = {}; let settled = 0, open = 0, book = 0;
+  for (const d of DAYS){
+    const b = ouDayBook(d);
+    for (const [p, v] of Object.entries(b.net)) net[p] = (net[p]||0) + v;
+    settled += b.settled; open += b.open; book += b.book;
+  }
+  return { net, settled, open, book };
+}
+// every bet one person has placed, across the trip, oldest first within a day
+function ouBetsBy(bettor){
+  const out = [];
+  for (const d of DAYS){
+    for (const pid of Object.keys((S.ou||{})[d]||{})){
+      const e = ouEntry(d, pid);
+      const bet = e.bets[bettor]; if (!bet) continue;
+      const sc = ouScore(d, pid);
+      const result = ouResult(e.line, sc.score);
+      out.push({ d, pid, bet, line:e.line, score:sc.score, result, net: ouBetNet(bet, result) });
+    }
+  }
+  return out.sort((a,b)=> DAYS.indexOf(a.d)-DAYS.indexOf(b.d) || (a.bet.t||0)-(b.bet.t||0));
+}
+function money(n){ const a = Math.abs(Math.round(n)); return (n < 0 ? '−' : n > 0 ? '+' : '') + '$' + a; }
+function ouLineTxt(v){ return v == null ? '—' : (Math.abs(v % 1) === 0.5 ? String(v) : String(Math.round(v*10)/10)); }
+
+// ---- head-to-head: stroke play, negotiated strokes, one bet per matchup ------
+// h2h/{d}/{id} = { a, b, give:{to, n}, stake, t }. Pure arithmetic on the round
+// totals over/under already collects (ouScore: a posted total beats the card):
+// a.gross − b.gross ± the negotiated strokes, flat off the total. Handicaps are
+// never read. Display only for the teams; the cup never sees it.
+function h2hStake(){ const v = +cfg().h2hStake; return (v > 0 && isFinite(v)) ? Math.round(v) : 10; }
+function h2hRow(d, id){
+  const r = ((S.h2h||{})[d]||{})[id];
+  if (!r || !r.a || !r.b || r.a === r.b) return null;
+  const give = r.give || {};
+  const n = Math.max(0, Math.round(+give.n || 0));
+  return { id, d, a:r.a, b:r.b, n, to: n && (give.to===r.a || give.to===r.b) ? give.to : null,
+           stake: (+r.stake > 0) ? Math.round(+r.stake) : h2hStake(), t:+r.t || 0 };
+}
+function h2hRows(d){ return Object.keys((S.h2h||{})[d]||{}).map(id=>h2hRow(d, id)).filter(Boolean).sort((x,y)=>x.t-y.t || x.id.localeCompare(y.id)); }
+function h2hResult(r){
+  const sa = ouScore(r.d, r.a).score, sb = ouScore(r.d, r.b).score;
+  if (sa != null && sb != null){
+    const diff = (sa - (r.to===r.a ? r.n : 0)) - (sb - (r.to===r.b ? r.n : 0)); // negative → a wins
+    return { done:true, winner: diff === 0 ? null : (diff < 0 ? r.a : r.b), margin: Math.abs(diff), sa, sb };
+  }
+  // live: the gross running diff over the holes both players have posted
+  let thru = 0, diff = 0;
+  for (let n=1; n<=18; n++){
+    const ga = cardGross(r.d, n, r.a), gb = cardGross(r.d, n, r.b);
+    if (typeof ga !== 'number' || typeof gb !== 'number') continue;
+    thru++; diff += ga - gb;
+  }
+  return { done:false, thru, diff, sa, sb };
+}
+// what a matchup is worth to one of its two players once it settles
+function h2hNet(r, res, pid){ if (!res || !res.done) return null; if (!res.winner) return 0; return res.winner === pid ? r.stake : -r.stake; }
+function h2hTally(d){
+  const t = { red:0, blue:0, push:0, open:0, n:0 };
+  for (const r of h2hRows(d)){
+    t.n++;
+    const res = h2hResult(r);
+    if (!res.done){ t.open++; continue; }
+    if (!res.winner){ t.push++; continue; }
+    const tm = effTeam(d, res.winner);
+    if (tm === 'red') t.red++; else if (tm === 'blue') t.blue++;
+  }
+  return t;
+}
+// pair today's reds against today's blues at random; on an uneven day the
+// short side doubles up, and who doubles is part of the draw
+function h2hDraw(d){
+  const shuf = a => { a = a.slice(); for (let i=a.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const ids = presentIds(d);
+  const reds = shuf(ids.filter(p=>effTeam(d,p)==='red')), blues = shuf(ids.filter(p=>effTeam(d,p)==='blue'));
+  if (!reds.length || !blues.length) return 0;
+  const long = reds.length >= blues.length ? reds : blues, short = long === reds ? blues : reds;
+  const rows = {}, t0 = Date.now(), stake = h2hStake();
+  long.forEach((p, i) => {
+    const q = short[i % short.length];
+    rows[uid()] = { a: long === reds ? p : q, b: long === reds ? q : p, give:{ n:0 }, stake, t: t0 + i };
+  });
+  op(`h2h/${d}`, rows);
+  return long.length;
+}
+
+// ---- best ball: three teams, one point a hole, pushes carry -----------------
+// bb/{d}/team/{pid} = 1|2|3 (anything else: sitting out) — the day's teams.
+// bb/{d}/strokes/{n}/{pid} = gross | 'pickup' typed on the page; otherwise a
+// player's gross comes off the card (their cup match) like over/under.
+// Scoring lives in ENG.bestBall: each team's best net ball, low team takes the
+// hole, a tie for low is a push that the tied teams settle on the next hole.
+const BB_TEAMS = ['1','2','3'];
+function bbDay(d){ return ((S.bb||{})[d]) || {}; }
+function bbTeamOf(d, pid){ const t = String((bbDay(d).team||{})[pid]||''); return BB_TEAMS.includes(t) ? t : null; }
+// non-empty teams, in order: [{id:'1', ids:[pid,...]}]
+function bbTeams(d){
+  const out = [];
+  for (const t of BB_TEAMS){
+    const ids = presentIds(d).filter(pid=>bbTeamOf(d, pid)===t);
+    if (ids.length) out.push({ id:t, ids });
+  }
+  return out;
+}
+function bbIds(d){ return bbTeams(d).flatMap(t=>t.ids); }
+function bbOn(d){ return bbTeams(d).length >= 2; }
+function bbTeamEm(d, t){ const tm = bbTeams(d).find(x=>x.id===t); return tm ? tm.ids.map(pid=>player(pid).emoji||'❔').join('') : '?'; }
+// strokes: four-ball allowance, every player in the game off the low man
+function bbStrokes(d){
+  const dc = dayCfg(d);
+  const ps = bbIds(d).map(id=>({ id, ch:playingCH(d, player(id)), side:'A' }));
+  const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
+  const net = dayNet(d) && anyH && dc.course !== 'tbd';
+  const c = cfg();
+  const pct = c.flat100 ? 100 : ((c.allowances||{}).fourball != null ? c.allowances.fourball : WHS_DEFAULTS.fourball);
+  const si = ENG.playingStrokes(ps, 'fourball', { net, pctOverride: pct });
+  const cap = c.strokeCap|0;
+  if (cap > 0) for (const k in si.players) si.players[k] = Math.min(si.players[k], cap);
+  si.net = net;
+  si.missingHcp = net ? ps.filter(p=>{ const pl = player(p.id); return pl.hcp == null || pl.hcp === ''; }).map(p=>p.id) : [];
+  return si;
+}
+// a player's gross on a hole for this game: typed here, else off the card
+function bbGross(d, n, pid){
+  const hand = handGross(d, n, pid);
+  if (hand != null) return { v:hand, from:'hand' };
+  const t = mapGross(d, n, pid);
+  if (t != null) return { v:t, from:'map' };
+  const v = matchGross(d, n, pid);
+  return v == null ? { v:null, from:null } : { v, from:'card' };
+}
+// a completed shot trace on the day's card match
+function mapGross(d, n, pid){
+  const cm = cardMatch(d);
+  if (!cm.holes[n]) return null;
+  const v = (effStrokes(cm, n)||{})[pid];
+  return (v === 'pickup' || (typeof v === 'number' && v > 0)) ? v : null;
+}
+// running totals for everyone present: thru, gross, to par, net off the full course handicap
+function cardTotals(d){
+  const hs = holesFor(d);
+  return presentIds(d).map(pid=>{
+    let thru = 0, gross = 0, par = 0, picked = false;
+    for (let n=1; n<=18; n++){
+      const v = cardGross(d, n, pid);
+      if (v == null) continue;
+      if (v === 'pickup'){ picked = true; continue; }
+      thru++; gross += v; par += hs[n-1].par;
+    }
+    const p = player(pid);
+    const ch = (p.hcp == null || p.hcp === '') ? null : playingCH(d, p);
+    return { pid, thru, gross, par, toPar: gross - par, picked, ch, net: ch == null ? null : gross - Math.round(ch * thru / 18) };
+  }).sort((a,b)=> (b.thru>0) - (a.thru>0) || a.toPar - b.toPar || a.gross - b.gross || (player(a.pid).ord||0) - (player(b.pid).ord||0));
+}
+function toParTxt(n){ return n === 0 ? 'E' : (n > 0 ? '+'+n : String(n)); }
+// one player's gross on one hole as the card has it: a number typed on the
+// card / best-ball page, else a posted number or completed shot trace in a
+// match, or 'pickup'; null when nothing is in yet
+function cardGross(d, n, pid){
+  const h = handGross(d, n, pid);
+  if (h != null) return h;
+  const t = mapGross(d, n, pid);
+  if (t != null) return t;
+  return matchGross(d, n, pid);
+}
+function handGross(d, n, pid){
+  const v = ((bbDay(d).strokes||{})[n]||{})[pid];
+  return (v === 'pickup' || (typeof v === 'number' && v > 0)) ? v : null;
+}
+function matchGross(d, n, pid){
+  for (const m of cupMatchesFor(d)){
+    if (!sideIds(m,'A').includes(pid) && !sideIds(m,'B').includes(pid)) continue;
+    const v = (effStrokes(m, n)||{})[pid];
+    if (v === 'pickup' || (typeof v === 'number' && v > 0)) return v;
+  }
+  return null;
+}
+function bbDots(d, si, n, pid){ const h = holesFor(d)[n-1]; return si.net ? ENG.dotsOnHole(si.players[pid]||0, h.si, 18) : 0; }
+// {teamId: best net | null} for one hole; a team whose every ball is picked up
+// has a score of Infinity — it loses the hole (or pushes with another pickup)
+function bbHoleNets(d, n, si){
+  si = si || bbStrokes(d);
+  const out = {};
+  for (const tm of bbTeams(d)){
+    let best = null, any = false;
+    for (const pid of tm.ids){
+      const g = bbGross(d, n, pid).v;
+      if (g == null) continue;
+      any = true;
+      if (g === 'pickup') continue;
+      const net = g - bbDots(d, si, n, pid);
+      if (best === null || net < best) best = net;
+    }
+    out[tm.id] = any ? (best === null ? Infinity : best) : null;
+  }
+  return out;
+}
+function bbState(d){
+  const si = bbStrokes(d);
+  const holes = {};
+  for (let n=1; n<=18; n++) holes[n] = bbHoleNets(d, n, si);
+  const st = ENG.bestBall(holes, ORDER18, bbTeams(d).map(t=>t.id));
+  st.si = si;
+  return st;
+}
+// the hole this phone is looking at: last touched, else the first unposted one
+function bbCurHole(d, st){
+  const h = (ui.bbHole||{})[d];
+  if (h) return h;
+  for (let n=1; n<=18; n++) if (!st.perHole[n]) return n;
+  return 18;
+}
+// deal the present players into teams — sizes as even as they go, the odd
+// men on the last team (7 → 2·2·3, 8 → 2·3·3), shuffled
+function bbDeal(d){
+  const ids = presentIds(d).slice();
+  for (let i = ids.length-1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  const team = {};
+  const sizes = bbDealSizes(ids.length);
+  let k = 0;
+  sizes.forEach((sz, ti)=>{ for (let i=0;i<sz;i++) team[ids[k++]] = BB_TEAMS[ti]; });
+  op(`bb/${d}/team`, team);
+}
+function bbDealSizes(n){
+  const T = Math.min(3, Math.max(2, Math.floor(n/2))); // 4-5 players → two teams
+  const base = Math.floor(n/T), extra = n - base*T;
+  return Array.from({length:T}, (_, i)=> base + (i >= T-extra ? 1 : 0));
+}
+function bbNetTxt(v){ return v == null ? '—' : v === Infinity ? 'X' : String(v); }
 
 // ---- date/day resolution ---------------------------------------------------
 function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1637,6 +2142,7 @@ function dayRulesTxt(d){
   const anyH = namedPlayers().some(p=>p.hcp!=null && p.hcp!=='');
   const net = dayNet(d) && anyH && dc.course !== 'tbd';
   const pct = dayAllowancePct(d);
+  if (dc.format === 'casual') return bits.concat(['OWN CARD', net ? 'GROSS & NET' : 'GROSS', 'NO CUP POINTS']).join(' · ');
   bits.push(net ? (dc.format==='mixer' ? 'NET · WHS PER SEGMENT' : 'NET '+pct+'%') : (dayNet(d) ? 'GROSS (no hcps yet)' : 'GROSS'));
   const worth = (dc.points||1) * ((dc.x2 && dc.format==='singles')?2:1);
   bits.push(`${halfTxt(worth)} PT${worth===1?'':'S'}`);
@@ -1728,13 +2234,9 @@ function renderBoard(d){
     body += `<div class="mlist">` + gm.map(m => preview ? matchRowHtml(m) : matchRowHtml(m)).join('') + `</div>`;
     if (!gm.length) body += `<div class="empty" style="padding:10px">No matches in this wave yet.</div>`;
   }
-  const sides = sideBetsFor(d);
-  if (sides.length){
-    body += `<div class="tgh">🥊 GRUDGE MATCHES — bragging rights only</div>`;
-    body += `<div class="mlist">` + sides.map(matchRowHtml).join('') + `</div>`;
-  }
-  const cupsOnly = ms.filter(m=>!m.side);
-  if (!ms.length && !anyCart){
+  if (dc.format === 'casual'){
+    body = cardBoardHtml(d);
+  } else if (!ms.length && !anyCart){
     body = `<div class="empty">Nothing on the tee sheet for ${DAYMETA[d].name} yet.<br>
       <button class="cta" data-act="setup" data-d="${d}">Set up ${DAYMETA[d].name}</button></div>`;
   } else if (!ms.length){
@@ -1747,6 +2249,12 @@ function renderBoard(d){
   let foot = '';
   if (out.length && named.length)
     foot = `<button class="dayfoot" data-act="setup" data-d="${d}">${named.length-out.length} of ${named.length} playing — ${out.map(pName).join(', ')} ${out.length>1?'are':'is'} out</button>`;
+  let bbL = '';
+  if (bbOn(d)){
+    const st = bbState(d);
+    bbL = `<div class="tgh">🏌️ BEST BALL — ${bbTeams(d).map(t=>t.ids.length).join(' v ')} · a point a hole · nothing to the cup</div>
+      <button class="dayfoot" data-act="bb" data-d="${d}" style="display:block;width:100%;text-align:left;padding-top:4px">${bbTeams(d).map(t=>`<span class="t${t.id}" style="color:var(--tc);font-weight:700">${bbTeamEm(d,t.id)} ${st.won[t.id]||0}</span>`).join(' · ')} · ${st.scored} of 18${st.carries.length?` · ${st.carries.length} riding`:''} ›</button>`;
+  }
   const rm = !dbConfigured() ? `<div class="banner">Range mode — nothing’s saving to the group. Add the trip link in Settings to go live.</div>` : '';
   const est = (dc.course==='breck' && dc.rot==='be') ? `<div class="banner">Bear→Elk has no printed card — net strokes use a derived allocation.</div>` : '';
   return `
@@ -1757,6 +2265,7 @@ function renderBoard(d){
   <button class="dayctx" data-act="setup" data-d="${d}"><div class="c1">${ctx1}</div><div class="c2">${dayRulesTxt(d)}</div></button>
   ${rm}${est}
   ${body}
+  ${bbL}
   ${foot}`;
 }
 
@@ -2391,13 +2900,14 @@ function renderSetupDay(d){
     </div>
 
     <h2 id="matches">5 · Matches</h2>
-    <div class="block">
+    ${dc.format==='casual' ? `<div class="block"><div class="mut" style="font-size:13.5px;line-height:1.5">Casual day — no matches, no cup points. Everyone keeps their own card and the board shows the running totals.</div>
+      <button class="cta" style="margin:8px 0 0" data-act="card" data-d="${d}">Open the card</button></div>` : `<div class="block">
       <button class="cta" style="margin:0 0 4px" data-act="makematches" data-d="${d}">${makeLabel}</button>
       ${mCards}
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="ghostbtn" data-act="addmatch" data-d="${d}">+ Add match</button>
-      <button class="ghostbtn" data-act="addsidebet" data-d="${d}">🥊 + Side bet (1v1, no cup points)</button>
+      <button class="ghostbtn" data-act="ou" data-d="${d}">🤝 Head-to-head bets live under Side action</button>
       <span class="mut" style="font-size:12px">Tap a name in a match, then a bench/other name to swap.</span></div>
-    </div>
+    </div>`}
 
     <h2>6 · Format &amp; points today</h2>
     <div class="block">
@@ -2532,6 +3042,14 @@ function renderSettings(){
         <button class="selopt ${c.skinsCarry?'on':''}" data-act="skinscarry">Carryovers ${c.skinsCarry?'on':'off'}</button></div>`:''}
     </div>
 
+    <h2>Side action <span class="ct">its own page — see the gear menu</span></h2>
+    <div class="block">
+      <div class="field"><label>Over / under: max per bet ($) <span class="mut" style="font-size:12px">even money, gross score, can’t take the over on yourself</span></label>
+        <input type="number" min="1" step="1" inputmode="numeric" value="${ouMax()}" data-input="oumax" style="width:74px"></div>
+      <div class="field"><label>Head-to-head: stake per matchup ($) <span class="mut" style="font-size:12px">the default — each matchup can change its own</span></label>
+        <input type="number" min="1" step="1" inputmode="numeric" value="${h2hStake()}" data-input="h2hstake" style="width:74px"></div>
+    </div>
+
     <h2 id="data">Data &amp; this phone</h2>
     <div class="block">
       <div class="togg"><span>Sync</span><span>${pillHtml()}</span></div>
@@ -2555,6 +3073,295 @@ function renderSettings(){
   </div>`;
 }
 
+// ---- over / under screen ---------------------------------------------------
+function ouBettorDefault(){
+  const me = LS.get('id', null);
+  if (me && me !== 'watch' && (S.players||{})[me]) return me;
+  const first = namedPlayers()[0];
+  return first ? first.id : null;
+}
+function ouBetChipHtml(d, pid, bettor, bet, result){
+  const v = ouBetNet(bet, result);
+  const cls = v == null ? '' : v > 0 ? 'win' : v < 0 ? 'lose' : 'push';
+  const tail = v == null ? '' : `<span class="net num">${v === 0 ? 'PUSH' : money(v)}</span>`;
+  return `<button class="oubet ${cls}" data-act="oubet" data-d="${d}" data-p="${pid}" data-b="${bettor}">
+    <span class="who">${pName(bettor)}</span><span class="side sc">${OU_SIDES[bet.side]}</span><span class="amt num">$${bet.amt}</span>${tail}</button>`;
+}
+function ouCardHtml(d, pid){
+  const p = player(pid);
+  const e = ouEntry(d, pid);
+  const sc = ouScore(d, pid);
+  const r = ouResult(e.line, sc.score);
+  const bets = Object.entries(e.bets).sort((a,b)=>((a[1].t||0)-(b[1].t||0)));
+  let verdict = '';
+  if (r === 'push') verdict = `<span class="verdict push">PUSH</span>`;
+  else if (r) verdict = `<span class="verdict ${r}">${OU_SIDES[r]} by ${ouLineTxt(Math.abs(sc.score - e.line))}</span>`;
+  else if (e.line == null) verdict = `<span class="verdict mut">no line yet</span>`;
+  else verdict = `<span class="verdict mut">${bets.length ? bets.length + ' bet' + (bets.length>1?'s':'') + ' riding' : 'open'}</span>`;
+  const fromCard = sc.from === 'card' && e.score == null;
+  return `<div class="oucard" id="ou-${pid}">
+    <div class="ourow">
+      <span class="em">${p.emoji||'❔'}</span>
+      <span class="who"><span class="nm">${esc(p.name||'??')}</span>${verdict}</span>
+      <input class="ouin" type="number" step="0.5" inputmode="decimal" placeholder="—" aria-label="Line" value="${e.line==null?'':esc(e.line)}" data-input="ouline" data-d="${d}" data-p="${pid}">
+      <input class="ouin ${fromCard?'card':''}" type="number" step="1" inputmode="numeric" placeholder="${fromCard?esc(sc.score):'—'}" aria-label="Score${fromCard?' (from the card)':''}" title="${fromCard?'From the card — type a number to override':''}" value="${e.score==null?'':esc(e.score)}" data-input="ouscore" data-d="${d}" data-p="${pid}">
+      <button class="oubtn" data-act="oubet" data-d="${d}" data-p="${pid}" ${e.line==null?'disabled title="Set a line first"':''}>BET</button>
+    </div>
+    ${bets.length ? `<div class="oubets">${bets.map(([b,bet])=>ouBetChipHtml(d, pid, b, bet, r)).join('')}</div>` : ''}
+  </div>`;
+}
+function ouBookHtml(title, book, foot){
+  const rows = Object.entries(book.net).filter(([pid])=>(S.players||{})[pid])
+    .sort((a,b)=>b[1]-a[1] || (player(a[0]).ord||0)-(player(b[0]).ord||0));
+  if (!rows.length) return '';
+  return `<div class="oubook"><h4 class="sc caps">${title}</h4>
+    ${rows.map(([pid,v])=>`<button class="brow" data-act="oubets" data-p="${pid}"><span>${pName(pid)}</span><span class="num ${v>0?'win':v<0?'lose':''}">${money(v)}</span></button>`).join('')}
+    ${book.book ? `<div class="brow mut"><span>The book</span><span class="num">${money(book.book)}</span></div>` : ''}
+    ${foot ? `<div class="mut" style="font-size:12px;margin-top:4px">${foot}</div>` : ''}
+  </div>`;
+}
+function h2hRowHtml(r){
+  const res = h2hResult(r);
+  const nm = pid => { const t = effTeam(r.d, pid); return `<span class="${t==='red'?'r':t==='blue'?'b':''}">${pName(pid)}</span>`; };
+  const terms = `${r.n ? `${pName(r.to===r.a ? r.b : r.a)} gives ${r.n}` : 'no strokes'} · $${r.stake}`;
+  let out;
+  if (res.done){
+    if (!res.winner) out = `<span class="push">PUSH</span><br><span class="mut">${res.sa} v ${res.sb}${r.n?` · ${r.n} given`:''}</span>`;
+    else out = `<span class="win">${pName(res.winner)} by ${res.margin} ✓</span><br><span class="win">${money(r.stake)} ${esc((player(res.winner).name||'').split(' ')[0])}</span>`;
+  } else if (res.thru){
+    out = `<span class="live">${res.diff === 0 ? 'LEVEL' : `${pName(res.diff < 0 ? r.a : r.b)} −${Math.abs(res.diff)}`}</span><br><span class="mut">gross thru ${res.thru}${r.n?` · ${r.n} to come`:''}</span>`;
+  } else out = `<span class="mut">no scores yet</span>`;
+  return `<button class="h2hrow" data-act="h2hedit" data-d="${r.d}" data-id="${r.id}">
+    <span class="vs"><span class="nm">${nm(r.a)} <span class="mut" style="font-weight:400">vs</span> ${nm(r.b)}</span><span class="terms">${terms}</span></span>
+    <span class="out">${out}</span></button>`;
+}
+function h2hSectionHtml(d){
+  const rows = h2hRows(d), t = h2hTally(d);
+  const tally = rows.length ? `<span class="tally"><span class="tRed">${teamName('A')} ${t.red}</span> <span class="mut">–</span> <span class="tBlue">${t.blue} ${teamName('B')}</span>${t.push?` <span class="mut" style="font-weight:400;font-size:12px">· ${t.push} push${t.push>1?'es':''}</span>`:''}</span>` : '';
+  const canDraw = presentIds(d).some(p=>effTeam(d,p)==='red') && presentIds(d).some(p=>effTeam(d,p)==='blue');
+  return `<div class="h2hhdr"><h4>HEAD-TO-HEAD</h4>${tally}<span class="sp" style="flex:1"></span>
+      <button class="selopt" data-act="h2hdraw" data-d="${d}" ${canDraw?'':'disabled'}>🎲 Draw</button>
+      <button class="selopt" data-act="h2hnew" data-d="${d}">+ Matchup</button></div>
+    ${rows.map(h2hRowHtml).join('') || `<div class="mut" style="font-size:12.5px;margin-bottom:6px">Stroke play, one on one, strokes negotiated between the two of you, $${h2hStake()} a matchup unless you say otherwise. <b>Draw</b> pairs today’s ${teamName('A')} against ${teamName('B')} — on an uneven day the short side doubles up, and who doubles is part of the draw.</div>`}`;
+}
+function renderOU(d){
+  const ids = presentIds(d);
+  const dayChips = DAYS.map(x=>{
+    const n = Object.values((S.ou||{})[x]||{}).filter(e=>e && e.line != null).length;
+    return `<button class="selopt ${x===d?'on':''}" data-act="ou" data-d="${x}" style="min-width:64px">${DAYMETA[x].label}
+      <span class="sub">${n ? n+' line'+(n>1?'s':'') : '—'}</span></button>`;
+  }).join('');
+  const cards = ids.map(pid=>ouCardHtml(d, pid)).join('');
+  const dayBook = ouDayBook(d), trip = ouTripBook();
+  const cl = courseLabel(d);
+  return `
+  <div class="appbar"><button class="backbtn" data-act="board">‹</button>
+    <span class="wordmark sc">SIDE ACTION</span><span class="sp"></span>${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
+  <div class="spage oupage">
+    <div class="selrow" style="margin-top:10px">${dayChips}</div>
+    <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · gross score · max <b>$${ouMax()}</b> a bet (<button data-act="settings" class="lnk">Settings</button>) · <b>no over on yourself</b></div>
+    <div class="oubyrow"><span class="lab">BETS BY</span>${namedPlayers().map(p=>
+      `<button class="selopt" data-act="oubets" data-p="${p.id}" title="Every bet ${esc(p.name)} has placed"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('')}</div>
+    ${ids.length ? h2hSectionHtml(d) : ''}
+    ${cards ? `<div class="h2hhdr" style="margin-top:14px"><h4>OVER / UNDER</h4></div><div class="ouhdr"><span class="sp"></span><span>LINE</span><span>SCORE</span><span class="bw"></span></div>` : ''}
+    ${cards || `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}
+    ${ouBookHtml(DAYMETA[d].name + ' ledger', dayBook, dayBook.open ? `${dayBook.open} bet${dayBook.open>1?'s':''} still riding — post scores to settle them.` : '')}
+    ${trip.settled && DAYS.some(x=>x!==d && ouDayBook(x).settled) ? ouBookHtml('Trip so far', trip, 'Every settled line and matchup, all days.') : ''}
+    <div class="mut" style="font-size:12px;margin-top:14px">Anyone sets a line; anyone bets it, even money against the book. Bets ride on whatever the line is now — settle the number before anybody bets. A score in brass came off the card (all 18 posted); type a total to override it.</div>
+  </div>`;
+}
+// ---- best ball screen -------------------------------------------------------
+function bbTeamsEditorHtml(d){
+  const ids = presentIds(d);
+  const si = bbStrokes(d);
+  const chip = pid => { const p = player(pid); const s = si.players[pid]||0;
+    return `<button class="bbchip" data-act="bbteam" data-d="${d}" data-p="${pid}" title="Tap to move to the next team">
+      <span class="em">${p.emoji||'❔'}</span><span class="nm">${esc((p.name||'??').split(' ')[0])}</span>${si.net&&s?`<span class="dots">${s}●</span>`:''}</button>`; };
+  const boxes = BB_TEAMS.map(t=>`<div class="tbox t${t}"><h5>TEAM ${t}</h5>${ids.filter(pid=>bbTeamOf(d,pid)===t).map(chip).join('')}</div>`).join('');
+  const out = ids.filter(pid=>!bbTeamOf(d,pid));
+  const sizes = bbDealSizes(ids.length).join('·');
+  return `<div class="bbteams">${boxes}</div>
+    ${out.length ? `<div class="bbteams"><div class="tbox out" style="flex:1"><h5>SITTING OUT — tap to put on a team</h5><div style="display:flex;flex-wrap:wrap;gap:4px">${out.map(chip).join('')}</div></div></div>` : ''}
+    <div class="bbnext"><button class="bigbtn ghost" data-act="bbdeal" data-d="${d}" ${ids.length<4?'disabled':''}>🎲 DRAW TEAMS ${ids.length>=4?sizes:''}</button>
+      ${bbOn(d)?`<button class="bigbtn pri" data-act="bbedit" data-d="${d}" data-v="0">DONE</button>`:''}</div>
+    <div class="mut" style="font-size:12px;margin:4px 0 8px">Tap a name to move it to the next team. ${si.net?`Net: four-ball allowance (${cfg().flat100?100:((cfg().allowances||{}).fourball!=null?cfg().allowances.fourball:WHS_DEFAULTS.fourball)}%), everyone off the low man in the game.`:'Gross play.'}</div>`;
+}
+function bbRailHtml(d, st, cur){
+  const hs = holesFor(d);
+  return `<div class="bbrail" id="bbrail">${hs.map(h=>{
+    const r = st.perHole[h.no];
+    let mark = '<span class="r"></span>';
+    if (r && r.winner) mark = `<span class="r w t${r.winner}"></span>`;
+    else if (r && r.push) mark = `<span class="r">${r.push.length===3?'≡':'='}</span>`;
+    return `<button class="cell ${h.no===cur?'cur':''}" id="bbcell${h.no}" data-act="bbhole" data-d="${d}" data-n="${h.no}">${h.no}${mark}</button>`;
+  }).join('')}</div>`;
+}
+function bbVerdictHtml(d, st, n){
+  const r = st.perHole[n];
+  const em = t => `<span class="w">${bbTeamEm(d, t)}</span>`;
+  const nets = bbHoleNets(d, n, st.si);
+  if (!r){
+    const missing = bbTeams(d).filter(t=>nets[t.id]==null).map(t=>bbTeamEm(d,t.id));
+    const open = st.carries.filter(c=>c.from < n);
+    const carryTxt = open.length ? `<div class="mut" style="font-size:12.5px;margin-top:3px">Riding on this hole: ${open.map(c=>`hole ${c.from} (${c.teams.map(t=>bbTeamEm(d,t)).join(' v ')})`).join(', ')} — settled between those teams only.</div>` : '';
+    return `<div class="bbverdict"><span class="mut">${missing.length ? `Waiting on ${missing.join(' · ')}` : 'Posting…'}</span>${carryTxt}</div>`;
+  }
+  const bits = [];
+  if (r.winner) bits.push(`${em(r.winner)} take hole ${n}`);
+  else bits.push(`<span class="push">PUSH</span> — ${r.push.map(em).join(' v ')} tie the hole; it rides to the next hole and only they can win it`);
+  for (const dd of r.decided) bits.push(`${em(dd.winner)} also take hole ${dd.from} (carried)`);
+  return `<div class="bbverdict">${bits.join('<br>')}</div>`;
+}
+function bbStandHtml(d, st){
+  const teams = bbTeams(d);
+  return `<div class="bbstand">${teams.map(t=>`<div class="tm t${t.id} ${st.leader===t.id?'lead':''}">
+      <span class="em">${t.ids.map(pid=>player(pid).emoji||'❔').join('')}</span>
+      <span class="pts num">${st.won[t.id]||0}</span><span class="lab">${(st.won[t.id]||0)===1?'HOLE':'HOLES'}</span></div>`).join('')}</div>`;
+}
+function bbLedgerHtml(d, st){
+  const teams = bbTeams(d);
+  const rows = ORDER18.filter(n=>st.perHole[n]);
+  if (!rows.length) return '';
+  const em = t => bbTeamEm(d, t);
+  return `<table class="bbledger"><tr><th>HOLE</th>${teams.map(t=>`<th class="t${t.id}" style="color:var(--tc)">${em(t.id)}</th>`).join('')}<th style="text-align:left">RESULT</th></tr>
+    ${rows.map(n=>{ const r = st.perHole[n];
+      const low = Math.min(...teams.map(t=>r.net[t.id]));
+      const res = (r.winner ? em(r.winner) : `<span class="push">PUSH → ${n<18?'hole '+(n+1):'open'}</span>`) + r.decided.map(dd=>` · +${dd.from} ${em(dd.winner)}`).join('');
+      return `<tr><td class="num">${n}</td>${teams.map(t=>`<td class="num t${t.id} ${r.net[t.id]===low?'lo':''}">${bbNetTxt(r.net[t.id])}</td>`).join('')}<td class="res">${res}</td></tr>`; }).join('')}</table>`;
+}
+// one player's quick-number row for hole n, writing to bb/{d}/strokes; cls
+// colours the set number (t1..t3 for best-ball teams, t0 for the plain card)
+function bbQRow(d, n, pid, si, cls, withMap){
+  const h = holesFor(d)[n-1];
+  const p = player(pid);
+  const g = bbGross(d, n, pid);
+  const curNum = typeof g.v === 'number' ? g.v : null;
+  const dotN = bbDots(d, si, n, pid);
+  const fromCard = g.from === 'card' || g.from === 'map';
+  const nums = [];
+  for (let v = Math.max(1,h.par-2); v <= h.par+2; v++){
+    const set = curNum === v;
+    nums.push(`<button class="qn ${set?('set '+cls):(v===h.par&&curNum==null?'ghost':'')} ${set&&fromCard?'card':''}" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${v}">${v}</button>`);
+  }
+  const minus = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)-1}">−</button>`;
+  const plus  = `<button class="qn step" data-act="bbgross" data-d="${d}" data-n="${n}" data-p="${pid}" data-v="${(curNum!=null?curNum:h.par)+1}">+</button>`;
+  const outlier = (curNum!=null && (curNum < Math.max(1,h.par-2) || curNum > h.par+2)) ? `<span class="netlab">${curNum}</span>` : '';
+  const bits = [];
+  if (dotN && curNum!=null) bits.push(`<span class="netlab">${curNum} → net ${curNum-dotN}</span>`);
+  if (g.v==='pickup') bits.push(`<span class="mut" style="font-size:12px">picked up</span>`);
+  if (g.from === 'card') bits.push(`<span class="brass" style="font-size:12px">${withMap ? 'match card' : 'from the match card'}</span>`);
+  if (g.from === 'map') bits.push(`<span class="brass" style="font-size:12px">⛳ mapped</span>`);
+  if (withMap){ const ti = traceInfo(traceFor(cardMatch(d), n, pid));
+    bits.push(`<button class="pickup mapbtn" data-act="cardmap" data-d="${d}" data-n="${n}" data-p="${pid}">🗺 map${ti.started && !ti.complete ? ` · ${ti.n} so far` : ''}</button>`); }
+  bits.push(`<button class="pickup" data-act="bbpickup" data-d="${d}" data-n="${n}" data-p="${pid}">${g.v==='pickup'?'back in':'pickup'}</button>`);
+  const dot = dotN ? ` <span class="brass">${'●'.repeat(Math.min(dotN,2))}</span>` : '';
+  return `<div class="srow ${g.v==='pickup'?'picked':''}"><span class="who ${cls}">${p.emoji||'❔'} ${esc((p.name||'??').split(' ')[0])}${dot}</span><div class="qnums">${minus}${nums.join('')}${plus}</div>${outlier}</div>
+    <div class="srowsub">${bits.join(' · ')}</div>`;
+}
+function bbHoleHtml(d, st, n){
+  const h = holesFor(d)[n-1];
+  let rows = '';
+  for (const tm of bbTeams(d)){
+    const nets = bbHoleNets(d, n, st.si);
+    const qrow = pid => bbQRow(d, n, pid, st.si, 't'+tm.id);
+    rows += `<div class="bbtm t${tm.id}"><div class="th">TEAM ${tm.id} <span>${bbTeamEm(d, tm.id)}</span><span class="best">${nets[tm.id]==null?'':`best ${st.si.net?'net ':''}${bbNetTxt(nets[tm.id])}`}</span></div>${tm.ids.map(qrow).join('')}</div>`;
+  }
+  const posted = !!st.perHole[n];
+  return `<div class="bbhole"><button class="nav" data-act="bbhole" data-d="${d}" data-n="${n-1}" ${n<=1?'disabled':''}>‹</button>
+      <span class="hn">HOLE ${n}</span><span class="hm">PAR ${h.par} · SI ${h.si}${h.yds?' · '+h.yds+' yds':''}${h.nine?' · '+esc(h.nine):''}</span><span class="sp" style="flex:1"></span>
+      <button class="nav" data-act="bbhole" data-d="${d}" data-n="${n+1}" ${n>=18?'disabled':''}>›</button></div>
+    ${rows}
+    ${bbVerdictHtml(d, st, n)}
+    ${posted && n < 18 ? `<div class="bbnext"><button class="bigbtn pri" data-act="bbhole" data-d="${d}" data-n="${n+1}">NEXT HOLE ›</button></div>` : ''}`;
+}
+function renderBB(d){
+  const dayChips = DAYS.map(x=>{
+    const on = bbOn(x);
+    const sub = on ? bbTeams(x).map(t=>t.ids.length).join('v') : '—';
+    return `<button class="selopt ${x===d?'on':''}" data-act="bb" data-d="${x}" style="min-width:64px">${DAYMETA[x].label}<span class="sub">${sub}</span></button>`;
+  }).join('');
+  const cl = courseLabel(d);
+  const teams = bbTeams(d);
+  const editing = !bbOn(d) || (ui.bbEdit||{})[d];
+  let body = '';
+  if (editing){
+    body = `<div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · <b>${presentIds(d).length} playing</b> · best ball, one point a hole, three teams (2·2·3 with seven).</div>
+      ${presentIds(d).length ? bbTeamsEditorHtml(d) : `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}`;
+  } else {
+    const st = bbState(d);
+    const cur = bbCurHole(d, st);
+    const open = st.carries;
+    body = `${bbStandHtml(d, st)}
+      ${open.length ? `<div class="bbopen">${open.map(c=>`Hole ${c.from} still up: ${c.teams.map(t=>bbTeamEm(d,t)).join(' v ')}`).join(' · ')} — ${open.length>1?'they ride':'it rides'} to the next hole, settled between those teams only.</div>` : ''}
+      <div class="ouintro" style="margin-top:2px">${teams.map(t=>t.ids.length).join(' v ')} · ${st.scored} of 18 posted${st.si.net?' · net':' · gross'}${st.si.missingHcp.length?` · <span style="color:var(--warn)">no handicap: ${st.si.missingHcp.map(pName).join(', ')}</span>`:''} · <button class="lnk" data-act="bbedit" data-d="${d}" data-v="1">teams</button></div>
+      ${bbRailHtml(d, st, cur)}
+      ${bbHoleHtml(d, st, cur)}
+      ${bbLedgerHtml(d, st)}`;
+  }
+  return `
+  <div class="appbar"><button class="backbtn" data-act="board">‹</button>
+    <span class="wordmark sc">BEST BALL</span><span class="sp"></span>${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
+  <div class="spage oupage bbpage">
+    <div class="selrow">${dayChips}</div>
+    ${body}
+    <div class="mut" style="font-size:12px;margin-top:14px">Each team’s best ${dayNet(d)?'net ':''}ball counts. Low team takes the hole. Two (or three) teams tied for low is a <b>push</b>: that hole rides to the next hole and goes to whichever of the tied teams is lower there — even if a third team wins that hole outright. Tied again, it keeps riding. Scores in brass came off the card; tap a number to override it here (tap it again to clear). Nothing here touches the cup.</div>
+  </div>`;
+}
+// ---- the card: a casual day, everyone keeps their own score -------------------
+function cardTableHtml(d){
+  const rows = cardTotals(d);
+  const anyNet = rows.some(r=>r.net != null);
+  return `<table class="bbledger cardtbl"><tr><th style="text-align:left">PLAYER</th><th>THRU</th><th>GROSS</th><th>TO PAR</th>${anyNet?'<th>NET</th>':''}</tr>
+    ${rows.map(r=>`<tr><td style="text-align:left;font-weight:700">${player(r.pid).emoji} ${esc(player(r.pid).name)}</td><td class="num">${r.thru||'—'}</td><td class="num">${r.thru?r.gross:'—'}</td><td class="num ${r.thru?(r.toPar<0?'under':r.toPar>0?'over':''):''}">${r.thru?toParTxt(r.toPar):'—'}</td>${anyNet?`<td class="num">${r.thru&&r.net!=null?r.net:'—'}</td>`:''}</tr>`).join('')}</table>`;
+}
+function cardBoardHtml(d){
+  if (!presentIds(d).length) return `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`;
+  return `<div class="tgh">📋 THE CARD — casual, own score, nothing to the cup</div>
+    <div style="padding:0 14px">${cardTableHtml(d)}
+    <button class="cta" style="margin:10px 0 4px;width:100%" data-act="card" data-d="${d}">SCORE</button></div>`;
+}
+function cardCurHole(d){
+  const h = (ui.cardHole||{})[d];
+  if (h) return h;
+  const ids = presentIds(d);
+  for (let n=1; n<=18; n++) if (ids.some(pid=>cardGross(d, n, pid) == null)) return n;
+  return 18;
+}
+function renderCard(d){
+  const ids = presentIds(d);
+  const hs = holesFor(d);
+  const n = cardCurHole(d);
+  const h = hs[n-1];
+  const cl = courseLabel(d);
+  const si = { kind:'individual', players:{}, sides:{A:0,B:0}, net:false, missingHcp:[] };
+  const dayChips = DAYS.map(x=>`<button class="selopt ${x===d?'on':''}" data-act="card" data-d="${x}" style="min-width:64px">${DAYMETA[x].label}<span class="sub">${FORMATS[dayCfg(x).format].name.toLowerCase()}</span></button>`).join('');
+  const rail = `<div class="bbrail" id="bbrail">${hs.map(x=>{
+    const done = ids.length && ids.every(pid=>cardGross(d, x.no, pid) != null);
+    const some = !done && ids.some(pid=>cardGross(d, x.no, pid) != null);
+    return `<button class="cell ${x.no===n?'cur':''}" id="bbcell${x.no}" data-act="cardhole" data-d="${d}" data-n="${x.no}">${x.no}<span class="r">${done?'●':some?'·':''}</span></button>`; }).join('')}</div>`;
+  const posted = ids.length && ids.every(pid=>cardGross(d, n, pid) != null);
+  const me = LS.get('id', null);
+  const order = ids.slice().sort((a,b)=> (a===me?-1:b===me?1:0)); // your own row first
+  return `
+  <div class="appbar"><button class="backbtn" data-act="board">‹</button>
+    <span class="wordmark sc">THE CARD</span><span class="sp"></span>${pillHtml()}
+    <button class="gear" data-act="hub" aria-label="Setup">⚙︎</button></div>
+  <div class="spage oupage bbpage">
+    <div class="selrow">${dayChips}</div>
+    <div class="ouintro">${DAYMETA[d].name}${cl?' · '+esc(cl):''} · ${ids.length} playing · everyone keeps their own score, nothing to the cup.</div>
+    ${ids.length ? `${rail}
+    <div class="bbhole"><button class="nav" data-act="cardhole" data-d="${d}" data-n="${n-1}" ${n<=1?'disabled':''}>‹</button>
+      <span class="hn">HOLE ${n}</span><span class="hm">PAR ${h.par} · SI ${h.si}${h.yds?' · '+h.yds+' yds':''}${h.nine?' · '+esc(h.nine):''}</span><span class="sp" style="flex:1"></span>
+      <button class="nav" data-act="cardhole" data-d="${d}" data-n="${n+1}" ${n>=18?'disabled':''}>›</button></div>
+    <div class="bbtm t0">${order.map(pid=>bbQRow(d, n, pid, si, 't0', true)).join('')}</div>
+    ${posted && n < 18 ? `<div class="bbnext"><button class="bigbtn pri" data-act="cardhole" data-d="${d}" data-n="${n+1}">NEXT HOLE ›</button></div>` : ''}
+    ${cardTableHtml(d)}
+    <div class="mut" style="font-size:12px;margin-top:14px">Tap your number, or − and + to nudge it; tap the set number again to clear it. <b>map</b> opens the hole to mark shots where they stopped — holed out, the count becomes your score unless you type over it. Net is gross less the course handicap, pro-rated to the holes played. Over/under and head-to-head settle off these totals like any other day.</div>`
+    : `<div class="empty">Nobody’s playing ${DAYMETA[d].name}. <button class="cta" data-act="setup" data-d="${d}">Set up the day</button></div>`}
+  </div>`;
+}
 // ---- hub, cup sheet, who, kickoff -----------------------------------------
 function hubSheetHtml(){
   const c = cfg();
@@ -2577,7 +3384,19 @@ function hubSheetHtml(){
     <button class="hubrow" data-act="settings"><div><div class="hl">Trip &amp; rules</div>
       <div class="hv">${c.net?'Net':'Gross'} · ${c.flat100?'flat 100%':'WHS allowances'} · gimmes: ${ {conc:'concessions only',leather:'inside the leather',two:'2 ft',three:'3 ft',none:'none'}[c.gimme] }</div></div><span class="chev">›</span></button>
     <button class="hubrow" data-act="settings"><div><div class="hl">Extras &amp; data</div>
-      <div class="hv">MVP on · Junk ${c.junk?'on':'off'} · Skins ${c.skins?'on':'off'} · ${dbConfigured()?'● live':'range mode'}</div></div><span class="chev">›</span></button>`;
+      <div class="hv">MVP on · Junk ${c.junk?'on':'off'} · Skins ${c.skins?'on':'off'} · ${dbConfigured()?'● live':'range mode'}</div></div><span class="chev">›</span></button>
+    <h4 style="margin:14px 0 4px" class="sc caps">Side action</h4>
+    <button class="hubrow" data-act="ou"><div><div class="hl">Head-to-head · Over / Under</div>
+      <div class="hv">${(()=>{ const d = ui.day || resolveDay(); const b = ouTripBook(); const t = h2hTally(d);
+        const lines = Object.values((S.ou||{})[d]||{}).filter(e=>e && e.line != null).length;
+        return `${DAYMETA[d].label}: ${t.n ? t.n+' matchup'+(t.n>1?'s':'')+(t.red+t.blue ? ` ${teamName('A')} ${t.red}–${t.blue} ${teamName('B')}` : '') : 'no matchups'} · ${lines ? lines+' line'+(lines>1?'s':'') : 'no lines'} · ${b.settled+b.open ? (b.settled+b.open)+' bet'+((b.settled+b.open)>1?'s':'')+' on the trip' : 'no bets yet'}`; })()}</div></div>
+      <span class="chev">›</span></button>
+    <button class="hubrow" data-act="card"><div><div class="hl">The card</div>
+      <div class="hv">Everyone’s own score for the day — casual rounds live here</div></div><span class="chev">›</span></button>
+    <button class="hubrow" data-act="bb"><div><div class="hl">Best Ball · 2 v 2 v 3</div>
+      <div class="hv">${(()=>{ const d = ui.day || resolveDay(); if (!bbOn(d)) return `${DAYMETA[d].label}: no teams yet · three teams, a point a hole, pushes ride`;
+        const st = bbState(d); return `${DAYMETA[d].label}: ${bbTeams(d).map(t=>bbTeamEm(d,t.id)+' '+(st.won[t.id]||0)).join(' · ')} · ${st.scored} of 18${st.carries.length?` · ${st.carries.length} riding`:''}`; })()}</div></div>
+      <span class="chev">›</span></button>`;
 }
 function cupSheetHtml(){
   const c = cup();
@@ -2592,17 +3411,6 @@ function cupSheetHtml(){
     return `<button class="selopt" data-act="day" data-d="${d}" style="min-width:70px">${DAYMETA[d].label}
       <span class="sub">${dp.any ? halfTxt(dp.red)+'–'+halfTxt(dp.blue) : '—'}</span></button>`;
   }).join('');
-  let grudgeL = '';
-  const allSides = DAYS.flatMap(sideBetsFor);
-  if (allSides.length){
-    grudgeL = `<h4 style="margin:14px 0 4px" class="sc caps">Grudge matches</h4>` + allSides.map(m=>{
-      const dr = mDer(m);
-      const a = sideIds(m,'A')[0], b = sideIds(m,'B')[0];
-      return `<button class="hubrow" data-act="match" data-id="${m.id}" style="margin-bottom:6px"><div>
-        <div class="hl" style="font-size:14px">${a?pName(a):'?'} vs ${b?pName(b):'?'} <span class="mut" style="font-size:11px">· ${DAYMETA[m.day].label}</span></div></div>
-        <span style="margin-left:auto">${chipHtml(m, dr)}</span></button>`;
-    }).join('');
-  }
   let junkL = '';
   if (conf.junk){
     const counts = {};
@@ -2620,7 +3428,7 @@ function cupSheetHtml(){
     ${tugHtml(c)}${projLine}
     <h4 style="margin:14px 0 4px" class="sc caps">MVP</h4>${mvpT||'<div class="mut">No matches finished yet.</div>'}
     <h4 style="margin:14px 0 4px" class="sc caps">By day</h4><div class="selrow">${byday}</div>
-    ${grudgeL}${junkL}${skinsL}
+    ${junkL}${skinsL}
     <div class="agr"><h4>The agreement</h4>
       <div>Tie: ${TIEBREAKS[conf.tieRule].label}${conf.holder?` · Holder: ${teamName(conf.holder==='red'?'A':'B')}`:''}</div>
       <div>Gimmes: ${GIMMES[conf.gimme]}</div>
@@ -2750,6 +3558,9 @@ function renderScreen(){
   if (ui.screen === 'match' && ui.matchId) return renderMatch(ui.matchId);
   if (ui.screen === 'setup' && ui.day) return renderSetupDay(ui.day);
   if (ui.screen === 'settings') return renderSettings();
+  if (ui.screen === 'ou') return renderOU(ui.day || resolveDay());
+  if (ui.screen === 'bb') return renderBB(ui.day || resolveDay());
+  if (ui.screen === 'card') return renderCard(ui.day || resolveDay());
   return renderBoard(ui.day || resolveDay());
 }
 function postRender(){
@@ -2789,6 +3600,9 @@ function parseRoute(){
     ui.screen = parts[2]==='setup' ? 'setup' : 'board'; return;
   }
   if (parts[0]==='settings'){ ui.screen='settings'; return; }
+  if (parts[0]==='ou'){ ui.screen='ou'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
+  if (parts[0]==='bb'){ ui.screen='bb'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
+  if (parts[0]==='card'){ ui.screen='card'; if (DAYS.includes(parts[1])){ ui.day = parts[1]; LS.set('day', ui.day); } return; }
   ui.screen='board'; ui.day = ui.day || resolveDay();
 }
 window.addEventListener('hashchange', ()=>{ parseRoute(); requestRender(); });
@@ -2840,7 +3654,7 @@ function sheetHtml(sh){
     const segSel = [3,6,9].map(s=>`<button class="selopt ${mx.seg===s?'on':''}" data-act="mixseg" data-id="${sh.id}" data-v="${s}">${s}-hole turns</button>`).join('');
     const rotChips = mx.formats.map((f,i)=>
       `<button class="selopt on" data-act="mixdel" data-id="${sh.id}" data-i="${i}">${FORMATS[f].name} ✕</button>`).join('');
-    const palette = (act) => Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles').map(f=>
+    const palette = (act) => Object.keys(FORMATS).filter(f=>f!=='mixer' && f!=='singles' && f!=='casual').map(f=>
       `<button class="selopt" data-act="${act}" data-id="${sh.id}" data-v="${f}">+ ${FORMATS[f].name}</button>`).join('');
     // the back nine: the front reversed, the same again, or its own order
     const bm = mixBackMode(mx);
@@ -3033,6 +3847,98 @@ function sheetHtml(sh){
         <button class="bigbtn ghost" data-act="odd-b" data-d="${sh.d}">Odd man rides — junk &amp; skins only</button>
       </div>`;
   }
+  if (t==='oubets'){
+    const bettor = sh.bettor && (S.players||{})[sh.bettor] ? sh.bettor : ouBettorDefault();
+    const rows = bettor ? ouBetsBy(bettor) : [];
+    const who = namedPlayers().map(p=>
+      `<button class="selopt ${p.id===bettor?'on':''}" data-act="oubetsfor" data-p="${p.id}"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('');
+    const riding = rows.filter(r=>r.net==null), settled = rows.filter(r=>r.net!=null);
+    const inPlay = riding.reduce((a,r)=>a+r.bet.amt, 0), net = settled.reduce((a,r)=>a+r.net, 0);
+    const sum = rows.length
+      ? `${riding.length ? `${riding.length} riding · $${inPlay} in play` : 'nothing riding'}${settled.length ? ` · settled <b class="num ${net>0?'win':net<0?'lose':''}">${money(net)}</b>` : ''}`
+      : 'No bets yet. Nothing ventured.';
+    let list = '';
+    for (const d of DAYS){
+      const dr = rows.filter(r=>r.d===d); if (!dr.length) continue;
+      list += `<h4 class="sc caps oubetsday">${DAYMETA[d].name}</h4>` + dr.map(r=>{
+        const tail = r.net == null ? `<span class="tag mut">riding</span>`
+          : r.net === 0 ? `<span class="tag push">PUSH</span>`
+          : `<span class="tag ${r.net>0?'win':'lose'}">${money(r.net)}</span>`;
+        const shot = r.score != null ? ` · shot ${r.score}` : '';
+        return `<button class="oubetrow" data-act="oubet" data-d="${r.d}" data-p="${r.pid}" data-b="${bettor}">
+          <span class="on">on ${pName(r.pid)}</span>
+          <span class="what"><b class="sc">${OU_SIDES[r.bet.side]} ${ouLineTxt(r.line)}</b> · $${r.bet.amt}${shot}</span>
+          ${tail}</button>`;
+      }).join('');
+    }
+    return `<h3>${bettor ? pName(bettor) + '’s bets' : 'Bets'}</h3>
+      <div class="selrow">${who}</div>
+      <div class="oubetsum">${sum}</div>
+      ${list}
+      ${rows.length ? `<div class="mut" style="font-size:12px;margin-top:8px">Tap a bet to change or pull it.</div>` : ''}`;
+  }
+  if (t==='oubet'){
+    const d = sh.d, pid = sh.pid;
+    const e = ouEntry(d, pid);
+    const bettor = sh.bettor;
+    const existing = bettor ? e.bets[bettor] : null;
+    const side = sh.side || (existing ? existing.side : null);
+    const max = ouMax();
+    const amt = Math.max(1, Math.min(max, sh.amt != null ? sh.amt : (existing ? existing.amt : max)));
+    const bettors = namedPlayers().map(p=>
+      `<button class="selopt ${p.id===bettor?'on':''}" data-act="oubettor" data-p="${p.id}"><span class="em">${p.emoji}</span> ${esc((p.name||'').split(' ')[0])}</button>`).join('');
+    const selfOver = bettor === pid;
+    const chips = [1,2,5,10,20,25,50,100].filter(v=>v<max); if (!chips.includes(max)) chips.push(max);
+    const amts = chips.map(v=>`<button class="selopt ${v===amt?'on':''}" data-act="ouamt" data-v="${v}">$${v}${v===max?' <span class="sub">max</span>':''}</button>`).join('');
+    const why = ouBetProblem(pid, bettor, side);
+    const scored = ouScore(d, pid).score != null;
+    return `<h3>Bet on ${pName(pid)}</h3>
+      <div class="ousheetline">Line <b class="sc">${ouLineTxt(e.line)}</b> · gross for the round</div>
+      <div class="mut" style="font-size:12.5px;margin:8px 0 4px">Who’s betting</div>
+      <div class="selrow">${bettors}</div>
+      <div class="ousides">
+        <button class="bigbtn ${side==='over'?'pri':'ghost'}" data-act="ouside" data-v="over" ${selfOver?'disabled':''}>OVER</button>
+        <button class="bigbtn ${side==='under'?'pri':'ghost'}" data-act="ouside" data-v="under">UNDER</button>
+      </div>
+      ${selfOver ? `<div class="warnchip" style="margin-top:6px">That’s you. Under only — nobody bets on themselves to play badly.</div>` : ''}
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">How much <span class="mut">(max $${max})</span></div>
+      <div class="selrow">${amts}</div>
+      ${scored ? `<div class="warnchip" style="margin-top:8px">A score is already in for ${pName(pid)}. A bet placed now is on your conscience.</div>` : ''}
+      <div class="btnrow">
+        ${existing ? `<button class="bigbtn danger" data-act="ouremove">Pull it</button>` : `<button class="bigbtn ghost" data-act="sheet-close">Never mind</button>`}
+        <button class="bigbtn pri" data-act="ouplace" ${why?'disabled':''}>${existing ? 'Change it' : 'Place it'} · $${amt}</button>
+      </div>`;
+  }
+  if (t==='cardmap'){
+    const cm = cardMatch(sh.d);
+    const h = holesFor(sh.d)[sh.n-1];
+    return `<h3>${pName(sh.pid)} · hole ${sh.n} <span class="mut" style="font-weight:400;font-size:13px">par ${h.par}</span></h3>
+      ${holeMapHtml(cm, sh.d, sh.n)}
+      <div class="btnrow" style="margin-top:10px"><button class="bigbtn pri" data-act="sheet-close">Done</button></div>`;
+  }
+  if (t==='h2h'){
+    const d = sh.d, ids = presentIds(d);
+    const existing = sh.id ? h2hRow(d, sh.id) : null;
+    const chip = pid => { const p = player(pid), tm = effTeam(d, pid); const sel = sh.a===pid || sh.b===pid;
+      return `<button class="pchip ${tm==='red'?'redx':tm==='blue'?'bluex':''} ${sel?'sel':''}" data-act="h2hpick" data-p="${pid}">
+        <span class="em">${p.emoji}</span><span class="nm">${esc((p.name||'').split(' ')[0])}</span>${sel?`<span class="mut" style="margin-left:auto;font-size:11px">${sh.a===pid?'1st':'2nd'}</span>`:''}</button>`; };
+    const stakes = [5,10,20,25,50,100]; if (!stakes.includes(sh.stake)) stakes.push(sh.stake); stakes.sort((x,y)=>x-y);
+    const ready = !!(sh.a && sh.b && sh.a !== sh.b);
+    const scored = ready && h2hResult({ d, a:sh.a, b:sh.b, n:0, to:null, stake:0 }).done;
+    return `<h3>${existing ? 'Matchup' : 'New matchup'}</h3>
+      <div class="h2hvs">${sh.a ? pName(sh.a) : '<span class="mut">tap a player</span>'} <span class="mut">vs</span> ${sh.b ? pName(sh.b) : '<span class="mut">tap another</span>'}</div>
+      <div class="pchips">${ids.map(chip).join('')}</div>
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">Strokes <span class="mut">— negotiated, flat off the round total</span></div>
+      <div class="h2hstep"><button class="nav" data-act="h2hn" data-v="${sh.n-1}" ${sh.n<=0?'disabled':''}>−</button><span class="n num">${sh.n}</span><button class="nav" data-act="h2hn" data-v="${sh.n+1}">+</button>
+        ${sh.n && ready ? `<button class="selopt ${sh.to===sh.b?'on':''}" data-act="h2hto" data-p="${sh.b}">${pName(sh.a)} gives</button><button class="selopt ${sh.to===sh.a?'on':''}" data-act="h2hto" data-p="${sh.a}">${pName(sh.b)} gives</button>` : ''}</div>
+      <div class="mut" style="font-size:12.5px;margin:10px 0 4px">Stake <span class="mut">(even money, player to player)</span></div>
+      <div class="selrow">${stakes.map(v=>`<button class="selopt ${v===sh.stake?'on':''}" data-act="h2hstake" data-v="${v}">$${v}</button>`).join('')}</div>
+      ${scored ? `<div class="warnchip" style="margin-top:8px">Both scores are already in. A matchup made now is on your conscience.</div>` : ''}
+      <div class="btnrow">
+        ${existing ? `<button class="bigbtn danger" data-act="h2hdel">Delete</button>` : `<button class="bigbtn ghost" data-act="sheet-close">Never mind</button>`}
+        <button class="bigbtn pri" data-act="h2hsave" ${ready && (!sh.n || sh.to) ? '' : 'disabled'}>${existing ? 'Save' : 'Add it'}</button>
+      </div>`;
+  }
   if (t==='confirmtext'){
     return `<h3>${esc(sh.title)}</h3><div>${esc(sh.body)} <b>Type the trip name. No mulligans on this one.</b></div>
       <input type="text" class="wide" id="confirmfield" style="width:100%;margin-top:10px;background:var(--bone);border:1px solid var(--pencil);border-radius:8px;padding:10px" placeholder="${esc(cfg().tripName)}">
@@ -3163,6 +4069,7 @@ function makeMatches(d){
   const ms = cupMatchesFor(d);
   const scored = ms.filter(m=>Object.values(m.holes||{}).some(h=>h&&h.winner));
   for (const m of ms) if (!scored.includes(m)) op('matches/'+m.id, null);
+  if (dc.format === 'casual') return; // no matches on a casual day
   const usedPids = new Set(scored.flatMap(m=>[...sideIds(m,'A'),...sideIds(m,'B')]));
   const leftovers = [];
   let ord = scored.length;
@@ -3330,7 +4237,7 @@ document.addEventListener('click', (ev)=>{
     case 'iam': {
       LS.set('id', a.p); ui.screen='board';
       const h = location.hash;
-      if (/^#\/(match|settings|day)/.test(h)){ parseRoute(); requestRender(); }
+      if (/^#\/(match|settings|day|ou)/.test(h)){ parseRoute(); requestRender(); }
       else landHome(true);
       break;
     }
@@ -3410,6 +4317,123 @@ document.addEventListener('click', (ev)=>{
       closeSheet(); requestRender(); break;
     }
 
+    // best ball (three teams)
+    case 'bb': closeSheet(true); navigate('#/bb/'+(a.d||ui.day||resolveDay())); break;
+    case 'card': closeSheet(true); navigate('#/card/'+(a.d||ui.day||resolveDay())); break;
+    case 'cardmap': { ui.sel['card_'+a.d] = { n:+a.n, key:a.p }; (ui.cardHole = ui.cardHole || {})[a.d] = +a.n; openSheet('cardmap', { d:a.d, n:+a.n, pid:a.p }); break; }
+    case 'cardhole': { const n = +a.n; if (n>=1 && n<=18){ (ui.cardHole = ui.cardHole || {})[a.d] = n; requestRender(); } break; }
+    case 'bbteam': { // tap a name: team 1 → 2 → 3 → out → 1
+      const cur = bbTeamOf(a.d, a.p);
+      const next = cur == null ? '1' : (BB_TEAMS[BB_TEAMS.indexOf(cur)+1] || null);
+      (ui.bbEdit = ui.bbEdit || {})[a.d] = true; // stay in the editor until DONE
+      op(`bb/${a.d}/team/${a.p}`, next); break;
+    }
+    case 'bbdeal': (ui.bbEdit = ui.bbEdit || {})[a.d] = true; bbDeal(a.d); break;
+    case 'bbedit': (ui.bbEdit = ui.bbEdit || {})[a.d] = a.v === '1'; requestRender(); break;
+    case 'bbhole': { const n = +a.n; if (n>=1 && n<=18){ (ui.bbHole = ui.bbHole || {})[a.d] = n; requestRender(); } break; }
+    case 'bbgross': {
+      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n; (ui.cardHole = ui.cardHole || {})[a.d] = +a.n; // stay on this hole until NEXT HOLE
+      const v = +a.v, cur = ((bbDay(a.d).strokes||{})[a.n]||{})[a.p];
+      const clear = cur === v || v < 1 || v > 15;
+      op(`bb/${a.d}/strokes/${a.n}/${a.p}`, clear ? null : v); break;
+    }
+    case 'bbpickup': {
+      (ui.bbHole = ui.bbHole || {})[a.d] = +a.n; (ui.cardHole = ui.cardHole || {})[a.d] = +a.n;
+      const cur = ((bbDay(a.d).strokes||{})[a.n]||{})[a.p];
+      op(`bb/${a.d}/strokes/${a.n}/${a.p}`, cur==='pickup' ? null : 'pickup'); break;
+    }
+
+    // head-to-head
+    case 'h2hnew': openSheet('h2h', { d:a.d, id:null, a:null, b:null, to:null, n:0, stake:h2hStake() }); break;
+    case 'h2hedit': { const r = h2hRow(a.d, a.id); if (r) openSheet('h2h', { d:a.d, id:a.id, a:r.a, b:r.b, to:r.to, n:r.n, stake:r.stake }); break; }
+    case 'h2hpick': { // first tap picks the first player, second the opponent; tapping a picked player clears him
+      const sh = ui.sheet; if (!sh || sh.type!=='h2h') break;
+      if (sh.a === a.p) sh.a = null; else if (sh.b === a.p) sh.b = null;
+      else if (!sh.a) sh.a = a.p; else sh.b = a.p;
+      if (sh.to && sh.to !== sh.a && sh.to !== sh.b) sh.to = null;
+      $sheetbox.innerHTML = sheetHtml(sh); break;
+    }
+    case 'h2hn': {
+      const sh = ui.sheet; if (!sh || sh.type!=='h2h') break;
+      sh.n = Math.max(0, Math.min(36, +a.v|0));
+      if (!sh.n) sh.to = null; else if (!sh.to) sh.to = sh.b || sh.a; // somebody has to get them; the toggle flips it
+      $sheetbox.innerHTML = sheetHtml(sh); break;
+    }
+    case 'h2hto': { const sh = ui.sheet; if (!sh || sh.type!=='h2h') break; sh.to = a.p; $sheetbox.innerHTML = sheetHtml(sh); break; }
+    case 'h2hstake': { const sh = ui.sheet; if (!sh || sh.type!=='h2h') break; sh.stake = Math.max(1, +a.v|0); $sheetbox.innerHTML = sheetHtml(sh); break; }
+    case 'h2hsave': {
+      const sh = ui.sheet; if (!sh || sh.type!=='h2h') break;
+      if (!sh.a || !sh.b || sh.a === sh.b){ toastSnack('Pick two players.'); break; }
+      if (sh.n && !sh.to){ toastSnack('Who gets the strokes?'); break; }
+      const old = sh.id ? h2hRow(sh.d, sh.id) : null;
+      const id = sh.id || uid();
+      op(`h2h/${sh.d}/${id}`, { a:sh.a, b:sh.b, give: sh.n ? { to:sh.to, n:sh.n } : { n:0 }, stake:sh.stake, t: old ? old.t : Date.now() });
+      closeSheet();
+      toastSnack(`${pName(sh.a)} vs ${pName(sh.b)} · ${sh.n ? `${pName(sh.to===sh.a?sh.b:sh.a)} gives ${sh.n}` : 'no strokes'} · $${sh.stake}`);
+      break;
+    }
+    case 'h2hdel': {
+      const sh = ui.sheet; if (!sh || !sh.id) break;
+      const raw = ((S.h2h||{})[sh.d]||{})[sh.id];
+      op(`h2h/${sh.d}/${sh.id}`, null); closeSheet();
+      if (raw) snack(`${pName(raw.a)} vs ${pName(raw.b)} scrapped`, 'UNDO', ()=>op(`h2h/${sh.d}/${sh.id}`, raw));
+      break;
+    }
+    case 'h2hdraw': {
+      const have = h2hRows(a.d).length;
+      if (have && !window.confirm(`Replace the ${have} matchup${have>1?'s':''} already drawn for ${DAYMETA[a.d].name}?`)) break;
+      const n = h2hDraw(a.d);
+      toastSnack(n ? `${n} matchup${n>1?'s':''} drawn. Now go negotiate.` : `Need someone on each team today to draw.`);
+      break;
+    }
+
+    // over / under
+    case 'ou': closeSheet(true); navigate('#/ou/'+(a.d||ui.day||resolveDay())); break;
+    case 'oubets': openSheet('oubets', { bettor: a.p || ouBettorDefault() }); break;
+    case 'oubetsfor': { if (!ui.sheet || ui.sheet.type!=='oubets') break; ui.sheet.bettor = a.p; $sheetbox.innerHTML = sheetHtml(ui.sheet); break; }
+    case 'oubet': {
+      const e = ouEntry(a.d, a.p);
+      if (e.line == null){ toastSnack('Set the line first.'); break; }
+      const bettor = a.b || ouBettorDefault();
+      const ex = bettor ? e.bets[bettor] : null;
+      openSheet('oubet', { d:a.d, pid:a.p, bettor, side: ex ? ex.side : (bettor===a.p ? 'under' : null), amt: ex ? ex.amt : null });
+      break;
+    }
+    case 'oubettor': {
+      if (!ui.sheet || ui.sheet.type!=='oubet') break;
+      const ex = ouEntry(ui.sheet.d, ui.sheet.pid).bets[a.p];
+      ui.sheet.bettor = a.p;
+      // a new bettor starts clean — nobody inherits the last guy's side or stake
+      if (ex){ ui.sheet.side = ex.side; ui.sheet.amt = ex.amt; }
+      else { ui.sheet.side = a.p === ui.sheet.pid ? 'under' : null; ui.sheet.amt = null; }
+      $sheetbox.innerHTML = sheetHtml(ui.sheet); break;
+    }
+    case 'ouside': {
+      if (!ui.sheet || ui.sheet.type!=='oubet') break;
+      const why = ouBetProblem(ui.sheet.pid, ui.sheet.bettor, a.v);
+      if (why && a.v==='over' && ui.sheet.bettor===ui.sheet.pid){ toastSnack(why); break; }
+      ui.sheet.side = a.v; $sheetbox.innerHTML = sheetHtml(ui.sheet); break;
+    }
+    case 'ouamt': { if (!ui.sheet || ui.sheet.type!=='oubet') break; ui.sheet.amt = +a.v; $sheetbox.innerHTML = sheetHtml(ui.sheet); break; }
+    case 'ouplace': {
+      const sh = ui.sheet; if (!sh || sh.type!=='oubet') break;
+      const e = ouEntry(sh.d, sh.pid);
+      const ex = sh.bettor ? e.bets[sh.bettor] : null;
+      const amt = sh.amt != null ? sh.amt : (ex ? ex.amt : ouMax());
+      const why = ouPlaceBet(sh.d, sh.pid, sh.bettor, sh.side || (ex ? ex.side : null), amt);
+      if (why){ toastSnack(why); break; }
+      closeSheet();
+      toastSnack(`${pName(sh.bettor)} has $${Math.min(ouMax(), Math.max(1, Math.round(amt)))} on the ${sh.side || ex.side} — ${pName(sh.pid)} at ${ouLineTxt(e.line)}.`);
+      break;
+    }
+    case 'ouremove': {
+      const sh = ui.sheet; if (!sh || sh.type!=='oubet') break;
+      const ex = ouEntry(sh.d, sh.pid).bets[sh.bettor];
+      op(`ou/${sh.d}/${sh.pid}/bets/${sh.bettor}`, null);
+      closeSheet();
+      if (ex) snack(`${pName(sh.bettor)}’s bet on ${pName(sh.pid)} pulled`, 'UNDO', ()=>op(`ou/${sh.d}/${sh.pid}/bets/${sh.bettor}`, ex));
+      break;
+    }
     // day setup
     case 'att': op(`days/${a.d}/att/${a.p}`, isPresent(a.d, a.p) ? false : true); break;
     case 'flipteam': {
@@ -3564,7 +4588,6 @@ document.addEventListener('click', (ev)=>{
     }
     case 'odd-b': closeSheet(); toastSnack('Odd man rides — he’s in the tee group, out of the matches.'); break;
     case 'addmatch': op('matches/m'+uid(), { day:a.d, group:'a', ord: matchesFor(a.d).length, red:[], blue:[], holes:{} }); break;
-    case 'addsidebet': op('matches/sb'+uid(), { day:a.d, side:true, group:'a', ord: 90+sideBetsFor(a.d).length, red:[], blue:[], holes:{} }); break;
     case 'delmatch': {
       const m = theMatch(a.mid);
       const scored = m && Object.values(m.holes||{}).some(h=>h&&h.winner);
@@ -3642,12 +4665,12 @@ document.addEventListener('click', (ev)=>{
       aEl.href = URL.createObjectURL(blob); aEl.download = 'no-gimmes-trip.json'; aEl.click();
       break;
     }
-    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result and stroke on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
+    case 'resetscores': openSheet('confirmtext', { title:'Reset all scores', body:'Every hole result, stroke, over/under bet, head-to-head matchup, and best-ball hole on every day gets wiped. Setup stays.', act:'resetscores2' }); break;
     case 'resetscores2': {
       const f = document.getElementById('confirmfield');
       if (f && f.value.trim() === cfg().tripName){
         for (const m of allMatches()){ op(`matches/${m.id}/holes`, null); op(`matches/${m.id}/concededBy`, null); op(`matches/${m.id}/concededAt`, null); }
-        op('junk', null);
+        op('junk', null); op('ou', null); op('bb', null); op('h2h', null);
         closeSheet(); toastSnack('Clean card. Play well.');
       } else toastSnack('Type the trip name exactly to confirm.');
       break;
@@ -3687,6 +4710,21 @@ document.addEventListener('change', (ev)=>{
     case 'allow': op(`config/allowances/${a.k}`, Math.max(0, Math.min(200, +v||0))); break;
     case 'strokecap': op('config/strokeCap', Math.max(0, +v|0)); break;
     case 'dburl': LS.set('db', v.trim()); sse.es && sse.es.close(); sse.es=null; sseConnect(); scheduleFlush(); requestRender(); break;
+    case 'ouline': {
+      const cur = ouEntry(a.d, a.p);
+      const n = v === '' ? null : Math.round((+v) * 2) / 2;
+      if (n != null && !(n > 0)){ toastSnack('A line is a score — try again.'); requestRender(); break; }
+      const nb = Object.keys(cur.bets).length;
+      if (nb && n !== cur.line && !window.confirm(`${nb} bet${nb>1?'s are':' is'} riding on ${ouLineTxt(cur.line)}. Move the line anyway?`)){ requestRender(); break; }
+      op(`ou/${a.d}/${a.p}/line`, n); break;
+    }
+    case 'ouscore': {
+      const n = v === '' ? null : Math.round(+v);
+      if (n != null && !(n > 0)){ toastSnack('That’s not a score.'); requestRender(); break; }
+      op(`ou/${a.d}/${a.p}/score`, n); break;
+    }
+    case 'oumax': op('config/ouMax', Math.max(1, Math.min(1000, Math.round(+v)||10))); break;
+    case 'h2hstake': op('config/h2hStake', Math.max(1, Math.min(1000, Math.round(+v)||10))); break;
     case 'holenote': ui.noteEdit = null; op(`notes/${a.c}/${a.hn}`, v.trim().slice(0,90) || null); break;
   }
 });
@@ -3715,9 +4753,9 @@ function landHome(fromWho){
   const me = LS.get('id', null);
   const d = resolveDay();
   ui.day = d;
+  if (me && me!=='watch' && isToday(d) && dayCfg(d).format === 'casual' && isPresent(d, me)){ navigate('#/card/'+d); return; }
   if (me && me!=='watch' && (isToday(d) || tripOver()===false)){
-    const landable = [...cupMatchesFor(d), ...sideBetsFor(d)];
-    for (const m of landable){
+    for (const m of cupMatchesFor(d)){
       if (!isToday(d)) break;
       const mine = sideIds(m,'A').includes(me) || sideIds(m,'B').includes(me);
       if (!mine) continue;

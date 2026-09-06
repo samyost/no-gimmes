@@ -73,6 +73,46 @@ best ball, scramble and Fig Jam, order switched on the back — ships as the
 **Birthday Weekend** recipe under *Mix library* (one tap saves an editable copy).
 - **Offline**: scores save on the phone instantly and sync when signal returns
   (the pill in the corner tells the truth: `LIVE` / `3 QUEUED`).
+- **Head-to-head** (gear → *Side action*): the singles-day bet. Stroke play
+  over the round, one on one, any strokes negotiated between the two of you
+  ("Mike gives Will 10", flat off the round total — handicaps never enter
+  it), one stake per matchup ($10 by default in Settings, editable per row).
+  Nothing to score: totals come off the card (or the posted total), so a row
+  reads `Will by 2 ✓ · +$20 Will` the moment both cards are in, and a live
+  gross running diff before that. **Draw** pairs today's Red against today's
+  Blue at random; on an uneven day the short side doubles up, and who doubles
+  is part of the draw. The header keeps a Red–Blue tally of matchups won —
+  display only, the cup never sees it. Settles into the same ledger as
+  over/under, so everyone has one number for the trip. This replaced the old
+  grudge matches (hole-by-hole 1v1 side matches), which are gone.
+- **Over / under** (same page): its own game, one per
+  day. Every player gets a line on their gross score for the round; anyone sets
+  it, anyone bets over or under it, up to the max per bet in Settings ($10 by
+  default). One rule: you can't take the over on yourself. Even money against
+  the book. The score fills in from the card once all 18 gross scores are
+  posted, or type the total; the day's book and the trip total settle
+  underneath. *Bets by* (or a tap on anyone in the book) lists every bet one
+  person has placed across the trip — what's riding, what settled, tap to
+  change or pull. Handicaps, the cup, and the match screens never see any of it.
+- **Casual day** (setup → format → **CASUAL**): no matches, no cup points,
+  everyone just keeps their own card. Your phone opens straight to *The card*
+  for that day: pick the hole, and every player is a row — tap the exact
+  number, **−** / **+** to nudge it, **pickup**, or **map** to open the hole
+  and mark shots where they stopped (holed out, the count becomes the score
+  unless a number is typed over it). Running gross, to-par, and net (course
+  handicap pro-rated to holes played) sit underneath and on the board.
+  Over/under and head-to-head settle off these totals like any other day.
+  *The card* is also under the gear menu on any day.
+- **Best ball, three teams** (gear → *Side action*): the seven-man answer. Its
+  own page, one game per day. Draw teams (2·2·3 with seven, 2·3·3 with eight;
+  tap a name to move it) and score hole by hole: each team's best net ball
+  counts (four-ball allowance, everyone off the low man), low team takes the
+  hole, one point a hole. A tie for low is a **push** that rides to the next
+  hole and is settled between the tied teams only — whichever of them is lower
+  there takes it, even if the third team wins that hole outright; tied again,
+  it keeps riding. Gross scores already on the card (that day's cup match)
+  fill in automatically in brass; tap a number to override, tap it again
+  to go back to the card. Nothing here touches the cup.
 
 ## Honesty box
 
@@ -124,6 +164,10 @@ node dev/engine.test.mjs   # unit tests for the scoring engine
 node dev/features.test.mjs # mixer / mix library / side-bet browser tests (needs: cd dev && npm i)
 node dev/sync.test.mjs     # two-browser integration tests (needs: cd dev && npm i)
 node dev/maps.test.mjs     # hole maps / ball marks / hole notes (needs: cd dev && npm i)
+node dev/ou.test.mjs       # over/under lines, bets, the max, settlement (needs: cd dev && npm i)
+node dev/bb.test.mjs       # three-team best ball: draw, card read-through, pushes riding (needs: cd dev && npm i)
+node dev/h2h.test.mjs      # head-to-head: negotiated strokes, draw, ledger, grudge matches gone (needs: cd dev && npm i)
+node dev/casual.test.mjs   # casual day: the card, totals, the map sheet, over/under off typed scores (needs: cd dev && npm i)
 node dev/mock-rtdb.js      # local Firebase RTDB imitation (REST + SSE)
 ```
 
